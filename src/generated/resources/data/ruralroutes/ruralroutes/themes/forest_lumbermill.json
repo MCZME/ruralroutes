@@ -1,0 +1,49 @@
+{
+  "biome": "minecraft:forest",
+  "buy_items": [
+    {
+      "type": "tag",
+      "id": "#ruralroutes:pool/mineral"
+    }
+  ],
+  "name": "ruralroutes:forest_lumbermill",
+  "price_modifiers": {
+    "#ruralroutes:pool/mineral": {
+      "buy": 0.8,
+      "sell": 1.2
+    },
+    "#ruralroutes:pool/wood": {
+      "buy": 1.2,
+      "sell": 0.8
+    }
+  },
+  "sell_items": [
+    {
+      "type": "tag",
+      "id": "#ruralroutes:pool/wood"
+    },
+    {
+      "type": "item",
+      "id": "minecraft:charcoal"
+    }
+  ],
+  "stock": {
+    "default": {
+      "max": 16,
+      "min": 8
+    },
+    "specific": {
+      "#ruralroutes:pool/wood": {
+        "max": 64,
+        "min": 32
+      },
+      "minecraft:bee_nest": {
+        "max": 2,
+        "min": 1
+      }
+    }
+  },
+  "theme_specialties": [
+    "minecraft:bee_nest"
+  ]
+}

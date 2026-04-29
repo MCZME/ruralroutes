@@ -6,8 +6,10 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
+import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.data.RRBlockTagsProvider;
 import github.mczme.ruralroutes.data.RRItemTagsProvider;
+import github.mczme.ruralroutes.data.ThemeDataProvider;
 import github.mczme.ruralroutes.data.ValueDataProvider;
 import github.mczme.ruralroutes.data.lang.RREnUsLanguageProvider;
 import github.mczme.ruralroutes.data.lang.RRZhCnLanguageProvider;
@@ -19,8 +21,10 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 
 @Mod(RuralRoutes.MODID)
 public class RuralRoutes {
@@ -31,6 +35,13 @@ public class RuralRoutes {
         modEventBus.addListener(this::gatherData);
         modEventBus.addListener(RRDataMaps::register);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+
+        // 注册到 NeoForge 游戏事件总线
+        NeoForge.EVENT_BUS.addListener(this::addReloadListener);
+    }
+
+    private void addReloadListener(AddReloadListenerEvent event) {
+        event.addListener(ThemeManager.INSTANCE);
     }
 
     private void gatherData(GatherDataEvent event) {
@@ -43,6 +54,7 @@ public class RuralRoutes {
         generator.addProvider(event.includeServer(), blockTagsProvider);
         generator.addProvider(event.includeServer(), new RRItemTagsProvider(output, lookupProvider, blockTagsProvider.contentsGetter(), existingFileHelper));
         generator.addProvider(event.includeServer(), new ValueDataProvider(output, lookupProvider));
+        generator.addProvider(event.includeServer(), new ThemeDataProvider(output, lookupProvider, existingFileHelper));
 
         // 客户端数据 - 语言文件
         generator.addProvider(event.includeClient(), new RREnUsLanguageProvider(output));
