@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
  */
 public class ThemeManager extends SimpleJsonResourceReloadListener {
 
-    public static final ThemeManager INSTANCE = new ThemeManager();
-
     private static final String PATH = "ruralroutes/themes";
     private static final Gson GSON = new Gson();
+
+    public static final ThemeManager INSTANCE = new ThemeManager();
 
     private Map<ResourceLocation, ThemeTemplate> byName = Map.of();
     private Map<ResourceLocation, List<ThemeTemplate>> byBiome = Map.of();
