@@ -9,6 +9,8 @@ import com.mojang.logging.LogUtils;
 import github.mczme.ruralroutes.data.RRBlockTagsProvider;
 import github.mczme.ruralroutes.data.RRItemTagsProvider;
 import github.mczme.ruralroutes.data.ValueDataProvider;
+import github.mczme.ruralroutes.data.lang.RREnUsLanguageProvider;
+import github.mczme.ruralroutes.data.lang.RRZhCnLanguageProvider;
 import github.mczme.ruralroutes.register.RRDataMaps;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
@@ -41,5 +43,9 @@ public class RuralRoutes {
         generator.addProvider(event.includeServer(), blockTagsProvider);
         generator.addProvider(event.includeServer(), new RRItemTagsProvider(output, lookupProvider, blockTagsProvider.contentsGetter(), existingFileHelper));
         generator.addProvider(event.includeServer(), new ValueDataProvider(output, lookupProvider));
+
+        // 客户端数据 - 语言文件
+        generator.addProvider(event.includeClient(), new RREnUsLanguageProvider(output));
+        generator.addProvider(event.includeClient(), new RRZhCnLanguageProvider(output));
     }
 }

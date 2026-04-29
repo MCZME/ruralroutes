@@ -1,0 +1,7 @@
+{
+  "ruralroutes.configuration.default": "Default Value",
+  "ruralroutes.configuration.default.tooltip": "Default value for items without defined value rules",
+  "ruralroutes.configuration.values": "Values",
+  "ruralroutes.configuration.values.button": "Values",
+  "ruralroutes.configuration.values.tooltip": "Value-related settings"
+}

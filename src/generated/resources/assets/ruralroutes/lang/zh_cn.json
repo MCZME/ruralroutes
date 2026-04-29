@@ -1,0 +1,7 @@
+{
+  "ruralroutes.configuration.default": "默认价值",
+  "ruralroutes.configuration.default.tooltip": "未定义价值规则的物品使用的默认价值",
+  "ruralroutes.configuration.values": "价值设置",
+  "ruralroutes.configuration.values.button": "价值设置",
+  "ruralroutes.configuration.values.tooltip": "价值相关设置"
+}
