@@ -8,6 +8,8 @@ import com.mojang.logging.LogUtils;
 
 import github.mczme.ruralroutes.data.RRBlockTagsProvider;
 import github.mczme.ruralroutes.data.RRItemTagsProvider;
+import github.mczme.ruralroutes.data.ValueDataProvider;
+import github.mczme.ruralroutes.register.RRDataMaps;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -25,6 +27,7 @@ public class RuralRoutes {
 
     public RuralRoutes(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::gatherData);
+        modEventBus.addListener(RRDataMaps::register);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
@@ -37,5 +40,6 @@ public class RuralRoutes {
         RRBlockTagsProvider blockTagsProvider = new RRBlockTagsProvider(output, lookupProvider, existingFileHelper);
         generator.addProvider(event.includeServer(), blockTagsProvider);
         generator.addProvider(event.includeServer(), new RRItemTagsProvider(output, lookupProvider, blockTagsProvider.contentsGetter(), existingFileHelper));
+        generator.addProvider(event.includeServer(), new ValueDataProvider(output, lookupProvider));
     }
 }
