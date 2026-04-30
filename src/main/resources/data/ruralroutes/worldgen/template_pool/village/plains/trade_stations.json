@@ -1,0 +1,15 @@
+{
+  "name": "ruralroutes:village/plains/trade_stations",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "ruralroutes:village/plains/trade_station",
+        "processors": "minecraft:empty",
+        "projection": "rigid"
+      }
+    }
+  ]
+}

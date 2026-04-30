@@ -3,7 +3,7 @@
   "package": "github.mczme.ruralroutes.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "StructureTemplatePoolAccessor"
+    "JigsawPlacementPlacerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

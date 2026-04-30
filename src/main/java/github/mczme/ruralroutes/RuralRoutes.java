@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 
 import github.mczme.ruralroutes.core.theme.ThemeManager;
-import github.mczme.ruralroutes.core.structure.VillageStructureInjector;
 import github.mczme.ruralroutes.data.RRBlockTagsProvider;
 import github.mczme.ruralroutes.data.RRItemTagsProvider;
 import github.mczme.ruralroutes.data.ThemeDataProvider;
@@ -18,7 +17,6 @@ import github.mczme.ruralroutes.register.RRDataMaps;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
@@ -27,7 +25,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
-import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 
 @Mod(RuralRoutes.MODID)
 public class RuralRoutes {
@@ -41,12 +38,6 @@ public class RuralRoutes {
 
         // 注册到 NeoForge 游戏事件总线
         NeoForge.EVENT_BUS.addListener(this::addReloadListener);
-        NeoForge.EVENT_BUS.addListener(this::onServerAboutToStart);
-    }
-
-    private void onServerAboutToStart(ServerAboutToStartEvent event) {
-        MinecraftServer server = event.getServer();
-        VillageStructureInjector.injectAll(server.registryAccess());
     }
 
     private void addReloadListener(AddReloadListenerEvent event) {
