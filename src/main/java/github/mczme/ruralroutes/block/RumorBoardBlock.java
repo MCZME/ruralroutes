@@ -1,10 +1,13 @@
 package github.mczme.ruralroutes.block;
 
 import github.mczme.ruralroutes.blockentity.RumorBoardBlockEntity;
+import github.mczme.ruralroutes.core.node.CommercialNodeData;
+import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.register.RRBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -20,8 +23,11 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 
+import java.util.UUID;
+
 /**
  * 传闻板方块 - 显示市场波动情报
+ * 不需要主题，仅通过 tradeNodeId 与贸易站关联
  */
 public class RumorBoardBlock extends BaseEntityBlock {
 
@@ -58,10 +64,50 @@ public class RumorBoardBlock extends BaseEntityBlock {
         if (!level.isClientSide) {
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof RumorBoardBlockEntity rumorBoard) {
-                player.openMenu(rumorBoard);
+                // 检查区块是否已有商业节点数据
+                if (!CommercialNodeManager.hasNodeData(level, pos)) {
+                    player.displayClientMessage(
+                        Component.translatable("block.ruralroutes.rumor_board.not_activated"),
+                        true);
+                    return InteractionResult.FAIL;
+                }
+
+                CommercialNodeData nodeData = CommercialNodeManager.getNodeData(level, pos);
+
+                // 校验节点ID一致性
+                if (!validateRumorBoard(rumorBoard, nodeData)) {
+                    player.displayClientMessage(
+                        Component.translatable("block.ruralroutes.rumor_board.mismatch"),
+                        true);
+                    return InteractionResult.FAIL;
+                }
+
+                // 第一阶段：显示占位信息
+                player.displayClientMessage(
+                    Component.translatable("block.ruralroutes.rumor_board.no_news"),
+                    false);
+                return InteractionResult.CONSUME;
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    /**
+     * 校验传闻板与区块数据的一致性
+     */
+    private boolean validateRumorBoard(RumorBoardBlockEntity rumorBoard, CommercialNodeData nodeData) {
+        if (rumorBoard == null || nodeData == null) {
+            return false;
+        }
+
+        UUID boardId = rumorBoard.getTradeNodeId();
+        // 如果传闻板没有节点ID，说明尚未同步，允许通过（等待贸易站同步）
+        if (boardId == null) {
+            return true;
+        }
+
+        // 如果有节点ID，必须与区块数据一致
+        return boardId.equals(nodeData.tradeNodeId());
     }
 
     @Override

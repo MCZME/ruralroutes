@@ -100,9 +100,10 @@ public class CommercialNodeManager {
 
         UUID tradeNodeId = UUID.randomUUID();
         Map<ResourceLocation, StockEntry> stocks = initializeStocks(template);
+        List<ResourceLocation> specialties = generateSpecialties(template);
         long timestamp = level.getGameTime();
 
-        CommercialNodeData data = CommercialNodeData.create(tradeNodeId, themeName, stocks, timestamp);
+        CommercialNodeData data = CommercialNodeData.create(tradeNodeId, themeName, stocks, specialties, timestamp);
 
         // 存储到区块
         ChunkAccess chunk = level.getChunk(pos);
@@ -112,6 +113,24 @@ public class CommercialNodeManager {
             tradeNodeId, themeName, pos);
 
         return data;
+    }
+
+    /**
+     * 从主题模板生成特产列表
+     * 特产 = 主题特产（必定出现）+ 随机特产（从全局池随机抽取）
+     */
+    private static List<ResourceLocation> generateSpecialties(ThemeTemplate template) {
+        List<ResourceLocation> specialties = new ArrayList<>();
+
+        // 添加主题特产（必定出现）
+        if (template.themeSpecialties().isPresent()) {
+            List<ResourceLocation> themeSpecialties = template.themeSpecialties().get();
+            specialties.addAll(themeSpecialties);
+        }
+
+        // TODO: 第二阶段实现从全局特产池随机抽取 0-N 种随机特产
+
+        return specialties;
     }
 
     /**

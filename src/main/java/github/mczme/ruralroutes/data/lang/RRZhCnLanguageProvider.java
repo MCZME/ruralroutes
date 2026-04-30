@@ -39,15 +39,32 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.title", "主题配置");
         add("gui.ruralroutes.config_tool.apply", "应用");
         add("gui.ruralroutes.config_tool.cancel", "取消");
+        add("gui.ruralroutes.config_tool.close", "关闭");
         add("gui.ruralroutes.config_tool.selected", "已选择: %s");
         add("gui.ruralroutes.config_tool.current_theme", "当前: %s");
         add("gui.ruralroutes.config_tool.no_current_theme", "未设置主题");
+        add("gui.ruralroutes.config_tool.node_id", "节点ID: %s");
+        add("gui.ruralroutes.config_tool.no_node_id", "节点ID: 未激活");
+        add("gui.ruralroutes.config_tool.type.trade_station", "类型: 贸易站");
+        add("gui.ruralroutes.config_tool.type.display_case", "类型: 展示柜");
+        add("gui.ruralroutes.config_tool.type.rumor_board", "类型: 传闻板");
+        add("gui.ruralroutes.config_tool.type.unknown", "类型: 未知");
 
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "主题: %s");
         add("gui.ruralroutes.trade_station.sell", "出售");
         add("gui.ruralroutes.trade_station.buy", "收购");
         add("block.ruralroutes.trade_station.mismatch", "贸易站数据不匹配");
+
+        // 展示柜交互
+        add("block.ruralroutes.display_case.not_activated", "请先激活贸易站");
+        add("block.ruralroutes.display_case.mismatch", "展示柜数据不匹配");
+        add("block.ruralroutes.display_case.specialties", "本村特产 (%d 种)");
+
+        // 传闻板交互
+        add("block.ruralroutes.rumor_board.not_activated", "请先激活贸易站");
+        add("block.ruralroutes.rumor_board.mismatch", "传闻板数据不匹配");
+        add("block.ruralroutes.rumor_board.no_news", "商路消息将在下一个周期到来");
 
         // 创造模式标签页
         add("itemGroup.ruralroutes", "乡野商路");

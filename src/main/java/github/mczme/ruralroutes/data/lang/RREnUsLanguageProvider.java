@@ -39,15 +39,32 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.title", "Theme Configuration");
         add("gui.ruralroutes.config_tool.apply", "Apply");
         add("gui.ruralroutes.config_tool.cancel", "Cancel");
+        add("gui.ruralroutes.config_tool.close", "Close");
         add("gui.ruralroutes.config_tool.selected", "Selected: %s");
         add("gui.ruralroutes.config_tool.current_theme", "Current: %s");
         add("gui.ruralroutes.config_tool.no_current_theme", "No theme set");
+        add("gui.ruralroutes.config_tool.node_id", "Node ID: %s");
+        add("gui.ruralroutes.config_tool.no_node_id", "Node ID: Not activated");
+        add("gui.ruralroutes.config_tool.type.trade_station", "Type: Trade Station");
+        add("gui.ruralroutes.config_tool.type.display_case", "Type: Display Case");
+        add("gui.ruralroutes.config_tool.type.rumor_board", "Type: Rumor Board");
+        add("gui.ruralroutes.config_tool.type.unknown", "Type: Unknown");
 
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "Theme: %s");
         add("gui.ruralroutes.trade_station.sell", "Selling");
         add("gui.ruralroutes.trade_station.buy", "Buying");
         add("block.ruralroutes.trade_station.mismatch", "Trade station data mismatch");
+
+        // 展示柜交互
+        add("block.ruralroutes.display_case.not_activated", "Please activate the trade station first");
+        add("block.ruralroutes.display_case.mismatch", "Display case data mismatch");
+        add("block.ruralroutes.display_case.specialties", "Village Specialties (%d kinds)");
+
+        // 传闻板交互
+        add("block.ruralroutes.rumor_board.not_activated", "Please activate the trade station first");
+        add("block.ruralroutes.rumor_board.mismatch", "Rumor board data mismatch");
+        add("block.ruralroutes.rumor_board.no_news", "Trade route news will arrive next cycle");
 
         // 创造模式标签页
         add("itemGroup.ruralroutes", "Rural Routes");

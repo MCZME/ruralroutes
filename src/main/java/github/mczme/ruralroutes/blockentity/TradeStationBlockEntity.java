@@ -64,6 +64,9 @@ public class TradeStationBlockEntity extends BlockEntity implements MenuProvider
         if (villageTheme != null) {
             tag.putString("VillageTheme", villageTheme.toString());
         }
+        if (tradeNodeId != null) {
+            tag.putUUID("TradeNodeId", tradeNodeId);
+        }
         return tag;
     }
 
@@ -74,6 +77,11 @@ public class TradeStationBlockEntity extends BlockEntity implements MenuProvider
             villageTheme = ResourceLocation.tryParse(tag.getString("VillageTheme"));
         } else {
             villageTheme = null;
+        }
+        if (tag.contains("TradeNodeId")) {
+            tradeNodeId = tag.getUUID("TradeNodeId");
+        } else {
+            tradeNodeId = null;
         }
     }
 
@@ -113,6 +121,10 @@ public class TradeStationBlockEntity extends BlockEntity implements MenuProvider
     public void setTradeNodeId(UUID tradeNodeId) {
         this.tradeNodeId = tradeNodeId;
         setChanged();
+        Level level = getLevel();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+        }
     }
 
     // ===== MenuProvider =====

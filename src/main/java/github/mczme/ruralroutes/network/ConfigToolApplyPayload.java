@@ -36,7 +36,7 @@ public record ConfigToolApplyPayload(
     }
 
     /**
-     * 服务端处理
+     * 服务端处理 - 仅处理贸易站
      */
     public static void handleServer(ConfigToolApplyPayload payload, IPayloadContext context) {
         ServerPlayer player = (ServerPlayer) context.player();

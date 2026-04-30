@@ -1,5 +1,7 @@
 package github.mczme.ruralroutes.block;
 
+import github.mczme.ruralroutes.blockentity.DisplayCaseBlockEntity;
+import github.mczme.ruralroutes.blockentity.RumorBoardBlockEntity;
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
@@ -21,6 +23,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 
+import java.util.UUID;
+
 /**
  * 贸易站方块 - 村庄交易的核心方块
  */
@@ -28,6 +32,9 @@ public class TradeStationBlock extends BaseEntityBlock {
 
     public static final MapCodec<TradeStationBlock> CODEC =
         simpleCodec(TradeStationBlock::new);
+
+    /** 同步范围：贸易站周围查找展示柜和传闻板的半径 */
+    private static final int SYNC_RADIUS = 16;
 
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
@@ -87,14 +94,38 @@ public class TradeStationBlock extends BaseEntityBlock {
                 // 有村庄，创建商业节点数据
                 CommercialNodeData newData = CommercialNodeManager.createNodeData(level, pos, themeName);
                 if (newData != null) {
-                    // 同步 tradeNodeId 到 BlockEntity
-                    station.setTradeNodeId(newData.tradeNodeId());
+                    UUID nodeId = newData.tradeNodeId();
+                    // 同步 tradeNodeId 到贸易站 BlockEntity
+                    station.setTradeNodeId(nodeId);
+                    // 同步 tradeNodeId 到附近的展示柜和传闻板
+                    syncNodeIdToNearbyBlocks(level, pos, nodeId);
                     openMenu(player, station);
                     return InteractionResult.CONSUME;
                 }
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
+    }
+
+    /**
+     * 同步 tradeNodeId 到附近的展示柜和传闻板
+     * 确保同一建筑内的三个方块共享同一个商业节点
+     */
+    private void syncNodeIdToNearbyBlocks(Level level, BlockPos centerPos, UUID nodeId) {
+        for (int dx = -SYNC_RADIUS; dx <= SYNC_RADIUS; dx++) {
+            for (int dy = -SYNC_RADIUS; dy <= SYNC_RADIUS; dy++) {
+                for (int dz = -SYNC_RADIUS; dz <= SYNC_RADIUS; dz++) {
+                    BlockPos checkPos = centerPos.offset(dx, dy, dz);
+                    BlockEntity be = level.getBlockEntity(checkPos);
+
+                    if (be instanceof DisplayCaseBlockEntity displayCase) {
+                        displayCase.setTradeNodeId(nodeId);
+                    } else if (be instanceof RumorBoardBlockEntity rumorBoard) {
+                        rumorBoard.setTradeNodeId(nodeId);
+                    }
+                }
+            }
+        }
     }
 
     /**

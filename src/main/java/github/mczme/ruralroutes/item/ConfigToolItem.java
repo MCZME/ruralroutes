@@ -1,5 +1,7 @@
 package github.mczme.ruralroutes.item;
 
+import github.mczme.ruralroutes.blockentity.DisplayCaseBlockEntity;
+import github.mczme.ruralroutes.blockentity.RumorBoardBlockEntity;
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
 import github.mczme.ruralroutes.menu.ConfigToolMenu;
 import net.minecraft.core.BlockPos;
@@ -19,7 +21,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import java.util.List;
 
 /**
- * 配置工具 - 用于在结构模板中预置贸易站的主题名
+ * 配置工具 - 用于查看和配置核心方块
+ * 贸易站：可编辑主题
+ * 展示柜/传闻板：仅显示节点ID
  */
 public class ConfigToolItem extends Item {
 
@@ -27,10 +31,6 @@ public class ConfigToolItem extends Item {
         super(properties);
     }
 
-    /**
-     * 使用 onItemUseFirst 优先于方块交互处理
-     * 让配置工具在贸易站方块的 useWithoutItem 之前执行
-     */
     @Override
     public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
         Level level = context.getLevel();
@@ -42,7 +42,9 @@ public class ConfigToolItem extends Item {
         }
 
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof TradeStationBlockEntity) {
+        if (be instanceof TradeStationBlockEntity ||
+            be instanceof DisplayCaseBlockEntity ||
+            be instanceof RumorBoardBlockEntity) {
             player.openMenu(new MenuProvider() {
                 @Override
                 public Component getDisplayName() {
