@@ -26,6 +26,8 @@ public final class RRCreativeTabs {
                 output.accept(RRItems.TRADE_STATION.get());
                 output.accept(RRItems.DISPLAY_CASE.get());
                 output.accept(RRItems.RUMOR_BOARD.get());
+                // 配置工具（开发者工具）
+                output.accept(RRItems.CONFIG_TOOL.get());
             })
             .build());
 

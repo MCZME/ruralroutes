@@ -10,6 +10,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -69,6 +70,31 @@ public class TradeStationBlockEntity extends BlockEntity implements MenuProvider
         }
     }
 
+    /**
+     * 同步数据到客户端（用于渲染等）
+     */
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        if (villageTheme != null) {
+            tag.putString("VillageTheme", villageTheme.toString());
+        }
+        return tag;
+    }
+
+    /**
+     * 客户端接收更新数据
+     */
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        super.handleUpdateTag(tag, registries);
+        if (tag.contains("VillageTheme")) {
+            villageTheme = ResourceLocation.tryParse(tag.getString("VillageTheme"));
+        } else {
+            villageTheme = null;
+        }
+    }
+
     // Getters and Setters
     public ResourceLocation getVillageTheme() {
         return villageTheme;
@@ -77,6 +103,11 @@ public class TradeStationBlockEntity extends BlockEntity implements MenuProvider
     public void setVillageTheme(ResourceLocation villageTheme) {
         this.villageTheme = villageTheme;
         setChanged();
+        // 同步到客户端
+        Level level = getLevel();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
+        }
     }
 
     public UUID getVillageId() {
