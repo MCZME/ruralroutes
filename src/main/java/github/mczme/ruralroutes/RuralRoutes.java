@@ -13,6 +13,7 @@ import github.mczme.ruralroutes.data.ThemeDataProvider;
 import github.mczme.ruralroutes.data.ValueDataProvider;
 import github.mczme.ruralroutes.data.lang.RREnUsLanguageProvider;
 import github.mczme.ruralroutes.data.lang.RRZhCnLanguageProvider;
+import github.mczme.ruralroutes.register.RRAttachments;
 import github.mczme.ruralroutes.register.RRBlockEntities;
 import github.mczme.ruralroutes.register.RRBlocks;
 import github.mczme.ruralroutes.register.RRCreativeTabs;
@@ -28,6 +29,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import github.mczme.ruralroutes.network.NetworkHandler;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 
@@ -37,15 +39,17 @@ public class RuralRoutes {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public RuralRoutes(IEventBus modEventBus, ModContainer modContainer) {
-        // 注册方块、物品、BlockEntity、创造模式标签页、菜单类型
+        // 注册方块、物品、BlockEntity、创造模式标签页、菜单类型、Attachment
         RRBlocks.register(modEventBus);
         RRItems.register(modEventBus);
         RRBlockEntities.register(modEventBus);
         RRCreativeTabs.register(modEventBus);
         RRMenuTypes.register(modEventBus);
+        RRAttachments.register(modEventBus);
 
         modEventBus.addListener(this::gatherData);
         modEventBus.addListener(RRDataMaps::register);
+        modEventBus.addListener(NetworkHandler::registerPayloadHandlers);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
         // 注册到 NeoForge 游戏事件总线

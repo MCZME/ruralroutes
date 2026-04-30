@@ -27,8 +27,12 @@ public class ConfigToolItem extends Item {
         super(properties);
     }
 
+    /**
+     * 使用 onItemUseFirst 优先于方块交互处理
+     * 让配置工具在贸易站方块的 useWithoutItem 之前执行
+     */
     @Override
-    public InteractionResult useOn(UseOnContext context) {
+    public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();

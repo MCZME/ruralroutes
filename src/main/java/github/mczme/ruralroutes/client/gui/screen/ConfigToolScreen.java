@@ -1,7 +1,7 @@
 package github.mczme.ruralroutes.client.gui.screen;
 
 import github.mczme.ruralroutes.menu.ConfigToolMenu;
-import net.minecraft.client.Minecraft;
+import github.mczme.ruralroutes.network.ConfigToolApplyPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 
@@ -56,11 +57,16 @@ public class ConfigToolScreen extends Screen implements MenuAccess<ConfigToolMen
             addRenderableWidget(button);
         }
 
-        // 应用按钮
+        // 应用按钮 - 发送网络包到服务端
         addRenderableWidget(Button.builder(
             Component.translatable("gui.ruralroutes.config_tool.apply"),
             b -> {
-                if (menu.applyTheme(Minecraft.getInstance().player)) {
+                ResourceLocation selected = menu.getSelectedTheme();
+                if (selected != null) {
+                    // 发送网络包到服务端
+                    PacketDistributor.sendToServer(
+                        new ConfigToolApplyPayload(menu.getBlockPos(), selected)
+                    );
                     this.onClose();
                 }
             }

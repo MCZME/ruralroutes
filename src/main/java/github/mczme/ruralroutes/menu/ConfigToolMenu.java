@@ -72,20 +72,4 @@ public class ConfigToolMenu extends AbstractContainerMenu {
     public void selectTheme(ResourceLocation theme) {
         this.selectedTheme = theme;
     }
-
-    /**
-     * 应用选中的主题到贸易站
-     */
-    public boolean applyTheme(Player player) {
-        if (selectedTheme == null) {
-            return false;
-        }
-
-        Level level = player.level();
-        if (level.getBlockEntity(blockPos) instanceof TradeStationBlockEntity station) {
-            station.setVillageTheme(selectedTheme);
-            return true;
-        }
-        return false;
-    }
 }
