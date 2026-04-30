@@ -2,7 +2,9 @@
   "required": true,
   "package": "github.mczme.ruralroutes.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [],
+  "mixins": [
+    "StructureTemplatePoolAccessor"
+  ],
   "injectors": {
     "defaultRequire": 1
   },
