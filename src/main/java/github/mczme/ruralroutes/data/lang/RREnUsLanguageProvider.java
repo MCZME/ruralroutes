@@ -43,6 +43,12 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.current_theme", "Current: %s");
         add("gui.ruralroutes.config_tool.no_current_theme", "No theme set");
 
+        // 贸易站 GUI
+        add("gui.ruralroutes.trade_station.theme", "Theme: %s");
+        add("gui.ruralroutes.trade_station.sell", "Selling");
+        add("gui.ruralroutes.trade_station.buy", "Buying");
+        add("block.ruralroutes.trade_station.mismatch", "Trade station data mismatch");
+
         // 创造模式标签页
         add("itemGroup.ruralroutes", "Rural Routes");
     }

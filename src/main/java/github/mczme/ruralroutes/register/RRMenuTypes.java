@@ -2,9 +2,11 @@ package github.mczme.ruralroutes.register;
 
 import github.mczme.ruralroutes.RuralRoutes;
 import github.mczme.ruralroutes.menu.ConfigToolMenu;
+import github.mczme.ruralroutes.menu.TradeStationMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -18,7 +20,11 @@ public final class RRMenuTypes {
 
     public static final DeferredHolder<MenuType<?>, MenuType<ConfigToolMenu>> CONFIG_TOOL =
         MENU_TYPES.register("config_tool", () ->
-            net.neoforged.neoforge.common.extensions.IMenuTypeExtension.create(ConfigToolMenu::new));
+            IMenuTypeExtension.create(ConfigToolMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<TradeStationMenu>> TRADE_STATION =
+        MENU_TYPES.register("trade_station", () ->
+            IMenuTypeExtension.create(TradeStationMenu::new));
 
     public static void register(IEventBus modEventBus) {
         MENU_TYPES.register(modEventBus);

@@ -43,6 +43,12 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.current_theme", "当前: %s");
         add("gui.ruralroutes.config_tool.no_current_theme", "未设置主题");
 
+        // 贸易站 GUI
+        add("gui.ruralroutes.trade_station.theme", "主题: %s");
+        add("gui.ruralroutes.trade_station.sell", "出售");
+        add("gui.ruralroutes.trade_station.buy", "收购");
+        add("block.ruralroutes.trade_station.mismatch", "贸易站数据不匹配");
+
         // 创造模式标签页
         add("itemGroup.ruralroutes", "乡野商路");
     }

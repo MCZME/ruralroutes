@@ -1,10 +1,15 @@
 package github.mczme.ruralroutes.blockentity;
 
+import github.mczme.ruralroutes.menu.TradeStationMenu;
 import github.mczme.ruralroutes.register.RRBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -14,18 +19,16 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
- * 贸易站方块实体 - 存储村庄交易数据
+ * 贸易站方块实体
+ * 仅存储校验数据（themeName、tradeNodeId），核心业务数据存储在区块中
  */
 public class TradeStationBlockEntity extends BlockEntity implements MenuProvider {
 
     private ResourceLocation villageTheme;
-    private UUID villageId;
-    private final Map<ResourceLocation, Integer> stock = new HashMap<>();
+    private UUID tradeNodeId;
 
     public TradeStationBlockEntity(BlockPos pos, BlockState state) {
         super(RRBlockEntities.TRADE_STATION.get(), pos, state);
@@ -37,15 +40,9 @@ public class TradeStationBlockEntity extends BlockEntity implements MenuProvider
         if (villageTheme != null) {
             tag.putString("VillageTheme", villageTheme.toString());
         }
-        if (villageId != null) {
-            tag.putUUID("VillageId", villageId);
+        if (tradeNodeId != null) {
+            tag.putUUID("TradeNodeId", tradeNodeId);
         }
-        // 保存库存
-        CompoundTag stockTag = new CompoundTag();
-        for (Map.Entry<ResourceLocation, Integer> entry : stock.entrySet()) {
-            stockTag.putInt(entry.getKey().toString(), entry.getValue());
-        }
-        tag.put("Stock", stockTag);
     }
 
     @Override
@@ -54,25 +51,13 @@ public class TradeStationBlockEntity extends BlockEntity implements MenuProvider
         if (tag.contains("VillageTheme")) {
             villageTheme = ResourceLocation.tryParse(tag.getString("VillageTheme"));
         }
-        if (tag.contains("VillageId")) {
-            villageId = tag.getUUID("VillageId");
-        }
-        // 加载库存
-        stock.clear();
-        if (tag.contains("Stock")) {
-            CompoundTag stockTag = tag.getCompound("Stock");
-            for (String key : stockTag.getAllKeys()) {
-                ResourceLocation itemId = ResourceLocation.tryParse(key);
-                if (itemId != null) {
-                    stock.put(itemId, stockTag.getInt(key));
-                }
-            }
+        if (tag.contains("TradeNodeId")) {
+            tradeNodeId = tag.getUUID("TradeNodeId");
         }
     }
 
-    /**
-     * 同步数据到客户端（用于渲染等）
-     */
+    // ===== 数据同步：区块加载时 =====
+
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = super.getUpdateTag(registries);
@@ -82,9 +67,6 @@ public class TradeStationBlockEntity extends BlockEntity implements MenuProvider
         return tag;
     }
 
-    /**
-     * 客户端接收更新数据
-     */
     @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
         super.handleUpdateTag(tag, registries);
@@ -95,7 +77,21 @@ public class TradeStationBlockEntity extends BlockEntity implements MenuProvider
         }
     }
 
-    // Getters and Setters
+    // ===== 数据同步：方块更新时 =====
+
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet,
+            HolderLookup.Provider registries) {
+        super.onDataPacket(connection, packet, registries);
+    }
+
+    // ===== Getters and Setters =====
+
     public ResourceLocation getVillageTheme() {
         return villageTheme;
     }
@@ -103,34 +99,23 @@ public class TradeStationBlockEntity extends BlockEntity implements MenuProvider
     public void setVillageTheme(ResourceLocation villageTheme) {
         this.villageTheme = villageTheme;
         setChanged();
-        // 同步到客户端
+        // 触发方块更新同步到客户端
         Level level = getLevel();
         if (level != null && !level.isClientSide) {
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
         }
     }
 
-    public UUID getVillageId() {
-        return villageId;
+    public UUID getTradeNodeId() {
+        return tradeNodeId;
     }
 
-    public void setVillageId(UUID villageId) {
-        this.villageId = villageId;
+    public void setTradeNodeId(UUID tradeNodeId) {
+        this.tradeNodeId = tradeNodeId;
         setChanged();
     }
 
-    public int getStock(ResourceLocation itemId) {
-        return stock.getOrDefault(itemId, 0);
-    }
-
-    public void setStock(ResourceLocation itemId, int amount) {
-        stock.put(itemId, amount);
-        setChanged();
-    }
-
-    public Map<ResourceLocation, Integer> getAllStock() {
-        return stock;
-    }
+    // ===== MenuProvider =====
 
     @Override
     public Component getDisplayName() {
@@ -139,7 +124,6 @@ public class TradeStationBlockEntity extends BlockEntity implements MenuProvider
 
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
-        // TODO: 实现 GUI
-        return null;
+        return new TradeStationMenu(id, inventory, getBlockPos());
     }
 }
