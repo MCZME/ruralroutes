@@ -13,7 +13,11 @@ import github.mczme.ruralroutes.data.ThemeDataProvider;
 import github.mczme.ruralroutes.data.ValueDataProvider;
 import github.mczme.ruralroutes.data.lang.RREnUsLanguageProvider;
 import github.mczme.ruralroutes.data.lang.RRZhCnLanguageProvider;
+import github.mczme.ruralroutes.register.RRBlockEntities;
+import github.mczme.ruralroutes.register.RRBlocks;
+import github.mczme.ruralroutes.register.RRCreativeTabs;
 import github.mczme.ruralroutes.register.RRDataMaps;
+import github.mczme.ruralroutes.register.RRItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -32,6 +36,12 @@ public class RuralRoutes {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public RuralRoutes(IEventBus modEventBus, ModContainer modContainer) {
+        // 注册方块、物品、BlockEntity、创造模式标签页
+        RRBlocks.register(modEventBus);
+        RRItems.register(modEventBus);
+        RRBlockEntities.register(modEventBus);
+        RRCreativeTabs.register(modEventBus);
+
         modEventBus.addListener(this::gatherData);
         modEventBus.addListener(RRDataMaps::register);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);

@@ -1,6 +1,7 @@
 package github.mczme.ruralroutes.data.lang;
 
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.register.RRBlocks;
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
@@ -22,13 +23,12 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("ruralroutes.configuration.default", "Default Value");
         add("ruralroutes.configuration.default.tooltip", "Default value for items without defined value rules");
 
-        // 物品翻译示例：
-        // addItem(RRItems.EXAMPLE_ITEM, "Example Item");
+        // 方块翻译
+        addBlock(RRBlocks.TRADE_STATION, "Trade Station");
+        addBlock(RRBlocks.DISPLAY_CASE, "Display Case");
+        addBlock(RRBlocks.RUMOR_BOARD, "Rumor Board");
 
-        // 方块翻译示例：
-        // addBlock(RRBlocks.EXAMPLE_BLOCK, "Example Block");
-
-        // 通用翻译键：
-        // add("itemGroup.ruralroutes", "Rural Routes");
+        // 创造模式标签页
+        add("itemGroup.ruralroutes", "Rural Routes");
     }
 }

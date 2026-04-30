@@ -1,4 +1,8 @@
 {
+  "block.ruralroutes.display_case": "Display Case",
+  "block.ruralroutes.rumor_board": "Rumor Board",
+  "block.ruralroutes.trade_station": "Trade Station",
+  "itemGroup.ruralroutes": "Rural Routes",
   "ruralroutes.configuration.default": "Default Value",
   "ruralroutes.configuration.default.tooltip": "Default value for items without defined value rules",
   "ruralroutes.configuration.values": "Values",

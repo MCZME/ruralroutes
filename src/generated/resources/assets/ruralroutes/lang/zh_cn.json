@@ -1,4 +1,8 @@
 {
+  "block.ruralroutes.display_case": "展示柜",
+  "block.ruralroutes.rumor_board": "传闻板",
+  "block.ruralroutes.trade_station": "贸易站",
+  "itemGroup.ruralroutes": "乡野商路",
   "ruralroutes.configuration.default": "默认价值",
   "ruralroutes.configuration.default.tooltip": "未定义价值规则的物品使用的默认价值",
   "ruralroutes.configuration.values": "价值设置",
