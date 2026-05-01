@@ -2,8 +2,8 @@
   "biome": "minecraft:plains",
   "buy_items": [
     {
-      "type": "tag",
-      "id": "#ruralroutes:pool/mineral"
+      "type": "item",
+      "id": "minecraft:wheat"
     },
     {
       "type": "tag",
@@ -11,21 +11,7 @@
     }
   ],
   "name": "ruralroutes:plains_granary",
-  "price_modifiers": {
-    "#ruralroutes:pool/crop": {
-      "buy": 1.2,
-      "sell": 0.8
-    },
-    "#ruralroutes:pool/mineral": {
-      "buy": 0.8,
-      "sell": 1.2
-    }
-  },
   "sell_items": [
-    {
-      "type": "tag",
-      "id": "#ruralroutes:pool/crop"
-    },
     {
       "type": "item",
       "id": "minecraft:bread"
@@ -41,10 +27,6 @@
       "min": 8
     },
     "specific": {
-      "#ruralroutes:pool/crop": {
-        "max": 64,
-        "min": 32
-      },
       "minecraft:golden_carrot": {
         "max": 3,
         "min": 1

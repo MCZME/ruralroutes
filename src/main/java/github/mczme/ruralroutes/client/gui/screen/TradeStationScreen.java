@@ -10,6 +10,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 /**
  * 贸易站 GUI 屏幕
@@ -55,45 +57,53 @@ public class TradeStationScreen extends Screen implements MenuAccess<TradeStatio
         int currentY = topPos;
         int mainWidth = GUI_WIDTH - MARGIN * 2;
 
-        // 村庄出售清单 - 网格布局
-        int gridHeight = 12 + 2 * (18 + 2); // 标题 + 2行卡片
+        // 村庄出售清单 - 网格布局（增加内边距）
+        int gridHeight = 12 + 2 * (18 + 2) + 8; // 标题 + 2行卡片 + padding
         sellSection = new SellSectionWidget(
             leftPos + MARGIN,
             currentY,
             mainWidth,
             gridHeight
         );
+        // 测试数据
+        for (int i = 0; i < 30; i++) {
+            sellSection.addItem(new ItemStack(Items.WHEAT, i + 1));
+        }
         currentY += gridHeight + SECTION_SPACING;
 
-        // 村庄收购清单 - 网格布局
+        // 村庄收购清单 - 网格布局（增加内边距）
         buySection = new BuySectionWidget(
             leftPos + MARGIN,
             currentY,
             mainWidth,
             gridHeight
         );
+        // 测试数据
+        for (int i = 0; i < 25; i++) {
+            buySection.addItem(new ItemStack(Items.EMERALD, i + 1));
+        }
         currentY += gridHeight + SECTION_SPACING;
 
-        // 交易区（左侧 2/3 宽度）
-        int tradeWidth = mainWidth * 2 / 3 - SECTION_SPACING / 2;
+        // 交易区（左侧约 70% 宽度）
+        int tradeWidth = mainWidth * 7 / 10 - SECTION_SPACING / 2;
         tradeArea = new TradeAreaWidget(
             leftPos + MARGIN,
             currentY,
             tradeWidth,
-            130
+            110
         );
         tradeArea.init(btn -> {
             // 占位：确认按钮点击逻辑
         });
 
-        // 铸币快捷操作（右侧 1/3 宽度）
-        int coinWidth = mainWidth / 3 - SECTION_SPACING / 2;
+        // 铸币快捷操作（右侧约 30% 宽度）
+        int coinWidth = mainWidth * 3 / 10 - SECTION_SPACING / 2;
         int coinX = leftPos + MARGIN + tradeWidth + SECTION_SPACING;
         coinExchange = new CoinExchangeWidget(
             coinX,
             currentY,
             coinWidth,
-            130
+            110
         );
         coinExchange.init();
     }
@@ -118,6 +128,12 @@ public class TradeStationScreen extends Screen implements MenuAccess<TradeStatio
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (sellSection.mouseClicked(mouseX, mouseY, button)) {
+            return true;
+        }
+        if (buySection.mouseClicked(mouseX, mouseY, button)) {
+            return true;
+        }
         if (tradeArea.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
@@ -125,6 +141,35 @@ public class TradeStationScreen extends Screen implements MenuAccess<TradeStatio
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        sellSection.mouseReleased(mouseX, mouseY, button);
+        buySection.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (sellSection.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
+            return true;
+        }
+        if (buySection.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (sellSection.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+            return true;
+        }
+        if (buySection.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override

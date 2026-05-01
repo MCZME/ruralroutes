@@ -1,52 +1,25 @@
 package github.mczme.ruralroutes.client.gui.component;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.network.chat.Component;
 
+import java.util.function.Consumer;
+
 /**
- * 村庄收购清单组件 - 网格卡片布局
+ * 村庄收购清单组件 - 可横向滚动
  */
-public class BuySectionWidget extends AbstractWidget {
+public class BuySectionWidget extends ScrollableSectionWidget {
 
     private static final int TITLE_COLOR = 0xFF5555;
-    private static final int CARD_COLOR = 0x40FF5555;
-    private static final int CARD_SIZE = 18;
-    private static final int CARD_SPACING = 2;
-    private static final int COLS = 9;
-    private static final int ROWS = 2;
+    private static final int BG_COLOR = 0x40333333;
 
     public BuySectionWidget(int x, int y, int width, int height) {
-        super(x, y, width, height, Component.translatable("gui.ruralroutes.trade_station.buy"));
+        super(x, y, width, height, TITLE_COLOR, BG_COLOR,
+              Component.translatable("gui.ruralroutes.trade_station.buy"));
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        // 绘制标题
-        guiGraphics.drawString(Minecraft.getInstance().font, getMessage(), getX(), getY(), TITLE_COLOR);
-
-        // 绘制网格卡片
-        int gridX = getX();
-        int gridY = getY() + 12;
-
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLS; col++) {
-                int cardX = gridX + col * (CARD_SIZE + CARD_SPACING);
-                int cardY = gridY + row * (CARD_SIZE + CARD_SPACING);
-                fill(guiGraphics, cardX, cardY, CARD_SIZE, CARD_SIZE, CARD_COLOR);
-            }
-        }
-    }
-
-    @Override
-    protected void updateWidgetNarration(NarrationElementOutput narration) {
-        narration.add(NarratedElementType.TITLE, getMessage());
-    }
-
-    private void fill(GuiGraphics guiGraphics, int x, int y, int width, int height, int color) {
-        guiGraphics.fill(x, y, x + width, y + height, color);
+    public BuySectionWidget setOnCardClick(Consumer<ItemCardWidget> onCardClick) {
+        super.setOnCardClick(onCardClick);
+        return this;
     }
 }
