@@ -32,6 +32,11 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         // 物品翻译
         addItem(RRItems.CONFIG_TOOL, "Config Tool");
         add("item.ruralroutes.config_tool.tooltip", "Developer tool for setting trade station theme");
+
+        // 货币
+        addItem(RRItems.COPPER_COIN, "Copper Coin");
+        addItem(RRItems.IRON_COIN, "Iron Coin");
+        addItem(RRItems.GOLD_COIN, "Gold Coin");
         add("item.ruralroutes.config_tool.no_theme", "No theme set. Available themes: %s");
         add("item.ruralroutes.config_tool.current_theme", "Current theme: %s");
 

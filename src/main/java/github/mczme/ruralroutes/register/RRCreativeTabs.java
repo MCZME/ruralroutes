@@ -22,12 +22,10 @@ public final class RRCreativeTabs {
             .title(Component.translatable("itemGroup.ruralroutes"))
             .icon(() -> new ItemStack(RRItems.TRADE_STATION.get()))
             .displayItems((parameters, output) -> {
-                // 添加所有方块物品
-                output.accept(RRItems.TRADE_STATION.get());
-                output.accept(RRItems.DISPLAY_CASE.get());
-                output.accept(RRItems.RUMOR_BOARD.get());
-                // 配置工具（开发者工具）
-                output.accept(RRItems.CONFIG_TOOL.get());
+                // 自动添加所有注册的物品
+                for (var itemSupplier : RRItems.getAllItems()) {
+                    output.accept(itemSupplier.get());
+                }
             })
             .build());
 

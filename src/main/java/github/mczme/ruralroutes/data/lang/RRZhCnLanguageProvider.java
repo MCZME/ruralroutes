@@ -32,6 +32,11 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         // 物品翻译
         addItem(RRItems.CONFIG_TOOL, "配置工具");
         add("item.ruralroutes.config_tool.tooltip", "开发者工具，用于设置贸易站主题");
+
+        // 货币
+        addItem(RRItems.COPPER_COIN, "铜板");
+        addItem(RRItems.IRON_COIN, "铁币");
+        addItem(RRItems.GOLD_COIN, "金币");
         add("item.ruralroutes.config_tool.no_theme", "未设置主题。可用主题: %s");
         add("item.ruralroutes.config_tool.current_theme", "当前主题: %s");
 
