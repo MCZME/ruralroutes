@@ -194,6 +194,17 @@ public class CommercialNodeManager {
     }
 
     /**
+     * 更新区块中的商业节点数据
+     * @param level 世界
+     * @param pos 方块坐标
+     * @param newData 新的商业节点数据
+     */
+    public static void updateNodeData(Level level, BlockPos pos, CommercialNodeData newData) {
+        ChunkAccess chunk = level.getChunk(pos);
+        chunk.setData(RRAttachments.COMMERCIAL_NODE.get(), newData);
+    }
+
+    /**
      * 校验贸易站与区块数据的一致性
      * @return true 表示校验通过
      */

@@ -1,6 +1,8 @@
 package github.mczme.ruralroutes.data;
 
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.register.RRItemTags;
+import github.mczme.ruralroutes.register.RRItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
@@ -27,5 +29,13 @@ public class RRItemTagsProvider extends ItemTagsProvider {
     @SuppressWarnings("null")
     @Override
     protected void addTags(HolderLookup.Provider provider) {
+        // 货币标签
+        tag(RRItemTags.CURRENCY)
+                .add(RRItems.COPPER_COIN.get())
+                .add(RRItems.IRON_COIN.get())
+                .add(RRItems.GOLD_COIN.get());
+
+        tag(RRItemTags.CURRENCY_BASE)
+                .add(RRItems.COPPER_COIN.get());
     }
 }

@@ -23,8 +23,14 @@
   "gui.ruralroutes.config_tool.type.trade_station": "Type: Trade Station",
   "gui.ruralroutes.config_tool.type.unknown": "Type: Unknown",
   "gui.ruralroutes.trade_station.buy": "Buying",
+  "gui.ruralroutes.trade_station.coin_exchange": "Coin Exchange",
+  "gui.ruralroutes.trade_station.confirm": "Confirm Trade",
   "gui.ruralroutes.trade_station.sell": "Selling",
   "gui.ruralroutes.trade_station.theme": "Theme: %s",
+  "gui.ruralroutes.trade_station.trade_area": "Trade Area",
+  "gui.ruralroutes.trade_station.value_status": "Value Status:",
+  "gui.ruralroutes.trade_station.you_give": "You Give:",
+  "gui.ruralroutes.trade_station.you_receive": "You Receive:",
   "item.ruralroutes.config_tool": "Config Tool",
   "item.ruralroutes.config_tool.current_theme": "Current theme: %s",
   "item.ruralroutes.config_tool.no_theme": "No theme set. Available themes: %s",
@@ -37,5 +43,10 @@
   "ruralroutes.configuration.default.tooltip": "Default value for items without defined value rules",
   "ruralroutes.configuration.values": "Values",
   "ruralroutes.configuration.values.button": "Values",
-  "ruralroutes.configuration.values.tooltip": "Value-related settings"
+  "ruralroutes.configuration.values.tooltip": "Value-related settings",
+  "trade.fail.invalid_request": "Invalid trade request",
+  "trade.fail.player_insufficient": "Insufficient items in inventory",
+  "trade.fail.player_no_space": "Inventory full",
+  "trade.fail.value_mismatch": "Value mismatch",
+  "trade.fail.village_insufficient": "Village out of stock"
 }

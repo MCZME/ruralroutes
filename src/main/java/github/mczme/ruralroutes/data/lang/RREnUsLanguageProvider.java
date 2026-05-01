@@ -59,6 +59,12 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_station.theme", "Theme: %s");
         add("gui.ruralroutes.trade_station.sell", "Selling");
         add("gui.ruralroutes.trade_station.buy", "Buying");
+        add("gui.ruralroutes.trade_station.you_give", "You Give:");
+        add("gui.ruralroutes.trade_station.you_receive", "You Receive:");
+        add("gui.ruralroutes.trade_station.value_status", "Value Status:");
+        add("gui.ruralroutes.trade_station.confirm", "Confirm Trade");
+        add("gui.ruralroutes.trade_station.coin_exchange", "Coin Exchange");
+        add("gui.ruralroutes.trade_station.trade_area", "Trade Area");
         add("block.ruralroutes.trade_station.mismatch", "Trade station data mismatch");
 
         // 展示柜交互
@@ -70,6 +76,13 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("block.ruralroutes.rumor_board.not_activated", "Please activate the trade station first");
         add("block.ruralroutes.rumor_board.mismatch", "Rumor board data mismatch");
         add("block.ruralroutes.rumor_board.no_news", "Trade route news will arrive next cycle");
+
+        // 交易失败原因
+        add("trade.fail.value_mismatch", "Value mismatch");
+        add("trade.fail.player_insufficient", "Insufficient items in inventory");
+        add("trade.fail.village_insufficient", "Village out of stock");
+        add("trade.fail.player_no_space", "Inventory full");
+        add("trade.fail.invalid_request", "Invalid trade request");
 
         // 创造模式标签页
         add("itemGroup.ruralroutes", "Rural Routes");

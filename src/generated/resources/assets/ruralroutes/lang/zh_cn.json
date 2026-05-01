@@ -23,8 +23,14 @@
   "gui.ruralroutes.config_tool.type.trade_station": "类型: 贸易站",
   "gui.ruralroutes.config_tool.type.unknown": "类型: 未知",
   "gui.ruralroutes.trade_station.buy": "收购",
+  "gui.ruralroutes.trade_station.coin_exchange": "铸币",
+  "gui.ruralroutes.trade_station.confirm": "确认交换",
   "gui.ruralroutes.trade_station.sell": "出售",
   "gui.ruralroutes.trade_station.theme": "主题: %s",
+  "gui.ruralroutes.trade_station.trade_area": "交易区",
+  "gui.ruralroutes.trade_station.value_status": "价值状态:",
+  "gui.ruralroutes.trade_station.you_give": "你付出:",
+  "gui.ruralroutes.trade_station.you_receive": "你获得:",
   "item.ruralroutes.config_tool": "配置工具",
   "item.ruralroutes.config_tool.current_theme": "当前主题: %s",
   "item.ruralroutes.config_tool.no_theme": "未设置主题。可用主题: %s",
@@ -37,5 +43,10 @@
   "ruralroutes.configuration.default.tooltip": "未定义价值规则的物品使用的默认价值",
   "ruralroutes.configuration.values": "价值设置",
   "ruralroutes.configuration.values.button": "价值设置",
-  "ruralroutes.configuration.values.tooltip": "价值相关设置"
+  "ruralroutes.configuration.values.tooltip": "价值相关设置",
+  "trade.fail.invalid_request": "无效交易请求",
+  "trade.fail.player_insufficient": "库存不足",
+  "trade.fail.player_no_space": "背包已满",
+  "trade.fail.value_mismatch": "价值不匹配",
+  "trade.fail.village_insufficient": "村庄缺货"
 }

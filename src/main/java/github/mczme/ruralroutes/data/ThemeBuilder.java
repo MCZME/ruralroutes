@@ -25,6 +25,7 @@ public class ThemeBuilder {
     private ThemeTemplate.StockRange defaultStock;
     private final Map<String, ThemeTemplate.StockRange> stockSpecific = new HashMap<>();
     private final Map<String, ThemeTemplate.PriceModifier> priceModifiers = new HashMap<>();
+    private boolean withCurrency = false;
 
     private BiConsumer<ResourceLocation, ThemeTemplate> registrar;
 
@@ -34,6 +35,15 @@ public class ThemeBuilder {
 
     public static ThemeBuilder create(String name) {
         return new ThemeBuilder(name);
+    }
+
+    /**
+     * 添加默认货币到出售池和收购池
+     * 村庄会出售和收购铜板（基础货币）
+     */
+    public ThemeBuilder withCurrency() {
+        this.withCurrency = true;
+        return this;
     }
 
     /**
@@ -115,11 +125,20 @@ public class ThemeBuilder {
      * 构建 ThemeTemplate
      */
     public ThemeTemplate build() {
+        List<ThemeTemplate.ItemReference> finalSellItems = new ArrayList<>(sellItems);
+        List<ThemeTemplate.ItemReference> finalBuyItems = new ArrayList<>(buyItems);
+
+        // 添加默认货币到出售池和收购池
+        if (withCurrency) {
+            finalSellItems.add(new ThemeTemplate.ItemReference("tag", "#ruralroutes:currency"));
+            finalBuyItems.add(new ThemeTemplate.ItemReference("tag", "#ruralroutes:currency"));
+        }
+
         return new ThemeTemplate(
             getId(),
             ResourceLocation.parse(biome),
-            List.copyOf(sellItems),
-            List.copyOf(buyItems),
+            List.copyOf(finalSellItems),
+            List.copyOf(finalBuyItems),
             specialties.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(specialties)),
             defaultStock == null && stockSpecific.isEmpty()
                 ? Optional.empty()

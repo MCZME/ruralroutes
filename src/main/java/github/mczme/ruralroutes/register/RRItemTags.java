@@ -13,12 +13,16 @@ import net.minecraft.world.item.Item;
  */
 public class RRItemTags {
 
+    // 货币标签
+    /** 所有货币物品（铜板、铁币、金币） */
+    public static final TagKey<Item> CURRENCY = tag("currency");
+    /** 基础货币物品（仅铜板） */
+    public static final TagKey<Item> CURRENCY_BASE = tag("currency_base");
+
     // 自定义物品池标签（当没有合适的现有标签时定义）
     // 命名规范：pool/<池名>，但这只是内部规范，非强制
 
-    private RRItemTags() {}
 
-    @SuppressWarnings("null")
     private static TagKey<Item> tag(String path) {
         return TagKey.create(Registries.ITEM,
                 ResourceLocation.fromNamespaceAndPath(RuralRoutes.MODID, path));

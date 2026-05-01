@@ -59,6 +59,12 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_station.theme", "主题: %s");
         add("gui.ruralroutes.trade_station.sell", "出售");
         add("gui.ruralroutes.trade_station.buy", "收购");
+        add("gui.ruralroutes.trade_station.you_give", "你付出:");
+        add("gui.ruralroutes.trade_station.you_receive", "你获得:");
+        add("gui.ruralroutes.trade_station.value_status", "价值状态:");
+        add("gui.ruralroutes.trade_station.confirm", "确认交换");
+        add("gui.ruralroutes.trade_station.coin_exchange", "铸币");
+        add("gui.ruralroutes.trade_station.trade_area", "交易区");
         add("block.ruralroutes.trade_station.mismatch", "贸易站数据不匹配");
 
         // 展示柜交互
@@ -70,6 +76,13 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("block.ruralroutes.rumor_board.not_activated", "请先激活贸易站");
         add("block.ruralroutes.rumor_board.mismatch", "传闻板数据不匹配");
         add("block.ruralroutes.rumor_board.no_news", "商路消息将在下一个周期到来");
+
+        // 交易失败原因
+        add("trade.fail.value_mismatch", "价值不匹配");
+        add("trade.fail.player_insufficient", "库存不足");
+        add("trade.fail.village_insufficient", "村庄缺货");
+        add("trade.fail.player_no_space", "背包已满");
+        add("trade.fail.invalid_request", "无效交易请求");
 
         // 创造模式标签页
         add("itemGroup.ruralroutes", "乡野商路");
