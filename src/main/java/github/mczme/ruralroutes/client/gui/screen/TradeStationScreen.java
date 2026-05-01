@@ -1,5 +1,9 @@
 package github.mczme.ruralroutes.client.gui.screen;
 
+import github.mczme.ruralroutes.client.gui.component.BuySectionWidget;
+import github.mczme.ruralroutes.client.gui.component.CoinExchangeWidget;
+import github.mczme.ruralroutes.client.gui.component.SellSectionWidget;
+import github.mczme.ruralroutes.client.gui.component.TradeAreaWidget;
 import github.mczme.ruralroutes.menu.TradeStationMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -7,14 +11,28 @@ import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
-import java.util.List;
-
 /**
- * 贸易站 GUI 屏幕 - 显示基本信息
+ * 贸易站 GUI 屏幕
  */
 public class TradeStationScreen extends Screen implements MenuAccess<TradeStationMenu> {
 
+    // GUI 尺寸
+    private static final int GUI_WIDTH = 320;
+    private static final int GUI_HEIGHT = 240;
+    private static final int MARGIN = 10;
+    private static final int SECTION_SPACING = 8;
+
     private final TradeStationMenu menu;
+
+    // 组件
+    private SellSectionWidget sellSection;
+    private BuySectionWidget buySection;
+    private TradeAreaWidget tradeArea;
+    private CoinExchangeWidget coinExchange;
+
+    // GUI 左上角位置（居中）
+    private int leftPos;
+    private int topPos;
 
     public TradeStationScreen(TradeStationMenu menu, Inventory ignored, Component title) {
         super(title);
@@ -29,47 +47,84 @@ public class TradeStationScreen extends Screen implements MenuAccess<TradeStatio
     @Override
     protected void init() {
         super.init();
+
+        // 计算 GUI 左上角位置（居中）
+        leftPos = (this.width - GUI_WIDTH) / 2;
+        topPos = (this.height - GUI_HEIGHT) / 2;
+
+        int currentY = topPos;
+        int mainWidth = GUI_WIDTH - MARGIN * 2;
+
+        // 村庄出售清单 - 网格布局
+        int gridHeight = 12 + 2 * (18 + 2); // 标题 + 2行卡片
+        sellSection = new SellSectionWidget(
+            leftPos + MARGIN,
+            currentY,
+            mainWidth,
+            gridHeight
+        );
+        currentY += gridHeight + SECTION_SPACING;
+
+        // 村庄收购清单 - 网格布局
+        buySection = new BuySectionWidget(
+            leftPos + MARGIN,
+            currentY,
+            mainWidth,
+            gridHeight
+        );
+        currentY += gridHeight + SECTION_SPACING;
+
+        // 交易区（左侧 2/3 宽度）
+        int tradeWidth = mainWidth * 2 / 3 - SECTION_SPACING / 2;
+        tradeArea = new TradeAreaWidget(
+            leftPos + MARGIN,
+            currentY,
+            tradeWidth,
+            130
+        );
+        tradeArea.init(btn -> {
+            // 占位：确认按钮点击逻辑
+        });
+
+        // 铸币快捷操作（右侧 1/3 宽度）
+        int coinWidth = mainWidth / 3 - SECTION_SPACING / 2;
+        int coinX = leftPos + MARGIN + tradeWidth + SECTION_SPACING;
+        coinExchange = new CoinExchangeWidget(
+            coinX,
+            currentY,
+            coinWidth,
+            130
+        );
+        coinExchange.init();
     }
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        // 绘制半透明背景
+        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+
+        // 绘制 GUI 背景
+        guiGraphics.fill(leftPos, topPos, leftPos + GUI_WIDTH, topPos + GUI_HEIGHT, 0xCC222222);
 
         // 绘制标题
-        guiGraphics.drawCenteredString(font, this.title, this.width / 2, 15, 0xFFFFFF);
+        guiGraphics.drawCenteredString(font, this.title, leftPos + GUI_WIDTH / 2, topPos + 5, 0xFFFFFF);
 
-        // 显示主题名称
-        String themeDisplay = menu.getThemeDisplayName();
-        guiGraphics.drawCenteredString(font,
-            Component.translatable("gui.ruralroutes.trade_station.theme", themeDisplay),
-            this.width / 2, 30, 0xAAAAAA);
+        // 渲染各组件
+        sellSection.render(guiGraphics, mouseX, mouseY, partialTick);
+        buySection.render(guiGraphics, mouseX, mouseY, partialTick);
+        tradeArea.render(guiGraphics, mouseX, mouseY, partialTick);
+        coinExchange.render(guiGraphics, mouseX, mouseY, partialTick);
+    }
 
-        // 显示出售物品（村庄卖给玩家）
-        int startY = 50;
-        guiGraphics.drawString(font,
-            Component.translatable("gui.ruralroutes.trade_station.sell"),
-            20, startY, 0x55FF55);
-
-        List<TradeStationMenu.StockInfo> sellStocks = menu.getSellStocks();
-        for (int i = 0; i < Math.min(10, sellStocks.size()); i++) {
-            TradeStationMenu.StockInfo info = sellStocks.get(i);
-            String itemText = info.itemId().getPath() + ": " + info.getDisplayText();
-            guiGraphics.drawString(font, itemText, 25, startY + 15 + i * 12, 0xFFFFFF);
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (tradeArea.mouseClicked(mouseX, mouseY, button)) {
+            return true;
         }
-
-        // 显示收购物品（玩家卖给村庄）
-        int buyStartY = startY + 15 + Math.min(10, sellStocks.size()) * 12 + 20;
-        guiGraphics.drawString(font,
-            Component.translatable("gui.ruralroutes.trade_station.buy"),
-            20, buyStartY, 0xFF5555);
-
-        List<TradeStationMenu.StockInfo> buyStocks = menu.getBuyStocks();
-        for (int i = 0; i < Math.min(10, buyStocks.size()); i++) {
-            TradeStationMenu.StockInfo info = buyStocks.get(i);
-            int currentSpace = info.max() - info.current();
-            String itemText = info.itemId().getPath() + ": " + currentSpace + "/" + info.max();
-            guiGraphics.drawString(font, itemText, 25, buyStartY + 15 + i * 12, 0xFFFFFF);
+        if (coinExchange.mouseClicked(mouseX, mouseY, button)) {
+            return true;
         }
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
