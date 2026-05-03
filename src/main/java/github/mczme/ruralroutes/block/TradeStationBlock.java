@@ -5,11 +5,13 @@ import github.mczme.ruralroutes.blockentity.RumorBoardBlockEntity;
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
+import github.mczme.ruralroutes.menu.TradeStationMenu;
 import github.mczme.ruralroutes.register.RRBlockEntities;
 import net.minecraft.core.BlockPos;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -130,19 +132,28 @@ public class TradeStationBlock extends BaseEntityBlock {
 
     /**
      * 打开贸易站菜单，发送 BlockPos 数据到客户端
+     * 并同步槽位数据到客户端
      */
     private void openMenu(Player player, TradeStationBlockEntity station) {
         BlockPos pos = station.getBlockPos();
-        player.openMenu(new MenuProvider() {
-            @Override
-            public Component getDisplayName() {
-                return Component.translatable("block.ruralroutes.trade_station");
-            }
+        if (player instanceof ServerPlayer serverPlayer) {
+            // 使用 openMenu 的返回值获取创建的 Menu
+            player.openMenu(new MenuProvider() {
+                @Override
+                public Component getDisplayName() {
+                    return Component.translatable("block.ruralroutes.trade_station");
+                }
 
-            @Override
-            public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
-                return station.createMenu(containerId, inventory, player);
+                @Override
+                public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
+                    return new TradeStationMenu(containerId, inventory, pos);
+                }
+            }, buffer -> buffer.writeBlockPos(pos));
+
+            // openMenu 完成后，客户端已创建 Menu，此时发送同步数据
+            if (player.containerMenu instanceof TradeStationMenu tradeMenu) {
+                tradeMenu.syncSlotDataToClient(serverPlayer);
             }
-        }, buffer -> buffer.writeBlockPos(pos));
+        }
     }
 }

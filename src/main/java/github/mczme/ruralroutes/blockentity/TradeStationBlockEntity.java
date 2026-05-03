@@ -1,20 +1,14 @@
 package github.mczme.ruralroutes.blockentity;
 
-import github.mczme.ruralroutes.menu.TradeStationMenu;
 import github.mczme.ruralroutes.register.RRBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -25,7 +19,7 @@ import java.util.UUID;
  * 贸易站方块实体
  * 仅存储校验数据（themeName、tradeNodeId），核心业务数据存储在区块中
  */
-public class TradeStationBlockEntity extends BlockEntity implements MenuProvider {
+public class TradeStationBlockEntity extends BlockEntity {
 
     private ResourceLocation villageTheme;
     private UUID tradeNodeId;
@@ -125,17 +119,5 @@ public class TradeStationBlockEntity extends BlockEntity implements MenuProvider
         if (level != null && !level.isClientSide) {
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
         }
-    }
-
-    // ===== MenuProvider =====
-
-    @Override
-    public Component getDisplayName() {
-        return Component.translatable("block.ruralroutes.trade_station");
-    }
-
-    @Override
-    public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
-        return new TradeStationMenu(id, inventory, getBlockPos());
     }
 }
