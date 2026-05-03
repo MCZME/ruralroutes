@@ -219,7 +219,9 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
      * 点击确认按钮
      */
     private void onConfirmClick() {
-        // TODO: 后续实现确认逻辑
+        if (!menu.getPendingSlots().isEmpty()) {
+            PacketDistributor.sendToServer(new TradeRequestPayload(menu.containerId, TradeRequestPayload.CONFIRM, 0));
+        }
     }
 
     /**

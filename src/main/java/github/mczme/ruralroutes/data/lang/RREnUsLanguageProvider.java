@@ -83,6 +83,10 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("trade.fail.player_no_space", "Inventory full");
         add("trade.fail.invalid_request", "Invalid trade request");
 
+        // 交易站交易结果
+        add("gui.ruralroutes.trade_station.success", "Trade successful!");
+        add("gui.ruralroutes.trade_station.error.no_data", "Unable to get village data");
+
         // 创造模式标签页
         add("itemGroup.ruralroutes", "Rural Routes");
     }

@@ -83,6 +83,10 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("trade.fail.player_no_space", "背包已满");
         add("trade.fail.invalid_request", "无效交易请求");
 
+        // 交易站交易结果
+        add("gui.ruralroutes.trade_station.success", "交易成功！");
+        add("gui.ruralroutes.trade_station.error.no_data", "无法获取村庄数据");
+
         // 创造模式标签页
         add("itemGroup.ruralroutes", "乡野商路");
     }
