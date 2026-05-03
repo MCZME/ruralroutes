@@ -13,14 +13,12 @@ import net.neoforged.neoforge.registries.datamaps.RegisterDataMapTypesEvent;
  */
 public final class RRDataMaps {
 
-    @SuppressWarnings("null")
     public static final DataMapType<Item, ItemValue> ITEM_VALUE = DataMapType.builder(
             ResourceLocation.fromNamespaceAndPath(RuralRoutes.MODID, "value"),
             Registries.ITEM,
             ItemValue.CODEC
     ).build();
 
-    @SuppressWarnings("null")
     public static void register(RegisterDataMapTypesEvent event) {
         event.register(ITEM_VALUE);
     }

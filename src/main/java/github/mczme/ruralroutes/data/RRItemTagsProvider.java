@@ -26,7 +26,6 @@ public class RRItemTagsProvider extends ItemTagsProvider {
                 super(output, lookupProvider, blockTags, RuralRoutes.MODID, existingFileHelper);
         }
 
-    @SuppressWarnings("null")
     @Override
     protected void addTags(HolderLookup.Provider provider) {
         // 货币标签
