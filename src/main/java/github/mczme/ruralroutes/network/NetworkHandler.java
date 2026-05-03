@@ -1,6 +1,8 @@
 package github.mczme.ruralroutes.network;
 
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.network.packet.PendingTradeSyncPayload;
+import github.mczme.ruralroutes.network.packet.TradeRequestPayload;
 import github.mczme.ruralroutes.network.packet.TradeSlotSyncPayload;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -19,8 +21,16 @@ public class NetworkHandler {
         registrar.playToServer(ConfigToolApplyPayload.TYPE, ConfigToolApplyPayload.STREAM_CODEC,
             ConfigToolApplyPayload::handleServer);
 
+        // 交易请求（客户端→服务端）
+        registrar.playToServer(TradeRequestPayload.TYPE, TradeRequestPayload.STREAM_CODEC,
+            TradeRequestPayload::handleServer);
+
         // 贸易槽位同步（服务端→客户端）
         registrar.playToClient(TradeSlotSyncPayload.TYPE, TradeSlotSyncPayload.STREAM_CODEC,
             TradeSlotSyncPayload::handleClient);
+
+        // 暂存区交易同步（服务端→客户端）
+        registrar.playToClient(PendingTradeSyncPayload.TYPE, PendingTradeSyncPayload.STREAM_CODEC,
+            PendingTradeSyncPayload::handleClient);
     }
 }

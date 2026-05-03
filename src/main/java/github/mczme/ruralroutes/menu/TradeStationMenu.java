@@ -5,7 +5,9 @@ import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.node.StockEntry;
 import github.mczme.ruralroutes.menu.container.TradeDisplayContainer;
+import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
 import github.mczme.ruralroutes.menu.slot.TradeSlot;
+import github.mczme.ruralroutes.network.packet.PendingTradeSyncPayload;
 import github.mczme.ruralroutes.network.packet.TradeSlotSyncPayload;
 import github.mczme.ruralroutes.register.RRMenuTypes;
 import net.minecraft.core.BlockPos;
@@ -24,6 +26,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,8 +34,9 @@ import java.util.Map;
  * 贸易站 GUI 菜单
  *
  * 槽位布局：
- * - 出售槽位 (sellSlots): 玩家可从村庄购买物品
- * - 收购槽位 (buySlots): 玩家可向村庄出售物品
+ * - 出售槽位 (sellSlots): 玩家可从村庄购买物品（村庄出售）
+ * - 收购槽位 (buySlots): 玩家可向村庄出售物品（村庄收购）
+ * - 暂存区：支持多物品暂存
  *
  * 使用 TradeSlot 实现不可交互的展示槽位
  * 槽位数量动态创建，基于 CommercialNodeData 中的 sellItems/buyItems 列表
@@ -40,10 +44,15 @@ import java.util.Map;
 public class TradeStationMenu extends AbstractContainerMenu {
 
     private final BlockPos blockPos;
+    private final Player player;
     private TradeDisplayContainer sellContainer;
     private TradeDisplayContainer buyContainer;
     private final List<TradeSlot> sellSlots;
     private final List<TradeSlot> buySlots;
+
+    // 多物品暂存区
+    private List<PendingTradeSlot> pendingSlots = new ArrayList<>();
+    private boolean isBuyTrade = true; // true=购买交易，false=出售交易
 
     // 滚动偏移数据槽
     private final DataSlot sellScrollOffset;
@@ -70,6 +79,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
             int sellSlotCount, int buySlotCount) {
         super(RRMenuTypes.TRADE_STATION.get(), containerId);
         this.blockPos = blockPos;
+        this.player = playerInventory.player;
 
         // 初始化槽位列表
         this.sellSlots = new ArrayList<>();
@@ -112,7 +122,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
         this.sellContainer = new TradeDisplayContainer(Math.max(1, sellItems.size()));
         this.buyContainer = new TradeDisplayContainer(Math.max(1, buyItems.size()));
 
-        // 创建出售槽位
+        // 创建出售槽位（村庄卖给玩家）
         int sellStartX = 10;
         int sellStartY = 22;
         for (int i = 0; i < sellItems.size(); i++) {
@@ -127,15 +137,17 @@ public class TradeStationMenu extends AbstractContainerMenu {
             int y = sellStartY + row * (SLOT_SIZE + SLOT_SPACING);
 
             TradeSlot slot = new TradeSlot(sellContainer, i, x, y);
+            slot.setItemId(itemId);
             slot.setDisplayStack(displayStack);
-            slot.setStockCount(stockCount);
+            slot.setBaseStock(stockCount);
             slot.setPrice(calculateSellPrice(itemId));
+            slot.setIsBuy(true); // 此槽位用于玩家购买
 
             sellSlots.add(slot);
             addSlot(slot);
         }
 
-        // 创建收购槽位
+        // 创建收购槽位（村庄收购玩家物品）
         int buyStartX = 10;
         int buyStartY = 62;
         for (int i = 0; i < buyItems.size(); i++) {
@@ -150,9 +162,11 @@ public class TradeStationMenu extends AbstractContainerMenu {
             int y = buyStartY + row * (SLOT_SIZE + SLOT_SPACING);
 
             TradeSlot slot = new TradeSlot(buyContainer, i, x, y);
+            slot.setItemId(itemId);
             slot.setDisplayStack(displayStack);
-            slot.setStockCount(stockCount);
+            slot.setBaseStock(stockCount);
             slot.setPrice(calculateBuyPrice(itemId));
+            slot.setIsBuy(false); // 此槽位用于玩家出售
 
             buySlots.add(slot);
             addSlot(slot);
@@ -175,6 +189,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
             int y = sellStartY + row * (SLOT_SIZE + SLOT_SPACING);
 
             TradeSlot slot = new TradeSlot(sellContainer, i, x, y);
+            slot.setIsBuy(true);
             sellSlots.add(slot);
             addSlot(slot);
         }
@@ -188,6 +203,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
             int y = buyStartY + row * (SLOT_SIZE + SLOT_SPACING);
 
             TradeSlot slot = new TradeSlot(buyContainer, i, x, y);
+            slot.setIsBuy(false);
             buySlots.add(slot);
             addSlot(slot);
         }
@@ -250,6 +266,154 @@ public class TradeStationMenu extends AbstractContainerMenu {
     }
 
     /**
+     * 检查是否可以添加物品到暂存区
+     * @param isBuy true=购买交易，false=出售交易
+     */
+    public boolean canAddItem(boolean isBuy) {
+        // 暂存区空时可以添加任何类型
+        // 暂存区有物品时只能添加同类型
+        return pendingSlots.isEmpty() || isBuyTrade == isBuy;
+    }
+
+    /**
+     * 获取暂存区槽位列表
+     */
+    public List<PendingTradeSlot> getPendingSlots() {
+        return pendingSlots;
+    }
+
+    /**
+     * 是否为购买交易
+     */
+    public boolean isBuyTrade() {
+        return isBuyTrade;
+    }
+
+    /**
+     * 获取总价
+     */
+    public int getTotalPrice() {
+        return pendingSlots.stream()
+            .mapToInt(slot -> slot.getPrice() * slot.getBaseStock())
+            .sum();
+    }
+
+    /**
+     * 暂存区是否有待处理交易
+     */
+    public boolean hasPendingTrade() {
+        return !pendingSlots.isEmpty();
+    }
+
+    /**
+     * 添加物品到暂存区
+     * @param isBuy true=购买交易（点击出售槽位），false=出售交易（点击收购槽位）
+     * @param slotIndex 来源槽位索引
+     */
+    public void addTradeEntry(boolean isBuy, int slotIndex) {
+        // 1. 检查 canAddItem，不符合则返回
+        if (!canAddItem(isBuy)) return;
+
+        // 2. 如果暂存区空，设置 isBuyTrade
+        if (pendingSlots.isEmpty()) {
+            isBuyTrade = isBuy;
+        }
+
+        // 3. 获取来源槽位，检查库存
+        List<TradeSlot> sourceSlots = isBuy ? sellSlots : buySlots;
+        if (slotIndex < 0 || slotIndex >= sourceSlots.size()) return;
+
+        TradeSlot sourceSlot = sourceSlots.get(slotIndex);
+        if (sourceSlot.isEmpty()) return;
+
+        int toAdd = 1;
+        int actualAdd = sourceSlot.addPending(toAdd);
+        if (actualAdd <= 0) return;
+
+        ResourceLocation itemId = sourceSlot.getItemId();
+
+        // 查找是否已有该物品的 PendingTradeSlot
+        PendingTradeSlot existingSlot = null;
+        for (PendingTradeSlot pending : pendingSlots) {
+            if (pending.getItemId() != null && pending.getItemId().equals(itemId)
+                && pending.getSourceSlotIndex() == slotIndex) {
+                existingSlot = pending;
+                break;
+            }
+        }
+
+        if (existingSlot != null) {
+            // 累加数量：增加 baseStock
+            existingSlot.setBaseStock(existingSlot.getBaseStock() + actualAdd);
+        } else {
+            // 新建 PendingTradeSlot
+            PendingTradeSlot newSlot = new PendingTradeSlot(
+                new TradeDisplayContainer(1), pendingSlots.size(), 0, 0);
+            newSlot.setItemId(itemId);
+            newSlot.setDisplayStack(sourceSlot.getDisplayStack().copy());
+            newSlot.setBaseStock(actualAdd);
+            newSlot.setPrice(sourceSlot.getPrice());
+            newSlot.setIsBuy(isBuy);
+            newSlot.setSource(slotIndex, isBuy);
+            pendingSlots.add(newSlot);
+        }
+
+        // 6. 同步到客户端
+        syncPendingTradeToClient();
+    }
+
+    /**
+     * 移除暂存区条目（点击暂存区物品）
+     * @param slotIndex 槽位索引
+     */
+    public void removeTradeEntry(int slotIndex) {
+        if (slotIndex < 0 || slotIndex >= pendingSlots.size()) return;
+
+        PendingTradeSlot pending = pendingSlots.get(slotIndex);
+
+        // 恢复来源槽位
+        if (pending.hasSource()) {
+            List<TradeSlot> sourceSlots = isBuyTrade ? sellSlots : buySlots;
+            int srcIdx = pending.getSourceSlotIndex();
+            if (srcIdx >= 0 && srcIdx < sourceSlots.size()) {
+                TradeSlot source = sourceSlots.get(srcIdx);
+                int currentPending = source.getPendingCount();
+                source.setPendingCount(Math.max(0, currentPending - pending.getBaseStock()));
+            }
+        }
+
+        pendingSlots.remove(slotIndex);
+
+        if (pendingSlots.isEmpty()) {
+            isBuyTrade = true;
+        }
+
+        syncPendingTradeToClient();
+    }
+
+    /**
+     * 清空暂存区
+     */
+    public void clearPendingTrade() {
+        List<TradeSlot> sourceSlots = isBuyTrade ? sellSlots : buySlots;
+        for (PendingTradeSlot pending : pendingSlots) {
+            if (pending.hasSource()) {
+                int srcIdx = pending.getSourceSlotIndex();
+                if (srcIdx >= 0 && srcIdx < sourceSlots.size()) {
+                    TradeSlot source = sourceSlots.get(srcIdx);
+                    int currentPending = source.getPendingCount();
+                    source.setPendingCount(Math.max(0, currentPending - pending.getBaseStock()));
+                }
+            }
+        }
+
+        pendingSlots.clear();
+        isBuyTrade = true;
+
+        syncPendingTradeToClient();
+    }
+
+    /**
      * 获取出售区滚动偏移
      */
     public int getSellScrollOffset() {
@@ -278,6 +442,20 @@ public class TradeStationMenu extends AbstractContainerMenu {
     }
 
     /**
+     * 处理交易请求
+     * @param requestType 请求类型：0=ADD_BUY, 1=ADD_SELL, 2=REMOVE_ENTRY, 3=CLEAR
+     * @param slotIndex 槽位索引或条目索引
+     */
+    public void handleTradeRequest(int requestType, int slotIndex) {
+        switch (requestType) {
+            case 0 -> addTradeEntry(true, slotIndex);  // ADD_BUY
+            case 1 -> addTradeEntry(false, slotIndex); // ADD_SELL
+            case 2 -> removeTradeEntry(slotIndex);      // REMOVE_ENTRY
+            case 3 -> clearPendingTrade();              // CLEAR
+        }
+    }
+
+    /**
      * 接收从服务端同步的槽位数据（客户端调用）
      * 支持动态槽位数量
      */
@@ -295,7 +473,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
             if (data.slotIndex() >= 0 && data.slotIndex() < sellSlots.size()) {
                 TradeSlot slot = sellSlots.get(data.slotIndex());
                 slot.setDisplayStack(data.displayStack());
-                slot.setStockCount(data.stockCount());
+                slot.setBaseStock(data.stockCount());
                 slot.setPrice(data.price());
             }
         }
@@ -305,7 +483,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
             if (data.slotIndex() >= 0 && data.slotIndex() < buySlots.size()) {
                 TradeSlot slot = buySlots.get(data.slotIndex());
                 slot.setDisplayStack(data.displayStack());
-                slot.setStockCount(data.stockCount());
+                slot.setBaseStock(data.stockCount());
                 slot.setPrice(data.price());
             }
         }
@@ -335,6 +513,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
             int y = sellStartY + row * (SLOT_SIZE + SLOT_SPACING);
 
             TradeSlot slot = new TradeSlot(sellContainer, i, x, y);
+            slot.setIsBuy(true);
             sellSlots.add(slot);
             addSlot(slot);
         }
@@ -348,6 +527,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
             int y = buyStartY + row * (SLOT_SIZE + SLOT_SPACING);
 
             TradeSlot slot = new TradeSlot(buyContainer, i, x, y);
+            slot.setIsBuy(false);
             buySlots.add(slot);
             addSlot(slot);
         }
@@ -357,7 +537,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
             if (data.slotIndex() >= 0 && data.slotIndex() < sellSlots.size()) {
                 TradeSlot slot = sellSlots.get(data.slotIndex());
                 slot.setDisplayStack(data.displayStack());
-                slot.setStockCount(data.stockCount());
+                slot.setBaseStock(data.stockCount());
                 slot.setPrice(data.price());
             }
         }
@@ -366,7 +546,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
             if (data.slotIndex() >= 0 && data.slotIndex() < buySlots.size()) {
                 TradeSlot slot = buySlots.get(data.slotIndex());
                 slot.setDisplayStack(data.displayStack());
-                slot.setStockCount(data.stockCount());
+                slot.setBaseStock(data.stockCount());
                 slot.setPrice(data.price());
             }
         }
@@ -403,13 +583,96 @@ public class TradeStationMenu extends AbstractContainerMenu {
     }
 
     /**
+     * 同步暂存区数据到客户端（服务端调用）
+     */
+    private void syncPendingTradeToClient() {
+        if (!(getPlayer() instanceof ServerPlayer serverPlayer)) return;
+
+        // 构建槽位数据列表
+        List<PendingTradeSyncPayload.PendingSlotData> slotDataList = new ArrayList<>();
+        for (PendingTradeSlot slot : pendingSlots) {
+            slotDataList.add(new PendingTradeSyncPayload.PendingSlotData(
+                slot.getItemId(),
+                slot.getDisplayStack(),
+                slot.getBaseStock(),
+                slot.getPrice(),
+                slot.isBuy(),
+                slot.getSourceSlotIndex()
+            ));
+        }
+
+        // 构建 pendingCountMap
+        Map<Integer, Integer> pendingCountMap = new HashMap<>();
+        for (int i = 0; i < sellSlots.size(); i++) {
+            int pending = sellSlots.get(i).getPendingCount();
+            if (pending > 0) {
+                pendingCountMap.put(i, pending);
+            }
+        }
+        for (int i = 0; i < buySlots.size(); i++) {
+            int pending = buySlots.get(i).getPendingCount();
+            if (pending > 0) {
+                pendingCountMap.put(sellSlots.size() + i, pending);
+            }
+        }
+
+        PacketDistributor.sendToPlayer(serverPlayer,
+            new PendingTradeSyncPayload(containerId, isBuyTrade, slotDataList, pendingCountMap));
+    }
+
+    /**
+     * 接收暂存区同步数据（客户端调用）
+     */
+    public void receivePendingTradeData(PendingTradeSyncPayload payload) {
+        // 更新暂存区槽位
+        pendingSlots.clear();
+        for (PendingTradeSyncPayload.PendingSlotData data : payload.pendingSlots()) {
+            PendingTradeSlot slot = new PendingTradeSlot(
+                new TradeDisplayContainer(1), pendingSlots.size(), 0, 0);
+            slot.setItemId(data.itemId());
+            slot.setDisplayStack(data.displayStack().copy());
+            slot.setBaseStock(data.stockCount());
+            slot.setPrice(data.price());
+            slot.setIsBuy(data.isBuy());
+            slot.setSource(data.sourceSlotIndex(), data.isBuy());
+            pendingSlots.add(slot);
+        }
+
+        // 更新交易类型
+        isBuyTrade = payload.isBuyTrade();
+
+        // 更新来源槽位的暂存计数
+        Map<Integer, Integer> pendingCountMap = payload.pendingCountMap();
+        for (Map.Entry<Integer, Integer> mapEntry : pendingCountMap.entrySet()) {
+            int slotIndex = mapEntry.getKey();
+            int pendingCount = mapEntry.getValue();
+
+            if (slotIndex < sellSlots.size()) {
+                sellSlots.get(slotIndex).setPendingCount(pendingCount);
+            } else if (slotIndex < sellSlots.size() + buySlots.size()) {
+                int buyIndex = slotIndex - sellSlots.size();
+                if (buyIndex < buySlots.size()) {
+                    buySlots.get(buyIndex).setPendingCount(pendingCount);
+                }
+            }
+        }
+    }
+
+    /**
+     * 获取玩家
+     */
+    private Player getPlayer() {
+        return player;
+    }
+
+    /**
      * 设置出售槽位数据（用于初始化）
      */
     public void setSellSlotData(int index, ItemStack stack, int stockCount, int price) {
         if (index >= 0 && index < sellSlots.size()) {
             TradeSlot slot = sellSlots.get(index);
             slot.setDisplayStack(stack);
-            slot.setStockCount(stockCount);
+            slot.setBaseStock(stockCount);
             slot.setPrice(price);
         }
     }
@@ -421,7 +684,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
         if (index >= 0 && index < buySlots.size()) {
             TradeSlot slot = buySlots.get(index);
             slot.setDisplayStack(stack);
-            slot.setStockCount(stockCount);
+            slot.setBaseStock(stockCount);
             slot.setPrice(price);
         }
     }
