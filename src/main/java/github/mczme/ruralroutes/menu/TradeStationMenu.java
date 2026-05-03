@@ -358,15 +358,20 @@ public class TradeStationMenu extends AbstractContainerMenu {
      * @param slotIndex 来源槽位索引
      */
     public void addTradeEntry(boolean isBuy, int slotIndex) {
-        // 获取来源槽位，检查库存
+        // 获取来源槽位
         List<TradeSlot> sourceSlots = isBuy ? sellSlots : buySlots;
         if (slotIndex < 0 || slotIndex >= sourceSlots.size()) return;
 
         TradeSlot sourceSlot = sourceSlots.get(slotIndex);
-        if (sourceSlot.isEmpty()) return;
+        // 收购区（玩家卖给村庄）只检查 displayStack，出售区检查完整 isEmpty
+        if (isBuy) {
+            if (sourceSlot.isEmpty()) return;
+        } else {
+            if (sourceSlot.getDisplayStack().isEmpty()) return;
+        }
 
         int toAdd = 1;
-        int actualAdd = sourceSlot.addPending(toAdd);
+        int actualAdd = sourceSlot.addPending(toAdd, isBuy);
         if (actualAdd <= 0) return;
 
         ResourceLocation itemId = sourceSlot.getItemId();

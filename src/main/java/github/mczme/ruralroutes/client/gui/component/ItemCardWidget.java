@@ -19,6 +19,8 @@ public class ItemCardWidget extends AbstractWidget {
     private static final int DEFAULT_COLOR = 0x40FFFFFF;
     private static final int HOVER_COLOR = 0x80FFFFFF;
     private static final int PRICE_COLOR = 0xFFD700; // 金色
+    private static final int STOCK_COLOR = 0xFFFFFF; // 白色（有库存）
+    private static final int OUT_OF_STOCK_COLOR = 0xFF5555; // 红色（无库存）
 
     private TradeSlot tradeSlot;
     private Consumer<ItemCardWidget> onClick;
@@ -66,13 +68,12 @@ public class ItemCardWidget extends AbstractWidget {
             guiGraphics.renderItem(displayStack, getX() + 1, getY() + 1);
         }
 
-        // 在右下角绘制库存数量
-        if (stockCount > 0) {
-            String stockText = String.valueOf(stockCount);
-            int stockX = getX() + getWidth() - Minecraft.getInstance().font.width(stockText) - 1;
-            int stockY = getY() + getHeight() - 8;
-            guiGraphics.drawString(Minecraft.getInstance().font, stockText, stockX, stockY, 0xFFFFFF);
-        }
+        // 在右下角绘制库存数量（始终显示，0时为红色）
+        String stockText = String.valueOf(stockCount);
+        int stockX = getX() + getWidth() - Minecraft.getInstance().font.width(stockText) - 1;
+        int stockY = getY() + getHeight() - 8;
+        int stockColor = stockCount > 0 ? STOCK_COLOR : OUT_OF_STOCK_COLOR;
+        guiGraphics.drawString(Minecraft.getInstance().font, stockText, stockX, stockY, stockColor);
 
         // 在物品下方绘制价格（金色）
         if (price > 0) {

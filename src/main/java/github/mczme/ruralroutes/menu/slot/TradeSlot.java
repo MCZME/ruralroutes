@@ -103,13 +103,21 @@ public class TradeSlot extends Slot {
     /**
      * 添加暂存数量
      * @param count 要添加的数量
+     * @param isBuy 是否为购买交易（村庄卖给玩家）
      * @return 实际添加的数量
      */
-    public int addPending(int count) {
-        int available = getStockCount();
-        int toAdd = Math.min(count, available);
-        pendingCount += toAdd;
-        return toAdd;
+    public int addPending(int count, boolean isBuy) {
+        if (isBuy) {
+            // 购买交易：受库存限制
+            int available = getStockCount();
+            int toAdd = Math.min(count, available);
+            pendingCount += toAdd;
+            return toAdd;
+        } else {
+            // 出售交易：不受库存限制
+            pendingCount += count;
+            return count;
+        }
     }
 
     /**
