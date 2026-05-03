@@ -7,8 +7,12 @@ import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.register.RRAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -99,11 +103,12 @@ public class CommercialNodeManager {
         }
 
         UUID tradeNodeId = UUID.randomUUID();
+        List<ResourceLocation> sellItems = generateSellItems(template);
+        List<ResourceLocation> buyItems = generateBuyItems(template);
         Map<ResourceLocation, StockEntry> stocks = initializeStocks(template);
-        List<ResourceLocation> specialties = generateSpecialties(template);
         long timestamp = level.getGameTime();
 
-        CommercialNodeData data = CommercialNodeData.create(tradeNodeId, themeName, stocks, specialties, timestamp);
+        CommercialNodeData data = CommercialNodeData.create(tradeNodeId, themeName, sellItems, buyItems, stocks, timestamp);
 
         // 存储到区块
         ChunkAccess chunk = level.getChunk(pos);
@@ -116,25 +121,60 @@ public class CommercialNodeManager {
     }
 
     /**
-     * 从主题模板生成特产列表
-     * 特产 = 主题特产（必定出现）+ 随机特产（从全局池随机抽取）
+     * 从主题模板生成出售物品列表
+     * 将模板中的 ItemReference 转换为 ResourceLocation 列表
      */
-    private static List<ResourceLocation> generateSpecialties(ThemeTemplate template) {
-        List<ResourceLocation> specialties = new ArrayList<>();
+    private static List<ResourceLocation> generateSellItems(ThemeTemplate template) {
+        List<ResourceLocation> sellItems = new ArrayList<>();
 
-        // 添加主题特产（必定出现）
-        if (template.themeSpecialties().isPresent()) {
-            List<ResourceLocation> themeSpecialties = template.themeSpecialties().get();
-            specialties.addAll(themeSpecialties);
+        for (ThemeTemplate.ItemReference itemRef : template.sellItems()) {
+            if (itemRef.isTag()) {
+                // 标签类型：展开为具体物品列表
+                ResourceLocation tagLocation = ResourceLocation.parse(itemRef.itemId());
+                TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagLocation);
+                BuiltInRegistries.ITEM.getOrCreateTag(tagKey)
+                    .stream()
+                    .map(holder -> holder.unwrapKey().map(key -> key.location()).orElse(null))
+                    .filter(Objects::nonNull)
+                    .forEach(sellItems::add);
+            } else {
+                // 精确物品类型
+                sellItems.add(ResourceLocation.parse(itemRef.itemId()));
+            }
         }
 
-        // TODO: 第二阶段实现从全局特产池随机抽取 0-N 种随机特产
+        return sellItems;
+    }
 
-        return specialties;
+    /**
+     * 从主题模板生成收购物品列表
+     * 将模板中的 ItemReference 转换为 ResourceLocation 列表
+     */
+    private static List<ResourceLocation> generateBuyItems(ThemeTemplate template) {
+        List<ResourceLocation> buyItems = new ArrayList<>();
+
+        for (ThemeTemplate.ItemReference itemRef : template.buyItems()) {
+            if (itemRef.isTag()) {
+                // 标签类型：展开为具体物品列表
+                ResourceLocation tagLocation = ResourceLocation.parse(itemRef.itemId());
+                TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagLocation);
+                BuiltInRegistries.ITEM.getOrCreateTag(tagKey)
+                    .stream()
+                    .map(holder -> holder.unwrapKey().map(key -> key.location()).orElse(null))
+                    .filter(Objects::nonNull)
+                    .forEach(buyItems::add);
+            } else {
+                // 精确物品类型
+                buyItems.add(ResourceLocation.parse(itemRef.itemId()));
+            }
+        }
+
+        return buyItems;
     }
 
     /**
      * 从主题模板初始化库存
+     * 处理标签展开：标签类型的物品引用会展开为具体物品列表
      */
     private static Map<ResourceLocation, StockEntry> initializeStocks(ThemeTemplate template) {
         Map<ResourceLocation, StockEntry> stocks = new HashMap<>();
@@ -155,42 +195,122 @@ public class CommercialNodeManager {
         }
 
         // 添加出售物品（村庄卖给玩家）
-        for (ThemeTemplate.ItemReference item : template.sellItems()) {
-            ResourceLocation itemId = ResourceLocation.parse(item.id().startsWith("#") ?
-                item.id().substring(1) : item.id());
-            int max = getStockMax(template, item.id(), defaultMin, defaultMax);
-            stocks.put(itemId, StockEntry.full(max));
+        for (ThemeTemplate.ItemReference itemRef : template.sellItems()) {
+            addItemsToStocks(stocks, template, itemRef, defaultMin, defaultMax, true);
         }
 
         // 添加收购物品（玩家卖给村庄）
-        for (ThemeTemplate.ItemReference item : template.buyItems()) {
-            ResourceLocation itemId = ResourceLocation.parse(item.id().startsWith("#") ?
-                item.id().substring(1) : item.id());
-            int max = getStockMax(template, item.id(), defaultMin, defaultMax);
-            // 收购物品初始库存为0，上限为max
-            stocks.put(itemId, StockEntry.empty(max));
+        for (ThemeTemplate.ItemReference itemRef : template.buyItems()) {
+            addItemsToStocks(stocks, template, itemRef, defaultMin, defaultMax, false);
         }
 
         return stocks;
     }
 
     /**
-     * 获取物品的库存上限
+     * 将物品引用中的物品添加到库存映射
+     * 如果是标签类型，展开为具体物品列表
+     * @param isSellItem true=出售物品（初始满库存），false=收购物品（叠加库存上限）
+     *
+     * 叠加逻辑：
+     * - 出售物品：库存满（current = max）
+     * - 收购物品：
+     *   - 如果物品不存在：库存空（current = 0, max = 配置值）
+     *   - 如果物品已存在（同时在出售清单中）：current 不变，max 增加
      */
-    private static int getStockMax(ThemeTemplate template, String itemId, int defaultMin, int defaultMax) {
+    private static void addItemsToStocks(Map<ResourceLocation, StockEntry> stocks,
+            ThemeTemplate template, ThemeTemplate.ItemReference itemRef,
+            int defaultMin, int defaultMax, boolean isSellItem) {
+
+        if (itemRef.isTag()) {
+            // 标签类型：展开为具体物品列表
+            String tagId = itemRef.itemId();
+            ResourceLocation tagLocation = ResourceLocation.parse(tagId);
+            TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagLocation);
+
+            // 使用 BuiltInRegistries 获取标签中的所有物品
+            BuiltInRegistries.ITEM.getOrCreateTag(tagKey)
+                .stream()
+                .map(holder -> holder.unwrapKey().map(key -> key.location()).orElse(null))
+                .filter(Objects::nonNull)
+                .forEach(itemId -> processStockEntry(stocks, template, itemRef.id(), itemId, defaultMin, defaultMax, isSellItem));
+        } else {
+            // 精确物品类型
+            ResourceLocation itemId = ResourceLocation.parse(itemRef.itemId());
+            processStockEntry(stocks, template, itemRef.id(), itemId, defaultMin, defaultMax, isSellItem);
+        }
+    }
+
+    /**
+     * 处理单个物品的库存条目
+     */
+    private static void processStockEntry(Map<ResourceLocation, StockEntry> stocks,
+            ThemeTemplate template, String itemRefId, ResourceLocation itemId,
+            int defaultMin, int defaultMax, boolean isSellItem) {
+
+        int max = getStockMax(template, itemRefId, itemId, defaultMin, defaultMax);
+
+        if (isSellItem) {
+            // 出售物品：库存满
+            stocks.put(itemId, StockEntry.full(max));
+        } else {
+            // 收购物品
+            StockEntry existing = stocks.get(itemId);
+            if (existing == null) {
+                // 不存在：库存空
+                stocks.put(itemId, StockEntry.empty(max));
+            } else {
+                // 已存在（同时在出售清单中）：current 不变，max 增加
+                stocks.put(itemId, new StockEntry(existing.current(), existing.max() + max));
+            }
+        }
+    }
+
+    /**
+     * 获取物品的库存上限
+     * @param itemRefId 物品引用ID（可能带#前缀的标签ID或精确物品ID）
+     * @param itemId 实际物品ID（不带#前缀）
+     */
+    private static int getStockMax(ThemeTemplate template, String itemRefId, ResourceLocation itemId,
+            int defaultMin, int defaultMax) {
+
         if (template.stock().isPresent()) {
             ThemeTemplate.StockConfig stockConfig = template.stock().get();
             if (stockConfig.specific().isPresent()) {
                 Map<String, ThemeTemplate.StockRange> specific = stockConfig.specific().get();
-                if (specific.containsKey(itemId)) {
-                    ThemeTemplate.StockRange range = specific.get(itemId);
-                    // 返回范围内的随机值
-                    return range.min() + (int)(Math.random() * (range.max() - range.min() + 1));
+
+                // 优先匹配精确物品ID
+                String itemKey = itemId.toString();
+                if (specific.containsKey(itemKey)) {
+                    ThemeTemplate.StockRange range = specific.get(itemKey);
+                    return randomInRange(range);
+                }
+
+                // 其次匹配标签ID（带#前缀）
+                String tagKeyWithPrefix = itemRefId.startsWith("#") ? itemRefId : "#" + itemRefId;
+                if (specific.containsKey(tagKeyWithPrefix)) {
+                    ThemeTemplate.StockRange range = specific.get(tagKeyWithPrefix);
+                    return randomInRange(range);
+                }
+
+                // 最后匹配标签ID（不带#前缀）
+                String tagKeyNoPrefix = itemRefId.startsWith("#") ? itemRefId.substring(1) : itemRefId;
+                if (specific.containsKey(tagKeyNoPrefix)) {
+                    ThemeTemplate.StockRange range = specific.get(tagKeyNoPrefix);
+                    return randomInRange(range);
                 }
             }
         }
+
         // 使用默认范围随机
         return defaultMin + (int)(Math.random() * (defaultMax - defaultMin + 1));
+    }
+
+    /**
+     * 在范围内取随机值
+     */
+    private static int randomInRange(ThemeTemplate.StockRange range) {
+        return range.min() + (int)(Math.random() * (range.max() - range.min() + 1));
     }
 
     /**

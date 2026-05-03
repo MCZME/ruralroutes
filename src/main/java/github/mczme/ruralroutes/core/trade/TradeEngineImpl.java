@@ -211,8 +211,9 @@ public final class TradeEngineImpl implements TradeEngine {
         CommercialNodeData newData = new CommercialNodeData(
             nodeData.tradeNodeId(),
             nodeData.themeName(),
+            nodeData.sellItems(),
+            nodeData.buyItems(),
             stocks,
-            nodeData.specialties(),
             nodeData.refreshTimestamp()
         );
         CommercialNodeManager.updateNodeData(player.level(), player.blockPosition(), newData);

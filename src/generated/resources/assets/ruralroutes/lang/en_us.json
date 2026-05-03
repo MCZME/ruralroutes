@@ -2,7 +2,7 @@
   "block.ruralroutes.display_case": "Display Case",
   "block.ruralroutes.display_case.mismatch": "Display case data mismatch",
   "block.ruralroutes.display_case.not_activated": "Please activate the trade station first",
-  "block.ruralroutes.display_case.specialties": "Village Specialties (%d kinds)",
+  "block.ruralroutes.display_case.sell_items": "Village Selling Items (%d kinds)",
   "block.ruralroutes.rumor_board": "Rumor Board",
   "block.ruralroutes.rumor_board.mismatch": "Rumor board data mismatch",
   "block.ruralroutes.rumor_board.no_news": "Trade route news will arrive next cycle",

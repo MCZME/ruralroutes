@@ -2,7 +2,7 @@
   "block.ruralroutes.display_case": "展示柜",
   "block.ruralroutes.display_case.mismatch": "展示柜数据不匹配",
   "block.ruralroutes.display_case.not_activated": "请先激活贸易站",
-  "block.ruralroutes.display_case.specialties": "本村特产 (%d 种)",
+  "block.ruralroutes.display_case.sell_items": "本村出售物品 (%d 种)",
   "block.ruralroutes.rumor_board": "传闻板",
   "block.ruralroutes.rumor_board.mismatch": "传闻板数据不匹配",
   "block.ruralroutes.rumor_board.no_news": "商路消息将在下一个周期到来",

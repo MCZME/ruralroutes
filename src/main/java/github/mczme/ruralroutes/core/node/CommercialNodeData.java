@@ -10,13 +10,14 @@ import java.util.UUID;
 
 /**
  * 商业节点数据，存储在区块中
- * 包含节点唯一标识、主题、库存、特产列表和刷新时间戳
+ * 包含节点唯一标识、主题、出售/收购物品列表、库存和刷新时间戳
  */
 public record CommercialNodeData(
     UUID tradeNodeId,
     ResourceLocation themeName,
-    Map<ResourceLocation, StockEntry> stocks,
-    List<ResourceLocation> specialties,
+    List<ResourceLocation> sellItems,           // 出售物品列表（村庄卖给玩家）
+    List<ResourceLocation> buyItems,            // 收购物品列表（玩家卖给村庄）
+    Map<ResourceLocation, StockEntry> stocks,   // 库存数据（共用）
     long refreshTimestamp
 ) {
     public static final Codec<CommercialNodeData> CODEC = RecordCodecBuilder.create(
@@ -27,12 +28,15 @@ public record CommercialNodeData(
             ResourceLocation.CODEC
                 .fieldOf("theme_name")
                 .forGetter(CommercialNodeData::themeName),
+            ResourceLocation.CODEC.listOf()
+                .fieldOf("sell_items")
+                .forGetter(CommercialNodeData::sellItems),
+            ResourceLocation.CODEC.listOf()
+                .fieldOf("buy_items")
+                .forGetter(CommercialNodeData::buyItems),
             Codec.unboundedMap(ResourceLocation.CODEC, StockEntry.CODEC)
                 .fieldOf("stocks")
                 .forGetter(CommercialNodeData::stocks),
-            ResourceLocation.CODEC.listOf()
-                .fieldOf("specialties")
-                .forGetter(CommercialNodeData::specialties),
             Codec.LONG
                 .fieldOf("refresh_timestamp")
                 .forGetter(CommercialNodeData::refreshTimestamp)
@@ -44,16 +48,19 @@ public record CommercialNodeData(
         return new CommercialNodeData(
             UUID.randomUUID(),
             ResourceLocation.parse("minecraft:empty"),
-            Map.of(),
             List.of(),
+            List.of(),
+            Map.of(),
             0L
         );
     }
 
     /** 创建新节点数据 */
     public static CommercialNodeData create(UUID tradeNodeId, ResourceLocation themeName,
-            Map<ResourceLocation, StockEntry> stocks, List<ResourceLocation> specialties, long timestamp) {
-        return new CommercialNodeData(tradeNodeId, themeName, Map.copyOf(stocks), List.copyOf(specialties), timestamp);
+            List<ResourceLocation> sellItems, List<ResourceLocation> buyItems,
+            Map<ResourceLocation, StockEntry> stocks, long timestamp) {
+        return new CommercialNodeData(tradeNodeId, themeName,
+            List.copyOf(sellItems), List.copyOf(buyItems), Map.copyOf(stocks), timestamp);
     }
 
     /** 获取指定物品的库存 */
@@ -65,11 +72,11 @@ public record CommercialNodeData(
     public CommercialNodeData withStock(ResourceLocation itemId, StockEntry newStock) {
         Map<ResourceLocation, StockEntry> newStocks = new java.util.HashMap<>(stocks);
         newStocks.put(itemId, newStock);
-        return new CommercialNodeData(tradeNodeId, themeName, Map.copyOf(newStocks), specialties, refreshTimestamp);
+        return new CommercialNodeData(tradeNodeId, themeName, sellItems, buyItems, Map.copyOf(newStocks), refreshTimestamp);
     }
 
     /** 更新刷新时间戳 */
     public CommercialNodeData withTimestamp(long newTimestamp) {
-        return new CommercialNodeData(tradeNodeId, themeName, stocks, specialties, newTimestamp);
+        return new CommercialNodeData(tradeNodeId, themeName, sellItems, buyItems, stocks, newTimestamp);
     }
 }

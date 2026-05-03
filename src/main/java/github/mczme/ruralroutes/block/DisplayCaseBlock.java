@@ -80,10 +80,10 @@ public class DisplayCaseBlock extends BaseEntityBlock {
                     return InteractionResult.FAIL;
                 }
 
-                // 第一阶段：显示特产列表信息
+                // 第一阶段：显示出售物品列表信息
                 player.displayClientMessage(
-                    Component.translatable("block.ruralroutes.display_case.specialties",
-                        nodeData.specialties().size()),
+                    Component.translatable("block.ruralroutes.display_case.sell_items",
+                        nodeData.sellItems().size()),
                     false);
                 return InteractionResult.CONSUME;
             }
