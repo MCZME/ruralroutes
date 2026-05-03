@@ -137,10 +137,10 @@ public class TradeStationBlock extends BaseEntityBlock {
     private void openMenu(Player player, TradeStationBlockEntity station) {
         BlockPos pos = station.getBlockPos();
         if (player instanceof ServerPlayer serverPlayer) {
-            // 获取商业节点数据，提取槽位数量
+            // 获取商业节点数据，提取槽位数量（过滤货币物品）
             CommercialNodeData nodeData = CommercialNodeManager.getNodeData(serverPlayer.level(), pos);
-            final int sellSlotCount = nodeData != null ? nodeData.sellItems().size() : 0;
-            final int buySlotCount = nodeData != null ? nodeData.buyItems().size() : 0;
+            final int sellSlotCount = nodeData != null ? TradeStationMenu.countNonCurrencyItems(nodeData.sellItems()) : 0;
+            final int buySlotCount = nodeData != null ? TradeStationMenu.countNonCurrencyItems(nodeData.buyItems()) : 0;
 
             // 使用 openMenu 的返回值获取创建的 Menu
             player.openMenu(new MenuProvider() {

@@ -10,6 +10,7 @@ import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
 import github.mczme.ruralroutes.menu.slot.TradeSlot;
 import github.mczme.ruralroutes.network.packet.PendingTradeSyncPayload;
 import github.mczme.ruralroutes.network.packet.TradeSlotSyncPayload;
+import github.mczme.ruralroutes.register.RRItemTags;
 import github.mczme.ruralroutes.register.RRItems;
 import github.mczme.ruralroutes.register.RRMenuTypes;
 import net.minecraft.core.BlockPos;
@@ -120,25 +121,36 @@ public class TradeStationMenu extends AbstractContainerMenu {
         List<ResourceLocation> buyItems = nodeData.buyItems();
         Map<ResourceLocation, StockEntry> stocks = nodeData.stocks();
 
-        // 创建容器
-        this.sellContainer = new TradeDisplayContainer(Math.max(1, sellItems.size()));
-        this.buyContainer = new TradeDisplayContainer(Math.max(1, buyItems.size()));
+        // 计算过滤货币后的实际槽位数量
+        int sellSlotCount = countNonCurrencyItems(sellItems);
+        int buySlotCount = countNonCurrencyItems(buyItems);
 
-        // 创建出售槽位（村庄卖给玩家）
+        // 创建容器
+        this.sellContainer = new TradeDisplayContainer(Math.max(1, sellSlotCount));
+        this.buyContainer = new TradeDisplayContainer(Math.max(1, buySlotCount));
+
+        // 创建出售槽位（村庄卖给玩家），过滤货币物品
         int sellStartX = 10;
         int sellStartY = 22;
+        int sellSlotIndex = 0;
         for (int i = 0; i < sellItems.size(); i++) {
             ResourceLocation itemId = sellItems.get(i);
             ItemStack displayStack = createItemStack(itemId);
+
+            // 跳过货币物品
+            if (isCurrencyItem(displayStack)) {
+                continue;
+            }
+
             StockEntry entry = stocks.get(itemId);
             int stockCount = entry != null ? entry.current() : 0;
 
-            int col = i / 2;
-            int row = i % 2;
+            int col = sellSlotIndex / 2;
+            int row = sellSlotIndex % 2;
             int x = sellStartX + col * (SLOT_SIZE + SLOT_SPACING);
             int y = sellStartY + row * (SLOT_SIZE + SLOT_SPACING);
 
-            TradeSlot slot = new TradeSlot(sellContainer, i, x, y);
+            TradeSlot slot = new TradeSlot(sellContainer, sellSlotIndex, x, y);
             slot.setItemId(itemId);
             slot.setDisplayStack(displayStack);
             slot.setBaseStock(stockCount);
@@ -147,23 +159,31 @@ public class TradeStationMenu extends AbstractContainerMenu {
 
             sellSlots.add(slot);
             addSlot(slot);
+            sellSlotIndex++;
         }
 
-        // 创建收购槽位（村庄收购玩家物品）
+        // 创建收购槽位（村庄收购玩家物品），过滤货币物品
         int buyStartX = 10;
         int buyStartY = 62;
+        int buySlotIndex = 0;
         for (int i = 0; i < buyItems.size(); i++) {
             ResourceLocation itemId = buyItems.get(i);
             ItemStack displayStack = createItemStack(itemId);
+
+            // 跳过货币物品
+            if (isCurrencyItem(displayStack)) {
+                continue;
+            }
+
             StockEntry entry = stocks.get(itemId);
             int stockCount = entry != null ? entry.current() : 0;
 
-            int col = i / 2;
-            int row = i % 2;
+            int col = buySlotIndex / 2;
+            int row = buySlotIndex % 2;
             int x = buyStartX + col * (SLOT_SIZE + SLOT_SPACING);
             int y = buyStartY + row * (SLOT_SIZE + SLOT_SPACING);
 
-            TradeSlot slot = new TradeSlot(buyContainer, i, x, y);
+            TradeSlot slot = new TradeSlot(buyContainer, buySlotIndex, x, y);
             slot.setItemId(itemId);
             slot.setDisplayStack(displayStack);
             slot.setBaseStock(stockCount);
@@ -172,7 +192,29 @@ public class TradeStationMenu extends AbstractContainerMenu {
 
             buySlots.add(slot);
             addSlot(slot);
+            buySlotIndex++;
         }
+    }
+
+    /**
+     * 检查物品是否为货币（静态方法，供外部调用）
+     */
+    public static boolean isCurrencyItem(ItemStack stack) {
+        return stack.is(RRItemTags.CURRENCY) || stack.is(RRItemTags.CURRENCY_BASE);
+    }
+
+    /**
+     * 计算非货币物品数量（静态方法，供外部调用）
+     */
+    public static int countNonCurrencyItems(List<ResourceLocation> itemIds) {
+        int count = 0;
+        for (ResourceLocation itemId : itemIds) {
+            ItemStack stack = createItemStack(itemId);
+            if (!isCurrencyItem(stack)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     /**
@@ -214,7 +256,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
     /**
      * 从资源位置创建物品堆
      */
-    private ItemStack createItemStack(ResourceLocation itemId) {
+    private static ItemStack createItemStack(ResourceLocation itemId) {
         Item item = BuiltInRegistries.ITEM.get(itemId);
         if (item == Items.AIR) {
             return ItemStack.EMPTY;
