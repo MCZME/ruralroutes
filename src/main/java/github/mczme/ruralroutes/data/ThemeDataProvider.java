@@ -26,7 +26,9 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
         // 平原粮仓主题
         theme("plains_granary")
             .biome("minecraft:plains")
-            .sell("minecraft:bread")
+            .sell("minecraft:bread","#minecraft:planks","#minecraft:logs",
+                        "#minecraft:swords","#minecraft:axes","#minecraft:pickaxes"
+            )
             .buy("minecraft:wheat")
             .specialty("minecraft:golden_carrot")
             .stock(8, 16)

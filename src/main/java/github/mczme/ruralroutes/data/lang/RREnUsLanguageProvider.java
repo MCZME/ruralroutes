@@ -61,6 +61,8 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_station.buy", "Buying");
         add("gui.ruralroutes.trade_station.you_give", "You Give:");
         add("gui.ruralroutes.trade_station.you_receive", "You Receive:");
+        add("gui.ruralroutes.trade_station.you_pay", "You Pay:");
+        add("gui.ruralroutes.trade_station.you_get_paid", "You Get Paid:");
         add("gui.ruralroutes.trade_station.value_status", "Value Status:");
         add("gui.ruralroutes.trade_station.confirm", "Confirm Trade");
         add("gui.ruralroutes.trade_station.coin_exchange", "Coin Exchange");

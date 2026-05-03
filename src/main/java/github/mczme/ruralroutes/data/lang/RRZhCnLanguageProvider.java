@@ -61,6 +61,8 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_station.buy", "收购");
         add("gui.ruralroutes.trade_station.you_give", "你付出:");
         add("gui.ruralroutes.trade_station.you_receive", "你获得:");
+        add("gui.ruralroutes.trade_station.you_pay", "你支付:");
+        add("gui.ruralroutes.trade_station.you_get_paid", "你获得报酬:");
         add("gui.ruralroutes.trade_station.value_status", "价值状态:");
         add("gui.ruralroutes.trade_station.confirm", "确认交换");
         add("gui.ruralroutes.trade_station.coin_exchange", "铸币");
