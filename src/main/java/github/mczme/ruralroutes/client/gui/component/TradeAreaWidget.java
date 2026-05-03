@@ -219,6 +219,9 @@ public class TradeAreaWidget extends AbstractWidget {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // 先检查鼠标是否在组件范围内
+        if (!isMouseOver(mouseX, mouseY)) return false;
+
         // 检查付出卡片点击（移除条目）
         for (int i = 0; i < giveCards.size() && i < MAX_VISIBLE_CARDS; i++) {
             ItemCardWidget card = giveCards.get(i);

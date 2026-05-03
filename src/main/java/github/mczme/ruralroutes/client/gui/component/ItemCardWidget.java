@@ -85,7 +85,7 @@ public class ItemCardWidget extends AbstractWidget {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (isValidClickButton(button) && isHovered()) {
+        if (isValidClickButton(button) && isMouseOver(mouseX, mouseY)) {
             if (onClick != null) {
                 onClick.accept(this);
             }

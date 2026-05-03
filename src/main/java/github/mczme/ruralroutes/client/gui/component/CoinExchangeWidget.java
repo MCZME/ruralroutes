@@ -64,6 +64,9 @@ public class CoinExchangeWidget extends AbstractWidget {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // 先检查鼠标是否在组件范围内
+        if (!isMouseOver(mouseX, mouseY)) return false;
+
         for (Button btn : buttons) {
             if (btn.isMouseOver(mouseX, mouseY)) {
                 return btn.mouseClicked(mouseX, mouseY, button);

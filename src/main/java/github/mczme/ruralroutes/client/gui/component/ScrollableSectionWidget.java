@@ -208,6 +208,9 @@ public class ScrollableSectionWidget extends AbstractWidget {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!isValidClickButton(button)) return false;
 
+        // 先检查鼠标是否在组件范围内
+        if (!isMouseOver(mouseX, mouseY)) return false;
+
         // 检查是否点击滚动条
         if (maxScroll > 0 && mouseY >= getY() + getHeight() - SCROLLBAR_HEIGHT - SCROLLBAR_MARGIN) {
             dragging = true;
