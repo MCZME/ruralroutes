@@ -668,19 +668,13 @@ public class TradeStationMenu extends AbstractContainerMenu {
             ));
         }
 
-        // 构建 pendingCountMap
+        // 构建 pendingCountMap（发送所有槽位的 pendingCount，包括 0）
         Map<Integer, Integer> pendingCountMap = new HashMap<>();
         for (int i = 0; i < sellSlots.size(); i++) {
-            int pending = sellSlots.get(i).getPendingCount();
-            if (pending > 0) {
-                pendingCountMap.put(i, pending);
-            }
+            pendingCountMap.put(i, sellSlots.get(i).getPendingCount());
         }
         for (int i = 0; i < buySlots.size(); i++) {
-            int pending = buySlots.get(i).getPendingCount();
-            if (pending > 0) {
-                pendingCountMap.put(sellSlots.size() + i, pending);
-            }
+            pendingCountMap.put(sellSlots.size() + i, buySlots.get(i).getPendingCount());
         }
 
         PacketDistributor.sendToPlayer(serverPlayer,
