@@ -19,7 +19,8 @@ public class TradeSlot extends Slot {
 
     private ResourceLocation itemId;    // 物品ID
     private ItemStack displayStack;     // 展示物品
-    private int baseStock;              // 原始库存
+    private int baseStock;              // 原始库存（出售区=当前库存，收购区=已收购数量）
+    private int maxStock;               // 最大库存（收购区使用）
     private int pendingCount;           // 暂存数量
     private int price;                  // 价格
     private boolean isBuy;              // true=购买（村庄卖给玩家），false=出售（玩家卖给村庄）
@@ -31,6 +32,7 @@ public class TradeSlot extends Slot {
         super(container, slot, x, y);
         this.displayStack = ItemStack.EMPTY;
         this.baseStock = 0;
+        this.maxStock = 0;
         this.pendingCount = 0;
         this.price = 0;
         this.isBuy = true;
@@ -80,17 +82,44 @@ public class TradeSlot extends Slot {
     }
 
     /**
-     * 获取当前可用库存数量（原始库存 - 暂存数量）
+     * 设置最大库存数量（收购区使用）
+     */
+    public void setMaxStock(int max) {
+        this.maxStock = Math.max(0, max);
+    }
+
+    /**
+     * 获取最大库存数量
+     */
+    public int getMaxStock() {
+        return maxStock;
+    }
+
+    /**
+     * 获取当前可用库存数量
+     * - 出售区（村庄卖给玩家）：原始库存 - 暂存数量
+     * - 收购区（玩家卖给村庄）：最大库存 - 已收购数量 - 暂存数量
      */
     public int getStockCount() {
-        return Math.max(0, baseStock - pendingCount);
+        if (isBuy) {
+            return Math.max(0, baseStock - pendingCount);
+        } else {
+            return Math.max(0, maxStock - baseStock - pendingCount);
+        }
     }
 
     /**
      * 设置暂存数量
      */
     public void setPendingCount(int count) {
-        this.pendingCount = Math.max(0, Math.min(count, baseStock));
+        if (isBuy) {
+            // 出售区：不超过 baseStock
+            this.pendingCount = Math.max(0, Math.min(count, baseStock));
+        } else {
+            // 收购区：不超过剩余可收购数量
+            int maxPending = maxStock - baseStock;
+            this.pendingCount = Math.max(0, Math.min(count, maxPending));
+        }
     }
 
     /**
@@ -107,17 +136,11 @@ public class TradeSlot extends Slot {
      * @return 实际添加的数量
      */
     public int addPending(int count, boolean isBuy) {
-        if (isBuy) {
-            // 购买交易：受库存限制
-            int available = getStockCount();
-            int toAdd = Math.min(count, available);
-            pendingCount += toAdd;
-            return toAdd;
-        } else {
-            // 出售交易：不受库存限制
-            pendingCount += count;
-            return count;
-        }
+        // 都受到可用数量限制
+        int available = getStockCount();
+        int toAdd = Math.min(count, available);
+        pendingCount += toAdd;
+        return toAdd;
     }
 
     /**
@@ -222,6 +245,7 @@ public class TradeSlot extends Slot {
         this.itemId = null;
         this.displayStack = ItemStack.EMPTY;
         this.baseStock = 0;
+        this.maxStock = 0;
         this.pendingCount = 0;
         this.price = 0;
         this.isBuy = true;
@@ -234,6 +258,7 @@ public class TradeSlot extends Slot {
         this.itemId = other.itemId;
         this.displayStack = other.displayStack.copy();
         this.baseStock = other.baseStock;
+        this.maxStock = other.maxStock;
         this.pendingCount = other.pendingCount;
         this.price = other.price;
         this.isBuy = other.isBuy;

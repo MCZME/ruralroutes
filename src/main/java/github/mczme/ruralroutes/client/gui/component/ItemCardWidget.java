@@ -1,5 +1,6 @@
 package github.mczme.ruralroutes.client.gui.component;
 
+import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
 import github.mczme.ruralroutes.menu.slot.TradeSlot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -60,7 +61,10 @@ public class ItemCardWidget extends AbstractWidget {
         if (tradeSlot == null) return;
 
         ItemStack displayStack = tradeSlot.getDisplayStack();
-        int stockCount = tradeSlot.getStockCount();
+        // 暂存区卡片显示交易数量，其他显示可用库存
+        int stockCount = tradeSlot instanceof PendingTradeSlot
+            ? tradeSlot.getBaseStock()
+            : tradeSlot.getStockCount();
         int price = tradeSlot.getPrice();
 
         // 绘制物品图标

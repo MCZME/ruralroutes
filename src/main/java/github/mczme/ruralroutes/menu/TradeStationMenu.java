@@ -180,7 +180,8 @@ public class TradeStationMenu extends AbstractContainerMenu {
             }
 
             StockEntry entry = stocks.get(itemId);
-            int stockCount = entry != null ? entry.current() : 0;
+            int currentStock = entry != null ? entry.current() : 0;
+            int maxStock = entry != null ? entry.max() : 0;
 
             int col = buySlotIndex / 2;
             int row = buySlotIndex % 2;
@@ -190,7 +191,8 @@ public class TradeStationMenu extends AbstractContainerMenu {
             TradeSlot slot = new TradeSlot(buyContainer, buySlotIndex, x, y);
             slot.setItemId(itemId);
             slot.setDisplayStack(displayStack);
-            slot.setBaseStock(stockCount);
+            slot.setBaseStock(currentStock);  // 已收购数量
+            slot.setMaxStock(maxStock);       // 收购上限
             slot.setPrice(calculateBuyPrice(itemId));
             slot.setIsBuy(false); // 此槽位用于玩家出售
 
@@ -629,6 +631,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
                 TradeSlot slot = sellSlots.get(data.slotIndex());
                 slot.setDisplayStack(data.displayStack());
                 slot.setBaseStock(data.stockCount());
+                slot.setMaxStock(data.maxStock());
                 slot.setPrice(data.price());
             }
         }
@@ -639,6 +642,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
                 TradeSlot slot = buySlots.get(data.slotIndex());
                 slot.setDisplayStack(data.displayStack());
                 slot.setBaseStock(data.stockCount());
+                slot.setMaxStock(data.maxStock());
                 slot.setPrice(data.price());
             }
         }
@@ -693,6 +697,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
                 TradeSlot slot = sellSlots.get(data.slotIndex());
                 slot.setDisplayStack(data.displayStack());
                 slot.setBaseStock(data.stockCount());
+                slot.setMaxStock(data.maxStock());
                 slot.setPrice(data.price());
             }
         }
@@ -702,6 +707,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
                 TradeSlot slot = buySlots.get(data.slotIndex());
                 slot.setDisplayStack(data.displayStack());
                 slot.setBaseStock(data.stockCount());
+                slot.setMaxStock(data.maxStock());
                 slot.setPrice(data.price());
             }
         }
@@ -717,8 +723,10 @@ public class TradeStationMenu extends AbstractContainerMenu {
             sellData.add(new TradeSlotSyncPayload.SlotData(
                 i,
                 slot.getDisplayStack(),
-                slot.getStockCount(),
-                slot.getPrice()
+                slot.getBaseStock(),
+                slot.getMaxStock(),
+                slot.getPrice(),
+                true
             ));
         }
 
@@ -728,8 +736,10 @@ public class TradeStationMenu extends AbstractContainerMenu {
             buyData.add(new TradeSlotSyncPayload.SlotData(
                 i,
                 slot.getDisplayStack(),
-                slot.getStockCount(),
-                slot.getPrice()
+                slot.getBaseStock(),
+                slot.getMaxStock(),
+                slot.getPrice(),
+                false
             ));
         }
 

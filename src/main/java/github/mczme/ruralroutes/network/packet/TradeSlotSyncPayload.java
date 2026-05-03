@@ -36,7 +36,9 @@ public record TradeSlotSyncPayload(
         int slotIndex,
         ItemStack displayStack,
         int stockCount,
-        int price
+        int maxStock,
+        int price,
+        boolean isBuy
     ) {
         /**
          * 序列化 SlotData
@@ -46,7 +48,9 @@ public record TradeSlotSyncPayload(
             // 使用标准 ItemStack codec 序列化（支持组件数据）
             ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, data.displayStack);
             buf.writeVarInt(data.stockCount);
+            buf.writeVarInt(data.maxStock);
             buf.writeVarInt(data.price);
+            buf.writeBoolean(data.isBuy);
         }
 
         /**
@@ -56,8 +60,10 @@ public record TradeSlotSyncPayload(
             int slotIndex = buf.readVarInt();
             ItemStack displayStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
             int stockCount = buf.readVarInt();
+            int maxStock = buf.readVarInt();
             int price = buf.readVarInt();
-            return new SlotData(slotIndex, displayStack, stockCount, price);
+            boolean isBuy = buf.readBoolean();
+            return new SlotData(slotIndex, displayStack, stockCount, maxStock, price, isBuy);
         }
     }
 
