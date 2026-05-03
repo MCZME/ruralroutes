@@ -1,5 +1,6 @@
 package github.mczme.ruralroutes.menu.slot;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -10,15 +11,18 @@ import net.minecraft.world.item.ItemStack;
  * 用于贸易站 GUI 中展示可交易物品
  *
  * 特点：
- * - 数量独立管理（stockCount 变量），不修改 ItemStack 本身
+ * - 数量独立管理（baseStock 和 pendingCount），不修改 ItemStack 本身
  * - 不可拿起、不可放入
  * - displayStack 可变（非 final），用于初始化赋值
  */
 public class TradeSlot extends Slot {
 
-    private ItemStack displayStack;
-    private int stockCount;
-    private int price;
+    private ResourceLocation itemId;    // 物品ID
+    private ItemStack displayStack;     // 展示物品
+    private int baseStock;              // 原始库存
+    private int pendingCount;           // 暂存数量
+    private int price;                  // 价格
+    private boolean isBuy;              // true=购买（村庄卖给玩家），false=出售（玩家卖给村庄）
 
     /**
      * 创建空的贸易槽位
@@ -26,8 +30,25 @@ public class TradeSlot extends Slot {
     public TradeSlot(Container container, int slot, int x, int y) {
         super(container, slot, x, y);
         this.displayStack = ItemStack.EMPTY;
-        this.stockCount = 0;
+        this.baseStock = 0;
+        this.pendingCount = 0;
         this.price = 0;
+        this.isBuy = true;
+        this.itemId = null;
+    }
+
+    /**
+     * 设置物品ID
+     */
+    public void setItemId(ResourceLocation itemId) {
+        this.itemId = itemId;
+    }
+
+    /**
+     * 获取物品ID
+     */
+    public ResourceLocation getItemId() {
+        return itemId;
     }
 
     /**
@@ -38,10 +59,64 @@ public class TradeSlot extends Slot {
     }
 
     /**
-     * 设置库存数量
+     * 获取展示物品（返回副本，数量为 stockCount）
      */
-    public void setStockCount(int count) {
-        this.stockCount = Math.max(0, count);
+    public ItemStack getDisplayStack() {
+        return displayStack;
+    }
+
+    /**
+     * 设置原始库存数量
+     */
+    public void setBaseStock(int count) {
+        this.baseStock = Math.max(0, count);
+    }
+
+    /**
+     * 获取原始库存数量
+     */
+    public int getBaseStock() {
+        return baseStock;
+    }
+
+    /**
+     * 获取当前可用库存数量（原始库存 - 暂存数量）
+     */
+    public int getStockCount() {
+        return Math.max(0, baseStock - pendingCount);
+    }
+
+    /**
+     * 设置暂存数量
+     */
+    public void setPendingCount(int count) {
+        this.pendingCount = Math.max(0, Math.min(count, baseStock));
+    }
+
+    /**
+     * 获取暂存数量
+     */
+    public int getPendingCount() {
+        return pendingCount;
+    }
+
+    /**
+     * 添加暂存数量
+     * @param count 要添加的数量
+     * @return 实际添加的数量
+     */
+    public int addPending(int count) {
+        int available = getStockCount();
+        int toAdd = Math.min(count, available);
+        pendingCount += toAdd;
+        return toAdd;
+    }
+
+    /**
+     * 清空暂存数量
+     */
+    public void clearPending() {
+        this.pendingCount = 0;
     }
 
     /**
@@ -52,24 +127,31 @@ public class TradeSlot extends Slot {
     }
 
     /**
-     * 获取展示物品（返回副本，数量由 stockCount 决定）
-     */
-    public ItemStack getDisplayStack() {
-        return displayStack;
-    }
-
-    /**
-     * 获取库存数量
-     */
-    public int getStockCount() {
-        return stockCount;
-    }
-
-    /**
      * 获取价格
      */
     public int getPrice() {
         return price;
+    }
+
+    /**
+     * 设置是否为购买槽位
+     */
+    public void setIsBuy(boolean isBuy) {
+        this.isBuy = isBuy;
+    }
+
+    /**
+     * 是否为购买槽位（村庄卖给玩家）
+     */
+    public boolean isBuy() {
+        return isBuy;
+    }
+
+    /**
+     * 是否为出售槽位（玩家卖给村庄）
+     */
+    public boolean isSell() {
+        return !isBuy;
     }
 
     /**
@@ -81,7 +163,7 @@ public class TradeSlot extends Slot {
             return ItemStack.EMPTY;
         }
         ItemStack result = displayStack.copy();
-        result.setCount(stockCount);
+        result.setCount(getStockCount());
         return result;
     }
 
@@ -110,36 +192,42 @@ public class TradeSlot extends Slot {
 
     @Override
     public int getMaxStackSize() {
-        return stockCount;
+        return getStockCount();
     }
 
     @Override
     public int getMaxStackSize(ItemStack stack) {
-        return stockCount;
+        return getStockCount();
     }
 
     /**
      * 是否为空槽位
      */
     public boolean isEmpty() {
-        return displayStack.isEmpty() || stockCount <= 0;
+        return displayStack.isEmpty() || getStockCount() <= 0;
     }
 
     /**
      * 清空槽位
      */
     public void clear() {
+        this.itemId = null;
         this.displayStack = ItemStack.EMPTY;
-        this.stockCount = 0;
+        this.baseStock = 0;
+        this.pendingCount = 0;
         this.price = 0;
+        this.isBuy = true;
     }
 
     /**
      * 复制另一个槽位的数据
      */
     public void copyFrom(TradeSlot other) {
+        this.itemId = other.itemId;
         this.displayStack = other.displayStack.copy();
-        this.stockCount = other.stockCount;
+        this.baseStock = other.baseStock;
+        this.pendingCount = other.pendingCount;
         this.price = other.price;
+        this.isBuy = other.isBuy;
     }
 }
