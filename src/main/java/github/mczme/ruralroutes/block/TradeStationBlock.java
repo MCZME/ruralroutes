@@ -131,12 +131,17 @@ public class TradeStationBlock extends BaseEntityBlock {
     }
 
     /**
-     * 打开贸易站菜单，发送 BlockPos 数据到客户端
+     * 打开贸易站菜单，发送 BlockPos 和槽位数量数据到客户端
      * 并同步槽位数据到客户端
      */
     private void openMenu(Player player, TradeStationBlockEntity station) {
         BlockPos pos = station.getBlockPos();
         if (player instanceof ServerPlayer serverPlayer) {
+            // 获取商业节点数据，提取槽位数量
+            CommercialNodeData nodeData = CommercialNodeManager.getNodeData(serverPlayer.level(), pos);
+            final int sellSlotCount = nodeData != null ? nodeData.sellItems().size() : 0;
+            final int buySlotCount = nodeData != null ? nodeData.buyItems().size() : 0;
+
             // 使用 openMenu 的返回值获取创建的 Menu
             player.openMenu(new MenuProvider() {
                 @Override
@@ -146,9 +151,13 @@ public class TradeStationBlock extends BaseEntityBlock {
 
                 @Override
                 public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
-                    return new TradeStationMenu(containerId, inventory, pos);
+                    return new TradeStationMenu(containerId, inventory, pos, sellSlotCount, buySlotCount);
                 }
-            }, buffer -> buffer.writeBlockPos(pos));
+            }, buffer -> {
+                buffer.writeBlockPos(pos);
+                buffer.writeVarInt(sellSlotCount);
+                buffer.writeVarInt(buySlotCount);
+            });
 
             // openMenu 完成后，客户端已创建 Menu，此时发送同步数据
             if (player.containerMenu instanceof TradeStationMenu tradeMenu) {

@@ -53,15 +53,21 @@ public class TradeStationMenu extends AbstractContainerMenu {
     public static final int SLOT_SIZE = 18;
     public static final int SLOT_SPACING = 2;
 
-    // 默认布局常量（用于无数据时的空槽位）
-    private static final int DEFAULT_SELL_SLOTS = 16;
-    private static final int DEFAULT_BUY_SLOTS = 16;
-
     public TradeStationMenu(int containerId, Inventory playerInventory, FriendlyByteBuf data) {
-        this(containerId, playerInventory, data.readBlockPos());
+        this(containerId, playerInventory, data.readBlockPos(), data.readVarInt(), data.readVarInt());
     }
 
     public TradeStationMenu(int containerId, Inventory playerInventory, BlockPos blockPos) {
+        this(containerId, playerInventory, blockPos, 0, 0);
+    }
+
+    /**
+     * 完整构造函数
+     * @param sellSlotCount 出售槽位数量（客户端从服务端接收）
+     * @param buySlotCount 收购槽位数量（客户端从服务端接收）
+     */
+    public TradeStationMenu(int containerId, Inventory playerInventory, BlockPos blockPos,
+            int sellSlotCount, int buySlotCount) {
         super(RRMenuTypes.TRADE_STATION.get(), containerId);
         this.blockPos = blockPos;
 
@@ -78,10 +84,11 @@ public class TradeStationMenu extends AbstractContainerMenu {
         CommercialNodeData nodeData = CommercialNodeManager.getNodeData(level, blockPos);
 
         if (nodeData != null) {
+            // 服务端：从节点数据初始化
             initializeFromNodeData(nodeData);
         } else {
-            // 无数据时创建空槽位
-            initializeEmptySlots();
+            // 客户端：使用服务端传递的槽位数量创建空槽位
+            initializeEmptySlots(sellSlotCount, buySlotCount);
         }
 
         // 添加数据槽
@@ -153,15 +160,15 @@ public class TradeStationMenu extends AbstractContainerMenu {
     }
 
     /**
-     * 初始化空槽位（无数据时）
+     * 初始化空槽位（客户端使用服务端传递的槽位数量）
      */
-    private void initializeEmptySlots() {
-        this.sellContainer = new TradeDisplayContainer(DEFAULT_SELL_SLOTS);
-        this.buyContainer = new TradeDisplayContainer(DEFAULT_BUY_SLOTS);
+    private void initializeEmptySlots(int sellSlotCount, int buySlotCount) {
+        this.sellContainer = new TradeDisplayContainer(Math.max(1, sellSlotCount));
+        this.buyContainer = new TradeDisplayContainer(Math.max(1, buySlotCount));
 
         int sellStartX = 10;
         int sellStartY = 22;
-        for (int i = 0; i < DEFAULT_SELL_SLOTS; i++) {
+        for (int i = 0; i < sellSlotCount; i++) {
             int col = i / 2;
             int row = i % 2;
             int x = sellStartX + col * (SLOT_SIZE + SLOT_SPACING);
@@ -174,7 +181,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
 
         int buyStartX = 10;
         int buyStartY = 62;
-        for (int i = 0; i < DEFAULT_BUY_SLOTS; i++) {
+        for (int i = 0; i < buySlotCount; i++) {
             int col = i / 2;
             int row = i % 2;
             int x = buyStartX + col * (SLOT_SIZE + SLOT_SPACING);
