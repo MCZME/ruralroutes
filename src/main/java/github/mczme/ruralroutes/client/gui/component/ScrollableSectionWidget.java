@@ -25,7 +25,7 @@ public class ScrollableSectionWidget extends AbstractWidget {
     private static final int ROWS = 2;
     private static final int PADDING = 4;
     private static final int SCROLLBAR_HEIGHT = 4;
-    private static final int SCROLLBAR_MARGIN = 4;
+    private static final int SCROLLBAR_MARGIN = 0;
 
     private final List<ItemCardWidget> cards = new ArrayList<>();
     private final List<ItemCardWidget> visibleCards = new ArrayList<>();

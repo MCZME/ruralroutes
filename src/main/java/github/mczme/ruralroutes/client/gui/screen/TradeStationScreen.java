@@ -25,13 +25,14 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
 
     private static final int GUI_WIDTH = 320;
     private static final int GUI_HEIGHT = 240;
-    private static final int MARGIN = 10;
-    private static final int SECTION_SPACING = 8;
+    private static final int MARGIN = 8;
+    private static final int SECTION_SPACING = 4;
 
     // 滚动相关常量
     private static final int SLOT_SIZE = 18;
     private static final int SLOT_SPACING = 2;
     private static final int ROWS = 2;
+    private static final int SECTION_HEIGHT = ROWS * (SLOT_SIZE + SLOT_SPACING) + 16;
 
     private ScrollableSectionWidget sellSection;
     private ScrollableSectionWidget buySection;
@@ -61,25 +62,23 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
 
         // 出售区
         sellSection = new ScrollableSectionWidget(
-            leftPos + MARGIN, currentY + 12, mainWidth,
-            ROWS * (SLOT_SIZE + SLOT_SPACING) + 20,
+            leftPos + MARGIN, currentY, mainWidth, SECTION_HEIGHT,
             0x55FF55, 0x40333333,
             Component.translatable("gui.ruralroutes.trade_station.sell"));
         sellSection.setSlots(menu.getSellSlots());
         sellSection.setOnCardClick(card -> onSellSlotClicked(card));
 
-        currentY += 12 + sellSection.getHeight() + SECTION_SPACING;
+        currentY += sellSection.getHeight() + SECTION_SPACING;
 
         // 收购区
         buySection = new ScrollableSectionWidget(
-            leftPos + MARGIN, currentY + 12, mainWidth,
-            ROWS * (SLOT_SIZE + SLOT_SPACING) + 20,
+            leftPos + MARGIN, currentY, mainWidth, SECTION_HEIGHT,
             0xFF5555, 0x40333333,
             Component.translatable("gui.ruralroutes.trade_station.buy"));
         buySection.setSlots(menu.getBuySlots());
         buySection.setOnCardClick(card -> onBuySlotClicked(card));
 
-        currentY += 12 + buySection.getHeight() + SECTION_SPACING;
+        currentY += buySection.getHeight() + SECTION_SPACING;
 
         // 交易区
         int tradeWidth = mainWidth * 7 / 10 - SECTION_SPACING / 2;
