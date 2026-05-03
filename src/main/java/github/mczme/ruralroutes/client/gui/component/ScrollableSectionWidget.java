@@ -6,6 +6,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +81,18 @@ public class ScrollableSectionWidget extends AbstractWidget {
 
     public List<ItemCardWidget> getCards() {
         return cards;
+    }
+
+    /**
+     * 更新指定索引卡片的数量
+     */
+    public void updateCardCount(int index, int newCount) {
+        if (index >= 0 && index < cards.size()) {
+            ItemStack stack = cards.get(index).getItemStack();
+            if (!stack.isEmpty()) {
+                stack.setCount(newCount);
+            }
+        }
     }
 
     private void updateLayout() {
