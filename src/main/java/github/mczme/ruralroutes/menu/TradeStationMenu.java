@@ -4,11 +4,13 @@ import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.node.StockEntry;
+import github.mczme.ruralroutes.core.trade.TradeRequest;
 import github.mczme.ruralroutes.menu.container.TradeDisplayContainer;
 import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
 import github.mczme.ruralroutes.menu.slot.TradeSlot;
 import github.mczme.ruralroutes.network.packet.PendingTradeSyncPayload;
 import github.mczme.ruralroutes.network.packet.TradeSlotSyncPayload;
+import github.mczme.ruralroutes.register.RRItems;
 import github.mczme.ruralroutes.register.RRMenuTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -225,7 +227,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
      */
     public int calculateSellPrice(ResourceLocation itemId) {
         // TODO: 从价值表计算
-        return 0;
+        return 1;
     }
 
     /**
@@ -233,7 +235,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
      */
     public int calculateBuyPrice(ResourceLocation itemId) {
         // TODO: 从价值表计算
-        return 0;
+        return 1;
     }
 
     @Override
@@ -270,9 +272,8 @@ public class TradeStationMenu extends AbstractContainerMenu {
      * @param isBuy true=购买交易，false=出售交易
      */
     public boolean canAddItem(boolean isBuy) {
-        // 暂存区空时可以添加任何类型
-        // 暂存区有物品时只能添加同类型
-        return pendingSlots.isEmpty() || isBuyTrade == isBuy;
+        // 允许混合交易，不再限制交易类型
+        return true;
     }
 
     /**
@@ -311,15 +312,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
      * @param slotIndex 来源槽位索引
      */
     public void addTradeEntry(boolean isBuy, int slotIndex) {
-        // 1. 检查 canAddItem，不符合则返回
-        if (!canAddItem(isBuy)) return;
-
-        // 2. 如果暂存区空，设置 isBuyTrade
-        if (pendingSlots.isEmpty()) {
-            isBuyTrade = isBuy;
-        }
-
-        // 3. 获取来源槽位，检查库存
+        // 获取来源槽位，检查库存
         List<TradeSlot> sourceSlots = isBuy ? sellSlots : buySlots;
         if (slotIndex < 0 || slotIndex >= sourceSlots.size()) return;
 
@@ -443,16 +436,48 @@ public class TradeStationMenu extends AbstractContainerMenu {
 
     /**
      * 处理交易请求
-     * @param requestType 请求类型：0=ADD_BUY, 1=ADD_SELL, 2=REMOVE_ENTRY, 3=CLEAR
+     * @param requestType 请求类型：0=ADD_BUY, 1=ADD_SELL, 2=REMOVE_ENTRY, 3=CLEAR, 4=REMOVE_BUY, 5=REMOVE_SELL
      * @param slotIndex 槽位索引或条目索引
      */
     public void handleTradeRequest(int requestType, int slotIndex) {
         switch (requestType) {
-            case 0 -> addTradeEntry(true, slotIndex);  // ADD_BUY
-            case 1 -> addTradeEntry(false, slotIndex); // ADD_SELL
-            case 2 -> removeTradeEntry(slotIndex);      // REMOVE_ENTRY
-            case 3 -> clearPendingTrade();              // CLEAR
+            case 0 -> addTradeEntry(true, slotIndex);   // ADD_BUY
+            case 1 -> addTradeEntry(false, slotIndex);  // ADD_SELL
+            case 2 -> removeTradeEntry(slotIndex);       // REMOVE_ENTRY (legacy)
+            case 3 -> clearPendingTrade();               // CLEAR
+            case 4 -> removeTradeEntryByType(true, slotIndex);  // REMOVE_BUY - 移除买入条目
+            case 5 -> removeTradeEntryByType(false, slotIndex); // REMOVE_SELL - 移除卖出条目
         }
+    }
+
+    /**
+     * 根据类型移除暂存区条目
+     * @param isBuy true=移除买入条目，false=移除卖出条目
+     * @param sourceSlotIndex 来源槽位索引
+     */
+    private void removeTradeEntryByType(boolean isBuy, int sourceSlotIndex) {
+        // 找到对应的 pendingSlot
+        for (int i = 0; i < pendingSlots.size(); i++) {
+            PendingTradeSlot pending = pendingSlots.get(i);
+            if (pending.isBuy() == isBuy && pending.getSourceSlotIndex() == sourceSlotIndex) {
+                // 恢复来源槽位的暂存计数
+                List<TradeSlot> sourceSlots = isBuy ? sellSlots : buySlots;
+                if (sourceSlotIndex >= 0 && sourceSlotIndex < sourceSlots.size()) {
+                    TradeSlot source = sourceSlots.get(sourceSlotIndex);
+                    int currentPending = source.getPendingCount();
+                    source.setPendingCount(Math.max(0, currentPending - pending.getBaseStock()));
+                }
+
+                pendingSlots.remove(i);
+                break;
+            }
+        }
+
+        if (pendingSlots.isEmpty()) {
+            isBuyTrade = true;
+        }
+
+        syncPendingTradeToClient();
     }
 
     /**
@@ -656,6 +681,34 @@ public class TradeStationMenu extends AbstractContainerMenu {
                 }
             }
         }
+    }
+
+    /**
+     * 构建交易请求
+     * @return TradeRequest 对象，包含 giveItems 和 takeItems
+     */
+    public TradeRequest buildTradeRequest() {
+        List<ItemStack> takeItems = new ArrayList<>();
+        List<ItemStack> giveItems = new ArrayList<>();
+
+        for (PendingTradeSlot slot : pendingSlots) {
+            int value = slot.getPrice() * slot.getBaseStock();
+            ItemStack coinStack = new ItemStack(RRItems.COPPER_COIN.get(), value);
+            ItemStack itemStack = slot.getDisplayStack().copy();
+            itemStack.setCount(slot.getBaseStock());
+
+            if (slot.isBuy()) {
+                // 玩家买入：获得物品，付出货币
+                takeItems.add(itemStack);
+                giveItems.add(coinStack);
+            } else {
+                // 玩家卖出：获得货币，付出物品
+                takeItems.add(coinStack);
+                giveItems.add(itemStack);
+            }
+        }
+
+        return new TradeRequest(giveItems, takeItems);
     }
 
     /**

@@ -59,14 +59,11 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_station.theme", "主题: %s");
         add("gui.ruralroutes.trade_station.sell", "出售");
         add("gui.ruralroutes.trade_station.buy", "收购");
-        add("gui.ruralroutes.trade_station.you_give", "你付出:");
-        add("gui.ruralroutes.trade_station.you_receive", "你获得:");
-        add("gui.ruralroutes.trade_station.you_pay", "你支付:");
-        add("gui.ruralroutes.trade_station.you_get_paid", "你获得报酬:");
-        add("gui.ruralroutes.trade_station.value_status", "价值状态:");
         add("gui.ruralroutes.trade_station.confirm", "确认交换");
         add("gui.ruralroutes.trade_station.coin_exchange", "铸币");
         add("gui.ruralroutes.trade_station.trade_area", "交易区");
+        add("gui.ruralroutes.trade_station.want_area", "玩家想要的");
+        add("gui.ruralroutes.trade_station.pay_area", "玩家支付的");
         add("block.ruralroutes.trade_station.mismatch", "贸易站数据不匹配");
 
         // 展示柜交互

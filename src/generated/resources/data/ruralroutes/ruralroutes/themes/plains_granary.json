@@ -2,6 +2,7 @@
   "biome": "minecraft:plains",
   "buy_items": [
     "minecraft:wheat",
+    "minecraft:bread",
     "#ruralroutes:currency"
   ],
   "name": "ruralroutes:plains_granary",

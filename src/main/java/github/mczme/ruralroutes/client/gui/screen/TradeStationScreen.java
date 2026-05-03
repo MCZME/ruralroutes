@@ -84,7 +84,7 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
         int tradeWidth = mainWidth * 7 / 10 - SECTION_SPACING / 2;
         tradeArea = new TradeAreaWidget(leftPos + MARGIN, currentY, tradeWidth, 110);
         tradeArea.init(btn -> onConfirmClick());
-        tradeArea.setOnGiveCardClick(this::onTradeAreaCardClick);
+        tradeArea.setOnPendingSlotRemove(this::onPendingSlotRemoved);
         tradeArea.setPendingSlots(menu.getPendingSlots(), menu.isBuyTrade());
 
         // 铸币区
@@ -223,10 +223,13 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
     }
 
     /**
-     * 点击交易区卡片（移除条目）
+     * 移除暂存槽位（点击任意卡片时触发）
      */
-    private void onTradeAreaCardClick(int entryIndex, Object card) {
-        PacketDistributor.sendToServer(new TradeRequestPayload(menu.containerId, TradeRequestPayload.REMOVE_ENTRY, entryIndex));
+    private void onPendingSlotRemoved(PendingTradeSlot slot) {
+        if (slot != null && slot.hasSource()) {
+            int requestType = slot.isSourceIsBuy() ? TradeRequestPayload.REMOVE_BUY : TradeRequestPayload.REMOVE_SELL;
+            PacketDistributor.sendToServer(new TradeRequestPayload(menu.containerId, requestType, slot.getSourceSlotIndex()));
+        }
     }
 
     @Override

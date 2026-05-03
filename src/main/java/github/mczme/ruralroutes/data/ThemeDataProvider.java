@@ -29,7 +29,7 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
             .sell("minecraft:bread","#minecraft:planks","#minecraft:logs",
                         "#minecraft:swords","#minecraft:axes","#minecraft:pickaxes"
             )
-            .buy("minecraft:wheat")
+            .buy("minecraft:wheat","minecraft:bread")
             .specialty("minecraft:golden_carrot")
             .stock(8, 16)
             .stockSpecific("minecraft:golden_carrot", 1, 3)

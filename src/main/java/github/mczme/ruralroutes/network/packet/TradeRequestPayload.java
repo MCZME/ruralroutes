@@ -22,6 +22,8 @@ public record TradeRequestPayload(
     public static final int ADD_SELL = 1;
     public static final int REMOVE_ENTRY = 2;
     public static final int CLEAR = 3;
+    public static final int REMOVE_BUY = 4;   // 移除买入条目
+    public static final int REMOVE_SELL = 5;  // 移除卖出条目
 
     public static final CustomPacketPayload.Type<TradeRequestPayload> TYPE =
         new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(RuralRoutes.MODID, "trade_request"));
