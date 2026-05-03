@@ -35,17 +35,23 @@ public record ThemeTemplate(
 
     /**
      * 物品引用，支持标签或精确物品
+     * 通过 # 前缀标识标签，如 "#ruralroutes:pool/crop" 或 "minecraft:bread"
      */
     public record ItemReference(
-        String type,  // "tag" 或 "item"
-        String id     // 如 "minecraft:bread" 或 "#ruralroutes:pool/crop"
+        String id     // 如 "#ruralroutes:pool/crop" 或 "minecraft:bread"
     ) {
-        public static final Codec<ItemReference> CODEC = RecordCodecBuilder.create(
-            instance -> instance.group(
-                Codec.STRING.fieldOf("type").forGetter(ItemReference::type),
-                Codec.STRING.fieldOf("id").forGetter(ItemReference::id)
-            ).apply(instance, ItemReference::new)
-        );
+        public static final Codec<ItemReference> CODEC = Codec.STRING
+            .xmap(ItemReference::new, ItemReference::id);
+
+        /** 是否为标签引用 */
+        public boolean isTag() {
+            return id.startsWith("#");
+        }
+
+        /** 获取物品/标签 ID（不含 # 前缀） */
+        public String itemId() {
+            return isTag() ? id.substring(1) : id;
+        }
     }
 
     /**

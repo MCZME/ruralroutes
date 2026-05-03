@@ -1,25 +1,13 @@
 {
   "biome": "minecraft:plains",
   "buy_items": [
-    {
-      "type": "item",
-      "id": "minecraft:wheat"
-    },
-    {
-      "type": "tag",
-      "id": "#ruralroutes:currency"
-    }
+    "minecraft:wheat",
+    "#ruralroutes:currency"
   ],
   "name": "ruralroutes:plains_granary",
   "sell_items": [
-    {
-      "type": "item",
-      "id": "minecraft:bread"
-    },
-    {
-      "type": "tag",
-      "id": "#ruralroutes:currency"
-    }
+    "minecraft:bread",
+    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {

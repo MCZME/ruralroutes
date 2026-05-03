@@ -61,7 +61,7 @@ public class ThemeBuilder {
 
     /**
      * 添加出售物品
-     * 格式: "tag:xxx" 或 "item:xxx" 或直接使用完整字符串(默认为item)
+     * 格式: "tag:xxx" 表示标签，其他为物品ID
      */
     public ThemeBuilder sell(String... items) {
         for (String item : items) {
@@ -130,8 +130,8 @@ public class ThemeBuilder {
 
         // 添加默认货币到出售池和收购池
         if (withCurrency) {
-            finalSellItems.add(new ThemeTemplate.ItemReference("tag", "#ruralroutes:currency"));
-            finalBuyItems.add(new ThemeTemplate.ItemReference("tag", "#ruralroutes:currency"));
+            finalSellItems.add(new ThemeTemplate.ItemReference("#ruralroutes:currency"));
+            finalBuyItems.add(new ThemeTemplate.ItemReference("#ruralroutes:currency"));
         }
 
         return new ThemeTemplate(
@@ -159,13 +159,21 @@ public class ThemeBuilder {
         }
     }
 
+    /**
+     * 解析物品引用字符串
+     * "tag:xxx" -> "#xxx"（标签）
+     * "xxx" -> "xxx"（物品）
+     */
     private static ThemeTemplate.ItemReference parseItemRef(String str) {
         if (str.startsWith("tag:")) {
-            return new ThemeTemplate.ItemReference("tag", str.substring(4));
-        } else if (str.startsWith("item:")) {
-            return new ThemeTemplate.ItemReference("item", str.substring(5));
+            String tagId = str.substring(4);
+            // 如果已经有#前缀则保留，否则添加
+            if (!tagId.startsWith("#")) {
+                tagId = "#" + tagId;
+            }
+            return new ThemeTemplate.ItemReference(tagId);
         } else {
-            return new ThemeTemplate.ItemReference("item", str);
+            return new ThemeTemplate.ItemReference(str);
         }
     }
 }
