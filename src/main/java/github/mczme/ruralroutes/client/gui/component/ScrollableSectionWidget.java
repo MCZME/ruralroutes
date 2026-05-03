@@ -1,5 +1,7 @@
 package github.mczme.ruralroutes.client.gui.component;
 
+import github.mczme.ruralroutes.menu.container.TradeDisplayContainer;
+import github.mczme.ruralroutes.menu.slot.TradeSlot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -27,6 +29,7 @@ public class ScrollableSectionWidget extends AbstractWidget {
 
     private final List<ItemCardWidget> cards = new ArrayList<>();
     private final List<ItemCardWidget> visibleCards = new ArrayList<>();
+    private List<TradeSlot> slots = new ArrayList<>();
     private Consumer<ItemCardWidget> onCardClick;
     private int scrollOffset = 0;
     private int maxScroll = 0;
@@ -46,11 +49,47 @@ public class ScrollableSectionWidget extends AbstractWidget {
         return this;
     }
 
-    public void setItems(List<net.minecraft.world.item.ItemStack> items) {
+    /**
+     * 设置 TradeSlot 列表
+     */
+    public void setSlots(List<TradeSlot> slots) {
+        this.slots = slots != null ? new ArrayList<>(slots) : new ArrayList<>();
         cards.clear();
-        for (int i = 0; i < items.size(); i++) {
+
+        for (int i = 0; i < this.slots.size(); i++) {
+            TradeSlot slot = this.slots.get(i);
             ItemCardWidget card = new ItemCardWidget(0, 0, CARD_SIZE, CARD_SIZE);
-            card.setItemStack(items.get(i));
+            card.setTradeSlot(slot);
+            card.setOnClick(c -> {
+                if (onCardClick != null) {
+                    onCardClick.accept(c);
+                }
+            });
+            cards.add(card);
+        }
+        scrollOffset = 0;
+        updateLayout();
+    }
+
+    /**
+     * 获取 TradeSlot 列表
+     */
+    public List<TradeSlot> getSlots() {
+        return slots;
+    }
+
+    public void setItems(List<ItemStack> items) {
+        cards.clear();
+        TradeDisplayContainer container = new TradeDisplayContainer(items.size());
+
+        for (int i = 0; i < items.size(); i++) {
+            ItemStack stack = items.get(i);
+            TradeSlot slot = new TradeSlot(container, i, 0, 0);
+            slot.setDisplayStack(stack.copy());
+            slot.setBaseStock(stack.getCount());
+
+            ItemCardWidget card = new ItemCardWidget(0, 0, CARD_SIZE, CARD_SIZE);
+            card.setTradeSlot(slot);
             card.setOnClick(c -> {
                 if (onCardClick != null) {
                     onCardClick.accept(c);
@@ -61,9 +100,14 @@ public class ScrollableSectionWidget extends AbstractWidget {
         updateLayout();
     }
 
-    public void addItem(net.minecraft.world.item.ItemStack stack) {
+    public void addItem(ItemStack stack) {
+        TradeDisplayContainer container = new TradeDisplayContainer(cards.size() + 1);
+        TradeSlot slot = new TradeSlot(container, cards.size(), 0, 0);
+        slot.setDisplayStack(stack.copy());
+        slot.setBaseStock(stack.getCount());
+
         ItemCardWidget card = new ItemCardWidget(0, 0, CARD_SIZE, CARD_SIZE);
-        card.setItemStack(stack);
+        card.setTradeSlot(slot);
         card.setOnClick(c -> {
             if (onCardClick != null) {
                 onCardClick.accept(c);
@@ -88,9 +132,9 @@ public class ScrollableSectionWidget extends AbstractWidget {
      */
     public void updateCardCount(int index, int newCount) {
         if (index >= 0 && index < cards.size()) {
-            ItemStack stack = cards.get(index).getItemStack();
-            if (!stack.isEmpty()) {
-                stack.setCount(newCount);
+            TradeSlot slot = cards.get(index).getTradeSlot();
+            if (slot != null) {
+                slot.setBaseStock(newCount);
             }
         }
     }
@@ -189,7 +233,7 @@ public class ScrollableSectionWidget extends AbstractWidget {
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (dragging && maxScroll > 0) {
-            scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (int) dragX));
+            scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset + (int) dragX));
             return true;
         }
         return false;
@@ -198,7 +242,7 @@ public class ScrollableSectionWidget extends AbstractWidget {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (isHovered() && maxScroll > 0) {
-            scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset + (int) scrollY * 20));
+            scrollOffset = Math.max(0, Math.min(maxScroll, scrollOffset - (int) scrollY * 20));
             return true;
         }
         return false;
