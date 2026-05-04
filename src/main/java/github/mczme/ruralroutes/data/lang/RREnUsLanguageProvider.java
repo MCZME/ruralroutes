@@ -18,11 +18,23 @@ public class RREnUsLanguageProvider extends LanguageProvider {
     @Override
     protected void addTranslations() {
         // 配置翻译
+        add("ruralroutes.configuration.title", "Rural Routes Configuration");
+        add("ruralroutes.configuration.section.ruralroutes.common.toml", "Rural Routes");
+        add("ruralroutes.configuration.section.ruralroutes.common.toml.title", "Rural Routes Configuration");
         add("ruralroutes.configuration.values", "Values");
         add("ruralroutes.configuration.values.button", "Values");
         add("ruralroutes.configuration.values.tooltip", "Value-related settings");
         add("ruralroutes.configuration.default", "Default Value");
         add("ruralroutes.configuration.default.tooltip", "Default value for items without defined value rules");
+
+        // 贸易周期配置
+        add("ruralroutes.configuration.cycle", "Trade Cycle");
+        add("ruralroutes.configuration.cycle.button", "Trade Cycle");
+        add("ruralroutes.configuration.cycle.tooltip", "Trade cycle refresh settings");
+        add("ruralroutes.configuration.days", "Cycle Length (Days)");
+        add("ruralroutes.configuration.days.tooltip", "Length of trade cycle in game days (1-30)");
+        add("ruralroutes.configuration.refresh_time", "Refresh Time");
+        add("ruralroutes.configuration.refresh_time.tooltip", "Time of day when trade cycle refreshes");
 
         // 方块翻译
         addBlock(RRBlocks.TRADE_STATION, "Trade Station");

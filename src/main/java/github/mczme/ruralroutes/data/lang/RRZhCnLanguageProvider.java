@@ -18,11 +18,23 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
     @Override
     protected void addTranslations() {
         // 配置翻译
+        add("ruralroutes.configuration.title", "乡野商路配置");
+        add("ruralroutes.configuration.section.ruralroutes.common.toml", "乡野商路");
+        add("ruralroutes.configuration.section.ruralroutes.common.toml.title", "乡野商路配置");
         add("ruralroutes.configuration.values", "价值设置");
         add("ruralroutes.configuration.values.button", "价值设置");
         add("ruralroutes.configuration.values.tooltip", "价值相关设置");
         add("ruralroutes.configuration.default", "默认价值");
         add("ruralroutes.configuration.default.tooltip", "未定义价值规则的物品使用的默认价值");
+
+        // 贸易周期配置
+        add("ruralroutes.configuration.cycle", "贸易周期");
+        add("ruralroutes.configuration.cycle.button", "贸易周期");
+        add("ruralroutes.configuration.cycle.tooltip", "贸易周期刷新设置");
+        add("ruralroutes.configuration.days", "周期长度（日）");
+        add("ruralroutes.configuration.days.tooltip", "贸易周期长度，单位为游戏日（1-30）");
+        add("ruralroutes.configuration.refresh_time", "刷新时刻");
+        add("ruralroutes.configuration.refresh_time.tooltip", "贸易周期刷新的时刻");
 
         // 方块翻译
         addBlock(RRBlocks.TRADE_STATION, "贸易站");

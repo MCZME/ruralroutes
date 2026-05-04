@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -77,6 +78,10 @@ public class TradeStationBlock extends BaseEntityBlock {
                     CommercialNodeData nodeData = CommercialNodeManager.getNodeData(level, pos);
                     // 校验数据一致性
                     if (CommercialNodeManager.validateTradeStation(station, nodeData)) {
+                        // 检查并刷新周期（如果需要）
+                        if (level instanceof ServerLevel serverLevel) {
+                            nodeData = CommercialNodeManager.checkAndRefreshCycle(serverLevel, pos, nodeData);
+                        }
                         openMenu(player, station);
                         return InteractionResult.CONSUME;
                     }

@@ -2,6 +2,7 @@ package github.mczme.ruralroutes.core.node;
 
 import github.mczme.ruralroutes.RuralRoutes;
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
+import github.mczme.ruralroutes.core.cycle.CycleManager;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.register.RRAttachments;
@@ -346,5 +347,63 @@ public class CommercialNodeManager {
         }
 
         return true;
+    }
+
+    // ===== 贸易周期相关 =====
+
+    /**
+     * 检查并刷新节点数据（如果周期已过期）
+     * @param level 世界
+     * @param pos 贸易站位置
+     * @param nodeData 节点数据
+     * @return 更新后的节点数据（如果刷新了则返回新数据，否则返回原数据）
+     */
+    public static CommercialNodeData checkAndRefreshCycle(ServerLevel level, BlockPos pos, CommercialNodeData nodeData) {
+        CycleManager cycleManager = CycleManager.get(level);
+        long currentGameTime = level.getGameTime();
+
+        if (cycleManager.needsRefresh(nodeData.refreshTimestamp(), currentGameTime)) {
+            RuralRoutes.LOGGER.debug("Refreshing commercial node {} at cycle {}",
+                nodeData.tradeNodeId(), cycleManager.getCycleIndex(currentGameTime));
+            return refreshNodeData(level, pos, nodeData, currentGameTime);
+        }
+
+        return nodeData;
+    }
+
+    /**
+     * 刷新节点数据
+     * 恢复库存到基准值，更新刷新时间戳
+     */
+    private static CommercialNodeData refreshNodeData(ServerLevel level, BlockPos pos,
+            CommercialNodeData oldData, long currentGameTime) {
+
+        ThemeTemplate template = ThemeManager.INSTANCE.getTheme(oldData.themeName());
+        if (template == null) {
+            RuralRoutes.LOGGER.warn("Cannot refresh node: theme {} not found", oldData.themeName());
+            return oldData;
+        }
+
+        // 重新初始化库存（全量恢复）
+        Map<ResourceLocation, StockEntry> newStocks = initializeStocks(template);
+
+        // 创建新数据，更新时间戳
+        CommercialNodeData newData = CommercialNodeData.create(
+            oldData.tradeNodeId(),
+            oldData.themeName(),
+            oldData.sellItems(),
+            oldData.buyItems(),
+            newStocks,
+            currentGameTime
+        );
+
+        // 存储到区块
+        ChunkAccess chunk = level.getChunk(pos);
+        chunk.setData(RRAttachments.COMMERCIAL_NODE.get(), newData);
+
+        RuralRoutes.LOGGER.debug("Refreshed node {} with {} stock entries",
+            newData.tradeNodeId(), newStocks.size());
+
+        return newData;
     }
 }
