@@ -29,7 +29,7 @@ public final class TradeEngineImpl implements TradeEngine {
     public TradeResult executeTrade(CommercialNodeData nodeData, Player player, TradeRequest request) {
         ChunkPos chunkPos = extractChunkPos(nodeData, player);
         if (chunkPos == null || !lockManager.acquire(chunkPos)) {
-            return TradeResult.fail(TradeResult.FailReason.INVALID_REQUEST, List.of());
+            return TradeResult.fail(TradeResult.Reason.INVALID_REQUEST, List.of());
         }
 
         try {
@@ -42,7 +42,7 @@ public final class TradeEngineImpl implements TradeEngine {
     private TradeResult doExecute(CommercialNodeData nodeData, Player player, TradeRequest request) {
         // 1. 验证请求有效性
         if (!request.isValid()) {
-            return TradeResult.fail(TradeResult.FailReason.INVALID_REQUEST, List.of());
+            return TradeResult.fail(TradeResult.Reason.INVALID_REQUEST, List.of());
         }
 
         // 2. 验证价值匹配
@@ -50,27 +50,22 @@ public final class TradeEngineImpl implements TradeEngine {
         int takeValue = calculateTotalValue(request.takeItems());
 
         if (giveValue != takeValue) {
-            return TradeResult.fail(TradeResult.FailReason.VALUE_MISMATCH, List.of());
+            return TradeResult.fail(TradeResult.Reason.VALUE_MISMATCH, List.of());
         }
 
         // 3. 验证玩家库存
         List<ItemStack> playerShortfall = checkPlayerInventory(player, request.giveItems());
         if (!playerShortfall.isEmpty()) {
-            return TradeResult.fail(TradeResult.FailReason.PLAYER_INSUFFICIENT, playerShortfall);
+            return TradeResult.fail(TradeResult.Reason.PLAYER_INSUFFICIENT, playerShortfall);
         }
 
         // 4. 验证村庄库存
         List<ItemStack> villageShortfall = checkVillageInventory(nodeData, request.takeItems());
         if (!villageShortfall.isEmpty()) {
-            return TradeResult.fail(TradeResult.FailReason.VILLAGE_INSUFFICIENT, villageShortfall);
+            return TradeResult.fail(TradeResult.Reason.VILLAGE_INSUFFICIENT, villageShortfall);
         }
 
-        // 5. 验证玩家背包空间
-        if (!checkPlayerSpace(player, request)) {
-            return TradeResult.fail(TradeResult.FailReason.PLAYER_NO_SPACE, List.of());
-        }
-
-        // 6. 原子执行
+        // 5. 原子执行
         executeTransfer(nodeData, player, request);
 
         return TradeResult.success(giveValue);
@@ -93,11 +88,7 @@ public final class TradeEngineImpl implements TradeEngine {
             return false;
         }
 
-        if (!checkVillageInventory(nodeData, request.takeItems()).isEmpty()) {
-            return false;
-        }
-
-        return checkPlayerSpace(player, request);
+        return checkVillageInventory(nodeData, request.takeItems()).isEmpty();
     }
 
     @Override
@@ -155,17 +146,6 @@ public final class TradeEngineImpl implements TradeEngine {
     }
 
     /**
-     * 检查玩家背包空间
-     */
-    private boolean checkPlayerSpace(Player player, TradeRequest request) {
-        int emptySlots = countEmptySlots(player);
-        int neededSlots = calculateNeededSlots(player, request.takeItems());
-        int releasedSlots = calculateReleasedSlots(player, request.giveItems());
-
-        return emptySlots + releasedSlots >= neededSlots;
-    }
-
-    /**
      * 执行物品转移
      */
     private void executeTransfer(CommercialNodeData nodeData, Player player, TradeRequest request) {
@@ -174,7 +154,7 @@ public final class TradeEngineImpl implements TradeEngine {
             removeItemFromPlayer(player, give);
         }
 
-        // 玩家背包 += 获得组
+        // 玩家背包 += 获得组，背包满时生成掉落物
         for (ItemStack take : request.takeItems()) {
             addItemToPlayer(player, take.copy());
         }
@@ -248,55 +228,15 @@ public final class TradeEngineImpl implements TradeEngine {
     }
 
     /**
-     * 向玩家背包添加物品
+     * 向玩家背包添加物品，背包满时生成掉落物
      */
     private void addItemToPlayer(Player player, ItemStack toAdd) {
-        player.getInventory().add(toAdd);
-    }
-
-    /**
-     * 计算玩家背包空槽数量
-     */
-    private int countEmptySlots(Player player) {
-        int count = 0;
-        for (ItemStack stack : player.getInventory().items) {
-            if (stack.isEmpty()) {
-                count++;
-            }
+        // 尝试添加到背包（会修改 toAdd 的数量为剩余数量）
+        boolean success = player.getInventory().add(toAdd);
+        // 如果有剩余（添加失败或部分失败），在玩家位置生成掉落物
+        if (!success && !toAdd.isEmpty()) {
+            player.spawnAtLocation(toAdd);
         }
-        return count;
-    }
-
-    /**
-     * 计算获得组需要的空槽数
-     */
-    private int calculateNeededSlots(Player player, List<ItemStack> takeItems) {
-        int needed = 0;
-        for (ItemStack take : takeItems) {
-            int has = countItemInPlayerInventory(player, take.getItem());
-            int maxStack = take.getMaxStackSize();
-            // 当前占用的槽数
-            int currentSlots = (has + maxStack - 1) / maxStack;
-            // 添加后需要的总槽数
-            int totalAfter = (has + take.getCount() + maxStack - 1) / maxStack;
-            needed += totalAfter - currentSlots;
-        }
-        return needed;
-    }
-
-    /**
-     * 计算付出组释放的空槽数
-     */
-    private int calculateReleasedSlots(Player player, List<ItemStack> giveItems) {
-        int released = 0;
-        for (ItemStack give : giveItems) {
-            int has = countItemInPlayerInventory(player, give.getItem());
-            int maxStack = give.getMaxStackSize();
-            if (has <= give.getCount() && has > 0) {
-                released++;
-            }
-        }
-        return released;
     }
 
     /**

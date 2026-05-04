@@ -25,8 +25,10 @@
   "gui.ruralroutes.trade_station.buy": "Buying",
   "gui.ruralroutes.trade_station.coin_exchange": "Coin Exchange",
   "gui.ruralroutes.trade_station.confirm": "Confirm Trade",
+  "gui.ruralroutes.trade_station.error.no_data": "Unable to get village data",
   "gui.ruralroutes.trade_station.pay_area": "You Pay",
   "gui.ruralroutes.trade_station.sell": "Selling",
+  "gui.ruralroutes.trade_station.success": "Trade successful!",
   "gui.ruralroutes.trade_station.theme": "Theme: %s",
   "gui.ruralroutes.trade_station.trade_area": "Trade Area",
   "gui.ruralroutes.trade_station.want_area": "You Want",
@@ -44,8 +46,8 @@
   "ruralroutes.configuration.values.button": "Values",
   "ruralroutes.configuration.values.tooltip": "Value-related settings",
   "trade.fail.invalid_request": "Invalid trade request",
-  "trade.fail.player_insufficient": "Insufficient items in inventory",
-  "trade.fail.player_no_space": "Inventory full",
+  "trade.fail.player_insufficient": "Player does not meet trade conditions",
   "trade.fail.value_mismatch": "Value mismatch",
-  "trade.fail.village_insufficient": "Village out of stock"
+  "trade.fail.village_insufficient": "Village stock does not meet trade conditions",
+  "trade.success": "Trade successful"
 }

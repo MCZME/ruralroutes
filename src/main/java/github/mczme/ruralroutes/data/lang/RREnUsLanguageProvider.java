@@ -76,11 +76,11 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("block.ruralroutes.rumor_board.mismatch", "Rumor board data mismatch");
         add("block.ruralroutes.rumor_board.no_news", "Trade route news will arrive next cycle");
 
-        // 交易失败原因
+        // 交易结果
+        add("trade.success", "Trade successful");
         add("trade.fail.value_mismatch", "Value mismatch");
-        add("trade.fail.player_insufficient", "Insufficient items in inventory");
-        add("trade.fail.village_insufficient", "Village out of stock");
-        add("trade.fail.player_no_space", "Inventory full");
+        add("trade.fail.player_insufficient", "Player does not meet trade conditions");
+        add("trade.fail.village_insufficient", "Village stock does not meet trade conditions");
         add("trade.fail.invalid_request", "Invalid trade request");
 
         // 交易站交易结果

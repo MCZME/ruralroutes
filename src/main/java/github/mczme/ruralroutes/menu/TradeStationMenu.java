@@ -526,7 +526,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
         // 执行交易
         TradeResult result = engine.executeTrade(nodeData, player, request);
 
-        if (result.success()) {
+        if (result.isSuccess()) {
             // 交易成功：清空暂存区，刷新库存显示
             pendingSlots.clear();
             isBuyTrade = true;
@@ -552,9 +552,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
             player.sendSystemMessage(Component.translatable("gui.ruralroutes.trade_station.success"));
         } else {
             // 交易失败：发送失败原因
-            Component failMessage = result.failReason() != null
-                ? Component.translatable(result.failReason().getTranslationKey())
-                : Component.translatable("trade.fail.invalid_request");
+            Component failMessage = Component.translatable(result.reason().getTranslationKey());
             player.sendSystemMessage(failMessage);
         }
     }

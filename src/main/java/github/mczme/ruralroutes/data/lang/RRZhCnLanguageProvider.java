@@ -76,11 +76,11 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("block.ruralroutes.rumor_board.mismatch", "传闻板数据不匹配");
         add("block.ruralroutes.rumor_board.no_news", "商路消息将在下一个周期到来");
 
-        // 交易失败原因
+        // 交易结果
+        add("trade.success", "交易成功");
         add("trade.fail.value_mismatch", "价值不匹配");
-        add("trade.fail.player_insufficient", "库存不足");
-        add("trade.fail.village_insufficient", "村庄缺货");
-        add("trade.fail.player_no_space", "背包已满");
+        add("trade.fail.player_insufficient", "玩家不满足交易条件");
+        add("trade.fail.village_insufficient", "村庄库存不满足交易条件");
         add("trade.fail.invalid_request", "无效交易请求");
 
         // 交易站交易结果
