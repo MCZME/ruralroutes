@@ -13,9 +13,12 @@ public record TradeResult(
 ) {
     /**
      * 创建成功结果
+     * @param sellValueTotal 玩家需支付的货币（购买物品总价）
+     * @param buyValueTotal 玩家将获得的货币（出售物品总价）
      */
-    public static TradeResult success(int totalValue) {
-        return new TradeResult(Reason.SUCCESS, List.of(), totalValue);
+    public static TradeResult success(int sellValueTotal, int buyValueTotal) {
+        int netValue = sellValueTotal - buyValueTotal;
+        return new TradeResult(Reason.SUCCESS, List.of(), netValue);
     }
 
     /**
@@ -37,10 +40,10 @@ public record TradeResult(
      */
     public enum Reason {
         SUCCESS("trade.success"),
-        VALUE_MISMATCH("trade.fail.value_mismatch"),
         PLAYER_INSUFFICIENT("trade.fail.player_insufficient"),
         VILLAGE_INSUFFICIENT("trade.fail.village_insufficient"),
-        INVALID_REQUEST("trade.fail.invalid_request");
+        INVALID_REQUEST("trade.fail.invalid_request"),
+        CYCLE_CHANGED("trade.fail.cycle_changed");
 
         private final String translationKey;
 

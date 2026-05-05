@@ -1,20 +1,20 @@
 package github.mczme.ruralroutes.menu;
 
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
+import github.mczme.ruralroutes.core.cycle.CycleManager;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.node.StockEntry;
-import github.mczme.ruralroutes.core.trade.TradeEngine;
-import github.mczme.ruralroutes.core.trade.TradeRequest;
+import github.mczme.ruralroutes.core.trade.TradeEngineImpl;
+import github.mczme.ruralroutes.core.trade.TradePricingService;
 import github.mczme.ruralroutes.core.trade.TradeResult;
-import github.mczme.ruralroutes.core.value.ValueTableManager;
+import github.mczme.ruralroutes.core.trade.TradeSide;
 import github.mczme.ruralroutes.menu.container.TradeDisplayContainer;
 import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
 import github.mczme.ruralroutes.menu.slot.TradeSlot;
 import github.mczme.ruralroutes.network.packet.PendingTradeSyncPayload;
 import github.mczme.ruralroutes.network.packet.TradeSlotSyncPayload;
 import github.mczme.ruralroutes.register.RRItemTags;
-import github.mczme.ruralroutes.register.RRItems;
 import github.mczme.ruralroutes.register.RRMenuTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -60,6 +60,9 @@ public class TradeStationMenu extends AbstractContainerMenu {
     // 多物品暂存区
     private List<PendingTradeSlot> pendingSlots = new ArrayList<>();
     private boolean isBuyTrade = true; // true=购买交易，false=出售交易
+
+    // 当前周期索引（用于跨周期检测）
+    private long currentCycleIndex;
 
     // 滚动偏移数据槽
     private final DataSlot sellScrollOffset;
@@ -200,6 +203,12 @@ public class TradeStationMenu extends AbstractContainerMenu {
             addSlot(slot);
             buySlotIndex++;
         }
+
+        // 初始化周期索引（服务端）
+        if (player instanceof ServerPlayer serverPlayer) {
+            CycleManager cycleManager = CycleManager.get(serverPlayer.serverLevel());
+            this.currentCycleIndex = cycleManager.getCycleIndex(serverPlayer.serverLevel().getGameTime());
+        }
     }
 
     /**
@@ -271,19 +280,49 @@ public class TradeStationMenu extends AbstractContainerMenu {
     }
 
     /**
-     * 计算出售价格（临时使用基础价值）
+     * 计算出售价格（村庄卖给玩家）
+     * 使用统一定价服务
      */
     public int calculateSellPrice(ResourceLocation itemId) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return 0;
+        }
+
         ItemStack stack = createItemStack(itemId);
-        return ValueTableManager.queryBaseValue(stack);
+        CommercialNodeData nodeData = CommercialNodeManager.getNodeData(player.level(), blockPos);
+        if (nodeData == null) {
+            return 0;
+        }
+
+        return TradePricingService.calculateFinalPrice(
+            serverPlayer.serverLevel(),
+            nodeData,
+            stack,
+            TradeSide.SELL_TO_PLAYER
+        );
     }
 
     /**
-     * 计算收购价格（临时使用基础价值）
+     * 计算收购价格（玩家卖给村庄）
+     * 使用统一定价服务
      */
     public int calculateBuyPrice(ResourceLocation itemId) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return 0;
+        }
+
         ItemStack stack = createItemStack(itemId);
-        return ValueTableManager.queryBaseValue(stack);
+        CommercialNodeData nodeData = CommercialNodeManager.getNodeData(player.level(), blockPos);
+        if (nodeData == null) {
+            return 0;
+        }
+
+        return TradePricingService.calculateFinalPrice(
+            serverPlayer.serverLevel(),
+            nodeData,
+            stack,
+            TradeSide.BUY_FROM_PLAYER
+        );
     }
 
     @Override
@@ -507,6 +546,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
     /**
      * 执行交易
      * 由服务端在收到 CONFIRM 请求时调用
+     * 直接从暂存区读取数据，服务端权威计算价格
      */
     public void executeTrade() {
         if (!(player instanceof ServerPlayer serverPlayer)) return;
@@ -519,15 +559,19 @@ public class TradeStationMenu extends AbstractContainerMenu {
             return;
         }
 
-        // 构建交易请求
-        TradeRequest request = buildTradeRequest();
-        TradeEngine engine = TradeEngine.getInstance();
-
-        // 执行交易
-        TradeResult result = engine.executeTrade(nodeData, player, request);
+        // 执行交易（直接从 pendingSlots 读取）
+        TradeEngineImpl engine = TradeEngineImpl.INSTANCE;
+        TradeResult result = engine.executeTrade(
+            serverPlayer.serverLevel(),
+            nodeData,
+            serverPlayer,
+            pendingSlots,
+            currentCycleIndex,
+            blockPos
+        );
 
         if (result.isSuccess()) {
-            // 交易成功：清空暂存区，刷新库存显示
+            // 交易成功：��空暂存区，刷新库存显示
             pendingSlots.clear();
             isBuyTrade = true;
 
@@ -550,8 +594,28 @@ public class TradeStationMenu extends AbstractContainerMenu {
             syncPendingTradeToClient();
 
             player.sendSystemMessage(Component.translatable("gui.ruralroutes.trade_station.success"));
+        } else if (result.reason() == TradeResult.Reason.CYCLE_CHANGED) {
+            // 周期变化：刷新 GUI 并通知玩家
+            CycleManager cycleManager = CycleManager.get(serverPlayer.serverLevel());
+            this.currentCycleIndex = cycleManager.getCycleIndex(serverPlayer.serverLevel().getGameTime());
+
+            // 刷新节点数据
+            CommercialNodeData updatedData = CommercialNodeManager.getNodeData(player.level(), blockPos);
+            if (updatedData != null) {
+                updateSlotsFromNodeData(updatedData);
+                // 重新计算价格
+                for (TradeSlot slot : sellSlots) {
+                    slot.setPrice(calculateSellPrice(slot.getItemId()));
+                }
+                for (TradeSlot slot : buySlots) {
+                    slot.setPrice(calculateBuyPrice(slot.getItemId()));
+                }
+            }
+
+            syncSlotDataToClient(serverPlayer);
+            player.sendSystemMessage(Component.translatable("gui.ruralroutes.trade_station.error.cycle_changed"));
         } else {
-            // 交易失败：发送失败原因
+            // 其他交易失败：发送失败原因
             Component failMessage = Component.translatable(result.reason().getTranslationKey());
             player.sendSystemMessage(failMessage);
         }
@@ -813,34 +877,6 @@ public class TradeStationMenu extends AbstractContainerMenu {
                 }
             }
         }
-    }
-
-    /**
-     * 构建交易请求
-     * @return TradeRequest 对象，包含 giveItems 和 takeItems
-     */
-    public TradeRequest buildTradeRequest() {
-        List<ItemStack> takeItems = new ArrayList<>();
-        List<ItemStack> giveItems = new ArrayList<>();
-
-        for (PendingTradeSlot slot : pendingSlots) {
-            int value = slot.getPrice() * slot.getBaseStock();
-            ItemStack coinStack = new ItemStack(RRItems.COPPER_COIN.get(), value);
-            ItemStack itemStack = slot.getDisplayStack().copy();
-            itemStack.setCount(slot.getBaseStock());
-
-            if (slot.isBuy()) {
-                // 玩家买入：获得物品，付出货币
-                takeItems.add(itemStack);
-                giveItems.add(coinStack);
-            } else {
-                // 玩家卖出：获得货币，付出物品
-                takeItems.add(coinStack);
-                giveItems.add(itemStack);
-            }
-        }
-
-        return new TradeRequest(giveItems, takeItems);
     }
 
     /**
