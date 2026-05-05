@@ -1,4 +1,4 @@
-package github.mczme.ruralroutes.data;
+package github.mczme.ruralroutes.data.builder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,7 +49,7 @@ public class ThemeBuilder {
     /**
      * 设置注册器（由 ThemeDataProvider 调用）
      */
-    ThemeBuilder registrar(BiConsumer<ResourceLocation, ThemeTemplate> registrar) {
+    public ThemeBuilder registrar(BiConsumer<ResourceLocation, ThemeTemplate> registrar) {
         this.registrar = registrar;
         return this;
     }
