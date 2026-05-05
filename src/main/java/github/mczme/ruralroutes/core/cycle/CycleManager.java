@@ -1,8 +1,11 @@
 package github.mczme.ruralroutes.core.cycle;
 
 import github.mczme.ruralroutes.Config;
+import github.mczme.ruralroutes.core.market.MarketState;
+import github.mczme.ruralroutes.core.market.MarketStateGenerator;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 
@@ -15,6 +18,9 @@ import net.minecraft.world.level.saveddata.SavedData;
 public class CycleManager extends SavedData {
 
     private static final String DATA_NAME = "ruralroutes_cycle";
+
+    /** 当前周期的市场状态 */
+    private MarketState marketState;
 
     /**
      * 获取或创建 CycleManager
@@ -37,11 +43,28 @@ public class CycleManager extends SavedData {
      * 从 NBT 加载
      */
     public static CycleManager load(CompoundTag tag, HolderLookup.Provider lookupProvider) {
-        return create();
+        CycleManager manager = create();
+
+        // 加载市场状态
+        if (tag.contains("market_state")) {
+            manager.marketState = MarketState.CODEC.parse(
+                    NbtOps.INSTANCE,
+                    tag.get("market_state")
+            ).result().orElse(null);
+        }
+
+        return manager;
     }
 
     @Override
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+        // 保存市场状态
+        if (marketState != null) {
+            MarketState.CODEC.encodeStart(
+                    NbtOps.INSTANCE,
+                    marketState
+            ).result().ifPresent(nbt -> tag.put("market_state", nbt));
+        }
         return tag;
     }
 
@@ -74,5 +97,47 @@ public class CycleManager extends SavedData {
     public long getCurrentCycleStartTick(long gameTime) {
         long cycleIndex = getCycleIndex(gameTime);
         return cycleIndex * Config.getCycleLengthInTicks();
+    }
+
+    // ===== 市场状态相关方法 =====
+
+    /**
+     * 获取当前市场状态
+     */
+    public MarketState getMarketState() {
+        return marketState;
+    }
+
+    /**
+     * 检查是否已有指定周期的市场状态
+     */
+    public boolean hasMarketStateFor(long cycleIndex) {
+        return marketState != null && marketState.cycleIndex() == cycleIndex;
+    }
+
+    /**
+     * 设置市场状态
+     */
+    public void setMarketState(MarketState state) {
+        this.marketState = state;
+        setDirty();
+    }
+
+    /**
+     * 获取或初始化市场状态
+     * 如果市场状态为空或周期不匹配，则生成新的市场状态
+     * @param currentGameTime 当前游戏时间
+     * @return 当前周期的市场状态
+     */
+    public MarketState getOrInitMarketState(long currentGameTime) {
+        long currentCycle = getCycleIndex(currentGameTime);
+
+        // 如果市场状态不存在或周期已过期，生成新状态
+        if (marketState == null || marketState.cycleIndex() != currentCycle) {
+            marketState = MarketStateGenerator.generateDeterministic(currentCycle);
+            setDirty();
+        }
+
+        return marketState;
     }
 }

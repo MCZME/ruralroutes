@@ -51,6 +51,29 @@ public class Config {
         }
     }
 
+    // ===== 市场系统配置 =====
+
+    /**
+     * 市场系统开关
+     */
+    public static final ModConfigSpec.BooleanValue MARKET_ENABLED = BUILDER
+            .comment("是否启用市场系统", "启用后每个贸易周期会生成市场事件影响物品价格")
+            .define("market.enabled", true);
+
+    /**
+     * 每周期选择的规则数量
+     */
+    public static final ModConfigSpec.IntValue MARKET_RULE_PICK_COUNT = BUILDER
+            .comment("每个贸易周期随机选择的市场事件规则数量", "数值越大，每周期可能出现的市场事件越多")
+            .defineInRange("market.rule_pick_count", 3, 1, 20);
+
+    /**
+     * 最大价格调整幅度
+     */
+    public static final ModConfigSpec.DoubleValue MARKET_MAX_DELTA = BUILDER
+            .comment("市场事件叠加后的最大价格调整百分比", "0.50 表示最多涨跌50%", "范围：0.1-1.0")
+            .defineInRange("market.max_delta", 0.50, 0.1, 1.0);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     // ===== 工具方法 =====

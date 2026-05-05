@@ -6,7 +6,11 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
+import github.mczme.ruralroutes.command.RefreshCycleCommand;
+import github.mczme.ruralroutes.core.cycle.CycleManager;
+import github.mczme.ruralroutes.core.market.MarketEventRuleCatalog;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
+import github.mczme.ruralroutes.data.MarketRuleDataProvider;
 import github.mczme.ruralroutes.data.RRBlockTagsProvider;
 import github.mczme.ruralroutes.data.RRItemTagsProvider;
 import github.mczme.ruralroutes.data.ThemeDataProvider;
@@ -23,6 +27,7 @@ import github.mczme.ruralroutes.register.RRMenuTypes;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
+import net.minecraft.server.level.ServerLevel;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
@@ -32,6 +37,8 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import github.mczme.ruralroutes.network.NetworkHandler;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 @Mod(RuralRoutes.MODID)
 public class RuralRoutes {
@@ -54,10 +61,34 @@ public class RuralRoutes {
 
         // 注册到 NeoForge 游戏事件总线
         NeoForge.EVENT_BUS.addListener(this::addReloadListener);
+        NeoForge.EVENT_BUS.addListener(this::onServerTick);
+        NeoForge.EVENT_BUS.addListener(this::registerCommands);
+    }
+
+    private void registerCommands(RegisterCommandsEvent event) {
+        RefreshCycleCommand.register(event.getDispatcher());
     }
 
     private void addReloadListener(AddReloadListenerEvent event) {
         event.addListener(ThemeManager.INSTANCE);
+        event.addListener(MarketEventRuleCatalog.INSTANCE);
+    }
+
+    private void onServerTick(ServerTickEvent.Post event) {
+        // 只处理主世界（CycleManager 存储在主世界）
+        ServerLevel overworld = event.getServer().overworld();
+        CycleManager cycleManager = CycleManager.get(overworld);
+        long gameTime = overworld.getGameTime();
+
+        // 检查是否到达周期边界（下一个 tick 是新周期的第一个 tick）
+        long currentCycle = cycleManager.getCycleIndex(gameTime);
+        long nextCycle = cycleManager.getCycleIndex(gameTime + 1);
+
+        if (nextCycle > currentCycle) {
+            // 预先生成下一周期的市场状态
+            cycleManager.getOrInitMarketState(gameTime + 1);
+            LOGGER.info("Market state generated for new cycle {}", nextCycle);
+        }
     }
 
     private void gatherData(GatherDataEvent event) {
@@ -71,6 +102,7 @@ public class RuralRoutes {
         generator.addProvider(event.includeServer(), new RRItemTagsProvider(output, lookupProvider, blockTagsProvider.contentsGetter(), existingFileHelper));
         generator.addProvider(event.includeServer(), new ValueDataProvider(output, lookupProvider));
         generator.addProvider(event.includeServer(), new ThemeDataProvider(output, lookupProvider, existingFileHelper));
+        generator.addProvider(event.includeServer(), new MarketRuleDataProvider(output, lookupProvider, existingFileHelper));
 
         // 客户端数据 - 语言文件
         generator.addProvider(event.includeClient(), new RREnUsLanguageProvider(output));

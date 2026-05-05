@@ -363,6 +363,8 @@ public class CommercialNodeManager {
         long currentGameTime = level.getGameTime();
 
         if (cycleManager.needsRefresh(nodeData.refreshTimestamp(), currentGameTime)) {
+            // 确保市场状态与当前周期同步
+            cycleManager.getOrInitMarketState(currentGameTime);
             RuralRoutes.LOGGER.debug("Refreshing commercial node {} at cycle {}",
                 nodeData.tradeNodeId(), cycleManager.getCycleIndex(currentGameTime));
             return refreshNodeData(level, pos, nodeData, currentGameTime);
