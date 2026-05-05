@@ -52,6 +52,7 @@ public class RefreshCycleCommand {
         // 强制生成新的市场状态
         MarketState newState = MarketStateGenerator.generate(currentCycle + 1, new Random());
         cycleManager.setMarketState(newState);
+        cycleManager.requestRefresh();
 
         source.sendSuccess(() -> Component.literal("贸易周期已刷新，新周期索引: " + (currentCycle + 1)
                 + "，市场事件数量: " + newState.events().size()), true);
@@ -76,6 +77,7 @@ public class RefreshCycleCommand {
         // 强制重新生成当前周期的市场状态
         MarketState newState = MarketStateGenerator.generate(currentCycle, new Random());
         cycleManager.setMarketState(newState);
+        cycleManager.requestRefresh();
 
         source.sendSuccess(() -> Component.literal("市场状态已刷新，周期索引: " + currentCycle
                 + "，市场事件数量: " + newState.events().size()), true);

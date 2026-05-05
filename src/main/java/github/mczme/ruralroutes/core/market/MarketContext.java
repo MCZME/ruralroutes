@@ -6,35 +6,29 @@ import java.util.Optional;
 
 /**
  * 市场上下文
- *
  * 用于查询价格调整时提供的上下文信息。
- * 包含交易节点、主题和群系的标识。
+ * 包含主题和群系的标识，用于匹配市场事件的作用域。
  */
 public record MarketContext(
-        ResourceLocation tradeNodeId,
         Optional<ResourceLocation> themeId,
         Optional<ResourceLocation> biomeId
 ) {
     /**
-     * 创建仅含节点 ID 的上下文
-     * @param tradeNodeId 交易节点 ID
+     * 创建空上下文
      * @return 不包含主题和群系信息的上下文
      */
-    public static MarketContext ofNode(ResourceLocation tradeNodeId) {
-        return new MarketContext(tradeNodeId, Optional.empty(), Optional.empty());
+    public static MarketContext empty() {
+        return new MarketContext(Optional.empty(), Optional.empty());
     }
 
     /**
      * 创建完整上下文
-     * @param tradeNodeId 交易节点 ID
      * @param themeId 主题 ID
      * @param biomeId 群系 ID
      * @return 包含完整信息的上下文
      */
-    public static MarketContext of(ResourceLocation tradeNodeId,
-                                    ResourceLocation themeId,
-                                    ResourceLocation biomeId) {
-        return new MarketContext(tradeNodeId, Optional.of(themeId), Optional.of(biomeId));
+    public static MarketContext of(ResourceLocation themeId, ResourceLocation biomeId) {
+        return new MarketContext(Optional.of(themeId), Optional.of(biomeId));
     }
 
     /**

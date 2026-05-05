@@ -321,7 +321,7 @@ public class CommercialNodeManager {
     // ===== 贸易周期相关 =====
 
     /**
-     * 检查并刷新节点数据（如果周期已过期）
+     * 检查并刷新节点数据（如果周期已过期或需要刷新）
      * @param level 世界
      * @param pos 贸易站位置
      * @param nodeData 节点数据
@@ -329,14 +329,14 @@ public class CommercialNodeManager {
      */
     public static CommercialNodeData checkAndRefreshCycle(ServerLevel level, BlockPos pos, CommercialNodeData nodeData) {
         CycleManager cycleManager = CycleManager.get(level);
-        long currentGameTime = level.getGameTime();
 
-        if (cycleManager.needsRefresh(nodeData.refreshTimestamp(), currentGameTime)) {
+        if (cycleManager.needsRefresh(nodeData.refreshTimestamp())) {
             // 确保市场状态与当前周期同步
-            cycleManager.getOrInitMarketState(currentGameTime);
+            cycleManager.getOrInitMarketState();
+            cycleManager.markRefreshed();
             RuralRoutes.LOGGER.debug("Refreshing commercial node {} at cycle {}",
-                nodeData.tradeNodeId(), cycleManager.getCycleIndex(currentGameTime));
-            return refreshNodeData(level, pos, nodeData, currentGameTime);
+                nodeData.tradeNodeId(), cycleManager.getCurrentCycle());
+            return refreshNodeData(level, pos, nodeData, level.getGameTime());
         }
 
         return nodeData;
@@ -373,7 +373,7 @@ public class CommercialNodeManager {
         chunk.setData(RRAttachments.COMMERCIAL_NODE.get(), newData);
 
         RuralRoutes.LOGGER.debug("Refreshed node {} with {} stock entries",
-            newData.tradeNodeId(), newStocks.size());
+                newData.tradeNodeId(), newStocks.size());
 
         return newData;
     }

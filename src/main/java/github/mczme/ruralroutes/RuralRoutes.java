@@ -10,6 +10,7 @@ import github.mczme.ruralroutes.command.RefreshCycleCommand;
 import github.mczme.ruralroutes.core.cycle.CycleManager;
 import github.mczme.ruralroutes.core.market.MarketEventRuleCatalog;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
+import github.mczme.ruralroutes.core.theme.ThemePriceModifierResolver;
 import github.mczme.ruralroutes.core.util.TagLookupCache;
 import github.mczme.ruralroutes.data.MarketRuleDataProvider;
 import github.mczme.ruralroutes.data.RRBlockTagsProvider;
@@ -70,6 +71,7 @@ public class RuralRoutes {
 
     private void onTagsUpdated(TagsUpdatedEvent event) {
         TagLookupCache.invalidate();
+        ThemePriceModifierResolver.invalidate();
     }
 
     private void registerCommands(RegisterCommandsEvent event) {
@@ -87,14 +89,11 @@ public class RuralRoutes {
         CycleManager cycleManager = CycleManager.get(overworld);
         long gameTime = overworld.getGameTime();
 
-        // 检查是否到达周期边界（下一个 tick 是新周期的第一个 tick）
-        long currentCycle = cycleManager.getCycleIndex(gameTime);
-        long nextCycle = cycleManager.getCycleIndex(gameTime + 1);
-
-        if (nextCycle > currentCycle) {
-            // 预先生成下一周期的市场状态
-            cycleManager.getOrInitMarketState(gameTime + 1);
-            LOGGER.info("Market state generated for new cycle {}", nextCycle);
+        // 检查周期是否推进
+        if (cycleManager.updateCurrentCycle(gameTime)) {
+            // 预先生成新周期的市场状态
+            cycleManager.getOrInitMarketState();
+            LOGGER.info("Market state generated for new cycle {}", cycleManager.getCurrentCycle());
         }
     }
 
