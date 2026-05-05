@@ -1,4 +1,4 @@
-package github.mczme.ruralroutes.data;
+package github.mczme.ruralroutes.data.builder;
 
 import github.mczme.ruralroutes.RuralRoutes;
 import github.mczme.ruralroutes.core.market.MarketEventRule;
