@@ -1,10 +1,9 @@
 package github.mczme.ruralroutes.core.market;
 
 import github.mczme.ruralroutes.Config;
+import github.mczme.ruralroutes.core.util.TagLookupCache;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -55,23 +54,11 @@ public final class MarketStateResolver {
      *
      * @param event 市场事件
      * @param stack 要检查的物品栈
-     * @param itemId 物品的注册表 ID
+     * @param itemId 物品的注册表 ID（用于精确匹配）
      * @return 如果事件目标匹配物品则返回 true
      */
     private static boolean matchesItem(MarketEvent event, ItemStack stack, ResourceLocation itemId) {
-        String targetRef = event.targetRef();
-
-        if (event.isTargetTag()) {
-            // 标签匹配
-            String tagId = event.getTargetId();
-            ResourceLocation tagLocation = ResourceLocation.parse(tagId);
-            TagKey<net.minecraft.world.item.Item> tagKey = TagKey.create(Registries.ITEM, tagLocation);
-
-            return stack.is(tagKey);
-        } else {
-            // 精确物品匹配
-            return itemId.toString().equals(targetRef);
-        }
+        return TagLookupCache.matchesItem(stack, event.targetRef());
     }
 
     /**

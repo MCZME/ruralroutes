@@ -10,6 +10,7 @@ import github.mczme.ruralroutes.command.RefreshCycleCommand;
 import github.mczme.ruralroutes.core.cycle.CycleManager;
 import github.mczme.ruralroutes.core.market.MarketEventRuleCatalog;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
+import github.mczme.ruralroutes.core.util.TagLookupCache;
 import github.mczme.ruralroutes.data.MarketRuleDataProvider;
 import github.mczme.ruralroutes.data.RRBlockTagsProvider;
 import github.mczme.ruralroutes.data.RRItemTagsProvider;
@@ -38,6 +39,7 @@ import github.mczme.ruralroutes.network.NetworkHandler;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 @Mod(RuralRoutes.MODID)
@@ -63,6 +65,11 @@ public class RuralRoutes {
         NeoForge.EVENT_BUS.addListener(this::addReloadListener);
         NeoForge.EVENT_BUS.addListener(this::onServerTick);
         NeoForge.EVENT_BUS.addListener(this::registerCommands);
+        NeoForge.EVENT_BUS.addListener(this::onTagsUpdated);
+    }
+
+    private void onTagsUpdated(TagsUpdatedEvent event) {
+        TagLookupCache.invalidate();
     }
 
     private void registerCommands(RegisterCommandsEvent event) {

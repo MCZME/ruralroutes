@@ -5,14 +5,13 @@ import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
 import github.mczme.ruralroutes.core.cycle.CycleManager;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.util.TagLookupCache;
 import github.mczme.ruralroutes.register.RRAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -129,18 +128,9 @@ public class CommercialNodeManager {
         List<ResourceLocation> sellItems = new ArrayList<>();
 
         for (ThemeTemplate.ItemReference itemRef : template.sellItems()) {
-            if (itemRef.isTag()) {
-                // 标签类型：展开为具体物品列表
-                ResourceLocation tagLocation = ResourceLocation.parse(itemRef.itemId());
-                TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagLocation);
-                BuiltInRegistries.ITEM.getOrCreateTag(tagKey)
-                    .stream()
-                    .map(holder -> holder.unwrapKey().map(key -> key.location()).orElse(null))
-                    .filter(Objects::nonNull)
-                    .forEach(sellItems::add);
-            } else {
-                // 精确物品类型
-                sellItems.add(ResourceLocation.parse(itemRef.itemId()));
+            Set<Item> items = TagLookupCache.getItems(itemRef.id());
+            for (Item item : items) {
+                sellItems.add(BuiltInRegistries.ITEM.getKey(item));
             }
         }
 
@@ -155,18 +145,9 @@ public class CommercialNodeManager {
         List<ResourceLocation> buyItems = new ArrayList<>();
 
         for (ThemeTemplate.ItemReference itemRef : template.buyItems()) {
-            if (itemRef.isTag()) {
-                // 标签类型：展开为具体物品列表
-                ResourceLocation tagLocation = ResourceLocation.parse(itemRef.itemId());
-                TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagLocation);
-                BuiltInRegistries.ITEM.getOrCreateTag(tagKey)
-                    .stream()
-                    .map(holder -> holder.unwrapKey().map(key -> key.location()).orElse(null))
-                    .filter(Objects::nonNull)
-                    .forEach(buyItems::add);
-            } else {
-                // 精确物品类型
-                buyItems.add(ResourceLocation.parse(itemRef.itemId()));
+            Set<Item> items = TagLookupCache.getItems(itemRef.id());
+            for (Item item : items) {
+                buyItems.add(BuiltInRegistries.ITEM.getKey(item));
             }
         }
 
@@ -223,21 +204,9 @@ public class CommercialNodeManager {
             ThemeTemplate template, ThemeTemplate.ItemReference itemRef,
             int defaultMin, int defaultMax, boolean isSellItem) {
 
-        if (itemRef.isTag()) {
-            // 标签类型：展开为具体物品列表
-            String tagId = itemRef.itemId();
-            ResourceLocation tagLocation = ResourceLocation.parse(tagId);
-            TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagLocation);
-
-            // 使用 BuiltInRegistries 获取标签中的所有物品
-            BuiltInRegistries.ITEM.getOrCreateTag(tagKey)
-                .stream()
-                .map(holder -> holder.unwrapKey().map(key -> key.location()).orElse(null))
-                .filter(Objects::nonNull)
-                .forEach(itemId -> processStockEntry(stocks, template, itemRef.id(), itemId, defaultMin, defaultMax, isSellItem));
-        } else {
-            // 精确物品类型
-            ResourceLocation itemId = ResourceLocation.parse(itemRef.itemId());
+        Set<Item> items = TagLookupCache.getItems(itemRef.id());
+        for (Item item : items) {
+            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
             processStockEntry(stocks, template, itemRef.id(), itemId, defaultMin, defaultMax, isSellItem);
         }
     }
