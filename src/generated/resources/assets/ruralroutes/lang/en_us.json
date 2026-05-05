@@ -57,7 +57,6 @@
   "ruralroutes.configuration.values.tooltip": "Value-related settings",
   "trade.fail.invalid_request": "Invalid trade request",
   "trade.fail.player_insufficient": "Player does not meet trade conditions",
-  "trade.fail.value_mismatch": "Value mismatch",
   "trade.fail.village_insufficient": "Village stock does not meet trade conditions",
   "trade.success": "Trade successful"
 }

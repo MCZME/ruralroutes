@@ -90,7 +90,6 @@ public class RREnUsLanguageProvider extends LanguageProvider {
 
         // 交易结果
         add("trade.success", "Trade successful");
-        add("trade.fail.value_mismatch", "Value mismatch");
         add("trade.fail.player_insufficient", "Player does not meet trade conditions");
         add("trade.fail.village_insufficient", "Village stock does not meet trade conditions");
         add("trade.fail.invalid_request", "Invalid trade request");

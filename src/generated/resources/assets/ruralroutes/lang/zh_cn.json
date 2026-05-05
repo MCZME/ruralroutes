@@ -57,7 +57,6 @@
   "ruralroutes.configuration.values.tooltip": "价值相关设置",
   "trade.fail.invalid_request": "无效交易请求",
   "trade.fail.player_insufficient": "玩家不满足交易条件",
-  "trade.fail.value_mismatch": "价值不匹配",
   "trade.fail.village_insufficient": "村庄库存不满足交易条件",
   "trade.success": "交易成功"
 }

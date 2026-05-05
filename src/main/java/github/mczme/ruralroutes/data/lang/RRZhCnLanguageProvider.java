@@ -90,7 +90,6 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
 
         // 交易结果
         add("trade.success", "交易成功");
-        add("trade.fail.value_mismatch", "价值不匹配");
         add("trade.fail.player_insufficient", "玩家不满足交易条件");
         add("trade.fail.village_insufficient", "村庄库存不满足交易条件");
         add("trade.fail.invalid_request", "无效交易请求");

@@ -1,0 +1,85 @@
+{
+  "values": {
+    "minecraft:acacia_log": {
+      "value": 4
+    },
+    "minecraft:birch_log": {
+      "value": 4
+    },
+    "minecraft:bread": {
+      "value": 6
+    },
+    "minecraft:cherry_log": {
+      "value": 4
+    },
+    "minecraft:dark_oak_log": {
+      "value": 4
+    },
+    "minecraft:diamond_axe": {
+      "value": 200
+    },
+    "minecraft:diamond_pickaxe": {
+      "value": 300
+    },
+    "minecraft:diamond_sword": {
+      "value": 200
+    },
+    "minecraft:golden_axe": {
+      "value": 80
+    },
+    "minecraft:golden_carrot": {
+      "value": 100
+    },
+    "minecraft:golden_pickaxe": {
+      "value": 120
+    },
+    "minecraft:golden_sword": {
+      "value": 80
+    },
+    "minecraft:iron_axe": {
+      "value": 50
+    },
+    "minecraft:iron_pickaxe": {
+      "value": 75
+    },
+    "minecraft:iron_sword": {
+      "value": 50
+    },
+    "minecraft:jungle_log": {
+      "value": 4
+    },
+    "minecraft:mangrove_log": {
+      "value": 4
+    },
+    "minecraft:oak_log": {
+      "value": 4
+    },
+    "minecraft:oak_planks": {
+      "value": 2
+    },
+    "minecraft:spruce_log": {
+      "value": 4
+    },
+    "minecraft:stone_axe": {
+      "value": 10
+    },
+    "minecraft:stone_pickaxe": {
+      "value": 15
+    },
+    "minecraft:stone_sword": {
+      "value": 10
+    },
+    "minecraft:wheat": {
+      "value": 2
+    },
+    "minecraft:wooden_axe": {
+      "value": 6
+    },
+    "minecraft:wooden_pickaxe": {
+      "value": 9
+    },
+    "minecraft:wooden_sword": {
+      "value": 6
+    }
+  }
+}
