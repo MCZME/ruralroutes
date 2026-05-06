@@ -34,6 +34,7 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
             .specialty("minecraft:golden_carrot")
             .stock(8, 16)
             .stockSpecific("minecraft:golden_carrot", 1, 3)
+            .priceModifier("minecraft:bread", 1.2f, 0.8f)
             .withCurrency()
             .register();
     }

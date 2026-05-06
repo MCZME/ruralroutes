@@ -109,7 +109,7 @@ public class ThemeBuilder {
     /**
      * 添加价格修正
      */
-    public ThemeBuilder priceMod(String key, float sell, float buy) {
+    public ThemeBuilder priceModifier(String key, float sell, float buy) {
         priceModifiers.put(key, new ThemeTemplate.PriceModifier(sell, buy));
         return this;
     }

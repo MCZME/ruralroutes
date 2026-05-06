@@ -6,6 +6,12 @@
     "#ruralroutes:currency"
   ],
   "name": "ruralroutes:plains_granary",
+  "price_modifiers": {
+    "minecraft:bread": {
+      "buy": 0.8,
+      "sell": 1.2
+    }
+  },
   "sell_items": [
     "minecraft:bread",
     "#minecraft:planks",
