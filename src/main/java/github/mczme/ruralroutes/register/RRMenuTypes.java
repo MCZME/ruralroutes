@@ -2,6 +2,7 @@ package github.mczme.ruralroutes.register;
 
 import github.mczme.ruralroutes.RuralRoutes;
 import github.mczme.ruralroutes.menu.ConfigToolMenu;
+import github.mczme.ruralroutes.menu.RumorBoardMenu;
 import github.mczme.ruralroutes.menu.TradeStationMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
@@ -25,6 +26,10 @@ public final class RRMenuTypes {
     public static final DeferredHolder<MenuType<?>, MenuType<TradeStationMenu>> TRADE_STATION =
         MENU_TYPES.register("trade_station", () ->
             IMenuTypeExtension.create(TradeStationMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<RumorBoardMenu>> RUMOR_BOARD =
+        MENU_TYPES.register("rumor_board", () ->
+            IMenuTypeExtension.create(RumorBoardMenu::new));
 
     public static void register(IEventBus modEventBus) {
         MENU_TYPES.register(modEventBus);

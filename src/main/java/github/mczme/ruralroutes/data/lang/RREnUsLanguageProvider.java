@@ -66,6 +66,9 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.type.display_case", "Type: Display Case");
         add("gui.ruralroutes.config_tool.type.rumor_board", "Type: Rumor Board");
         add("gui.ruralroutes.config_tool.type.unknown", "Type: Unknown");
+        add("gui.ruralroutes.config_tool.paste_node_info", "Paste Node Info: %s");
+        add("gui.ruralroutes.config_tool.copied_node_info", "Clipboard: %s");
+        add("gui.ruralroutes.config_tool.copy_node_info", "Copy Node Info: %s");
 
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "Theme: %s");
@@ -86,7 +89,12 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         // 传闻板交互
         add("block.ruralroutes.rumor_board.not_activated", "Please activate the trade station first");
         add("block.ruralroutes.rumor_board.mismatch", "Rumor board data mismatch");
-        add("block.ruralroutes.rumor_board.no_news", "Trade route news will arrive next cycle");
+
+        // 传闻板 GUI
+        add("gui.ruralroutes.rumor_board.refresh_in", "Refreshes in about %s");
+        add("gui.ruralroutes.rumor_board.time_days", "%d days");
+        add("gui.ruralroutes.rumor_board.time_hours", "%d hours");
+        add("gui.ruralroutes.rumor_board.time_soon", "soon");
 
         // 交易结果
         add("trade.success", "Trade successful");

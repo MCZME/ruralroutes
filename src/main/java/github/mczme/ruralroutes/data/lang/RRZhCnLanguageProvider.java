@@ -66,6 +66,9 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.type.display_case", "类型: 展示柜");
         add("gui.ruralroutes.config_tool.type.rumor_board", "类型: 传闻板");
         add("gui.ruralroutes.config_tool.type.unknown", "类型: 未知");
+        add("gui.ruralroutes.config_tool.paste_node_info", "粘贴节点信息: %s");
+        add("gui.ruralroutes.config_tool.copied_node_info", "已复制节点: %s");
+        add("gui.ruralroutes.config_tool.copy_node_info", "复制节点信息: %s");
 
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "主题: %s");
@@ -86,7 +89,12 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         // 传闻板交互
         add("block.ruralroutes.rumor_board.not_activated", "请先激活贸易站");
         add("block.ruralroutes.rumor_board.mismatch", "传闻板数据不匹配");
-        add("block.ruralroutes.rumor_board.no_news", "商路消息将在下一个周期到来");
+
+        // 传闻板 GUI
+        add("gui.ruralroutes.rumor_board.refresh_in", "约 %s 后刷新");
+        add("gui.ruralroutes.rumor_board.time_days", "%d 天");
+        add("gui.ruralroutes.rumor_board.time_hours", "%d 小时");
+        add("gui.ruralroutes.rumor_board.time_soon", "即将刷新");
 
         // 交易结果
         add("trade.success", "交易成功");
