@@ -100,5 +100,32 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
 
         // 创造模式标签页
         add("itemGroup.ruralroutes", "乡野商路");
+
+        // ===== 情报系统 =====
+
+        // 情报模板
+        add("rumor.template.1", "%s在%s价格%s");
+        add("rumor.template.2", "%s的%s价格%s");
+        add("rumor.template.3", "听说%s的%s价格%s");
+        add("rumor.template.4", "%s价格%s，%s受影响");
+        add("rumor.template.5", "商路传闻：%s的%s价格%s");
+
+        // 涨跌
+        add("rumor.direction.up", "上涨");
+        add("rumor.direction.down", "下跌");
+
+        // 作用域
+        add("rumor.scope.global", "世界各地");
+        add("rumor.scope.biome", "%s一带");
+        add("rumor.scope.theme", "%s");
+
+        // 闲谈
+        add("rumor.gossip.1", "最近风平平静，没有特别的消息。");
+        add("rumor.gossip.2", "商路上没什么新鲜事。");
+        add("rumor.gossip.3", "各村庄物价平稳。");
+
+        // 标签翻译（按需添加）
+        add("ruralroutes.tag.minecraft.planks", "木板类物品");
+        add("ruralroutes.tag.minecraft.crops", "农作物类");
     }
 }

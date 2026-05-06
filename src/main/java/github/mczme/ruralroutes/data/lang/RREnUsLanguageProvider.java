@@ -100,5 +100,32 @@ public class RREnUsLanguageProvider extends LanguageProvider {
 
         // 创造模式标签页
         add("itemGroup.ruralroutes", "Rural Routes");
+
+        // ===== Rumor System =====
+
+        // Rumor templates
+        add("rumor.template.1", "%s prices %s in %s");
+        add("rumor.template.2", "%s prices %s around %s");
+        add("rumor.template.3", "Heard that %s prices %s in %s");
+        add("rumor.template.4", "%s prices %s, %s affected");
+        add("rumor.template.5", "Trade route rumor: %s prices %s in %s");
+
+        // Direction
+        add("rumor.direction.up", "risen");
+        add("rumor.direction.down", "fallen");
+
+        // Scope
+        add("rumor.scope.global", "everywhere");
+        add("rumor.scope.biome", "%s area");
+        add("rumor.scope.theme", "%s");
+
+        // Gossip
+        add("rumor.gossip.1", "All's quiet lately, no special news.");
+        add("rumor.gossip.2", "Nothing new on the trade routes.");
+        add("rumor.gossip.3", "Prices are stable across villages.");
+
+        // Tag translations
+        add("ruralroutes.tag.minecraft.planks", "Plank items");
+        add("ruralroutes.tag.minecraft.crops", "Crop items");
     }
 }
