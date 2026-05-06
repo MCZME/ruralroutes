@@ -1,7 +1,6 @@
 package github.mczme.ruralroutes.block;
 
-import github.mczme.ruralroutes.blockentity.DisplayCaseBlockEntity;
-import github.mczme.ruralroutes.blockentity.RumorBoardBlockEntity;
+import github.mczme.ruralroutes.blockentity.TradeNodeBlockEntity;
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
@@ -115,20 +114,18 @@ public class TradeStationBlock extends BaseEntityBlock {
     }
 
     /**
-     * 同步 tradeNodeId 到附近的展示柜和传闻板
+     * 同步 tradeNodeId 和贸易站位置到附近的展示柜和传闻板
      * 确保同一建筑内的三个方块共享同一个商业节点
      */
-    private void syncNodeIdToNearbyBlocks(Level level, BlockPos centerPos, UUID nodeId) {
+    private void syncNodeIdToNearbyBlocks(Level level, BlockPos stationPos, UUID nodeId) {
         for (int dx = -SYNC_RADIUS; dx <= SYNC_RADIUS; dx++) {
             for (int dy = -SYNC_RADIUS; dy <= SYNC_RADIUS; dy++) {
                 for (int dz = -SYNC_RADIUS; dz <= SYNC_RADIUS; dz++) {
-                    BlockPos checkPos = centerPos.offset(dx, dy, dz);
+                    BlockPos checkPos = stationPos.offset(dx, dy, dz);
                     BlockEntity be = level.getBlockEntity(checkPos);
 
-                    if (be instanceof DisplayCaseBlockEntity displayCase) {
-                        displayCase.setTradeNodeId(nodeId);
-                    } else if (be instanceof RumorBoardBlockEntity rumorBoard) {
-                        rumorBoard.setTradeNodeId(nodeId);
+                    if (be instanceof TradeNodeBlockEntity nodeEntity) {
+                        nodeEntity.setTradeNodeInfo(nodeId, stationPos);
                     }
                 }
             }

@@ -1,31 +1,28 @@
 package github.mczme.ruralroutes.blockentity;
 
+import github.mczme.ruralroutes.core.rumor.StickyNoteLayout;
+import github.mczme.ruralroutes.core.rumor.StickyNoteLayoutGenerator;
 import github.mczme.ruralroutes.register.RRBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * 传闻板方块实体
- * 仅存储节点ID用于校验，情报数据存储在区块中
+ * 存储节点ID和贸易站位置用于校验，以及便签布局数据
  */
-public class RumorBoardBlockEntity extends BlockEntity implements MenuProvider {
+public class RumorBoardBlockEntity extends TradeNodeBlockEntity {
 
-    private UUID tradeNodeId;
+    // 布局数据
+    private long layoutCycleIndex = -1;
+    private List<StickyNoteLayout> layouts = new ArrayList<>();
 
     public RumorBoardBlockEntity(BlockPos pos, BlockState state) {
         super(RRBlockEntities.RUMOR_BOARD.get(), pos, state);
@@ -34,76 +31,76 @@ public class RumorBoardBlockEntity extends BlockEntity implements MenuProvider {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        if (tradeNodeId != null) {
-            tag.putUUID("TradeNodeId", tradeNodeId);
+        tag.putLong("LayoutCycleIndex", layoutCycleIndex);
+        if (!layouts.isEmpty()) {
+            ListTag layoutsTag = new ListTag();
+            for (StickyNoteLayout layout : layouts) {
+                StickyNoteLayout.CODEC.encodeStart(NbtOps.INSTANCE, layout)
+                        .resultOrPartial(err -> {})
+                        .ifPresent(layoutsTag::add);
+            }
+            tag.put("Layouts", layoutsTag);
         }
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        if (tag.contains("TradeNodeId")) {
-            tradeNodeId = tag.getUUID("TradeNodeId");
+        layoutCycleIndex = tag.getLong("LayoutCycleIndex");
+        layouts.clear();
+        if (tag.contains("Layouts")) {
+            ListTag layoutsTag = tag.getList("Layouts", net.minecraft.nbt.Tag.TAG_COMPOUND);
+            for (int i = 0; i < layoutsTag.size(); i++) {
+                StickyNoteLayout.CODEC.parse(NbtOps.INSTANCE, layoutsTag.getCompound(i))
+                        .resultOrPartial(err -> {})
+                        .ifPresent(layouts::add);
+            }
         }
     }
-
-    // ===== 数据同步 =====
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = super.getUpdateTag(registries);
-        if (tradeNodeId != null) {
-            tag.putUUID("TradeNodeId", tradeNodeId);
-        }
+        tag.putLong("LayoutCycleIndex", layoutCycleIndex);
         return tag;
     }
 
     @Override
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
         super.handleUpdateTag(tag, registries);
-        if (tag.contains("TradeNodeId")) {
-            tradeNodeId = tag.getUUID("TradeNodeId");
-        } else {
-            tradeNodeId = null;
+        layoutCycleIndex = tag.getLong("LayoutCycleIndex");
+    }
+
+    // ===== 布局管理 =====
+
+    /**
+     * 获取或生成布局数据
+     * 如果周期已更新或布局为空，重新生成布局
+     * @param noteCount 便签数量
+     * @param currentCycleIndex 当前周期索引
+     * @param random 随机数生成器
+     * @return 布局列表
+     */
+    public List<StickyNoteLayout> getOrGenerateLayouts(int noteCount, long currentCycleIndex, Random random) {
+        if (layoutCycleIndex != currentCycleIndex || layouts.isEmpty()) {
+            layouts = StickyNoteLayoutGenerator.generate(noteCount, random);
+            layoutCycleIndex = currentCycleIndex;
+            setChanged();
         }
+        return layouts;
     }
 
-    @Override
-    public Packet<ClientGamePacketListener> getUpdatePacket() {
-        return ClientboundBlockEntityDataPacket.create(this);
+    /**
+     * 获取当前布局
+     */
+    public List<StickyNoteLayout> getLayouts() {
+        return layouts;
     }
 
-    @Override
-    public void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet,
-            HolderLookup.Provider registries) {
-        super.onDataPacket(connection, packet, registries);
-    }
-
-    // ===== Getters and Setters =====
-
-    public UUID getTradeNodeId() {
-        return tradeNodeId;
-    }
-
-    public void setTradeNodeId(UUID tradeNodeId) {
-        this.tradeNodeId = tradeNodeId;
-        setChanged();
-        Level level = getLevel();
-        if (level != null && !level.isClientSide) {
-            level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
-        }
-    }
-
-    // ===== MenuProvider =====
-
-    @Override
-    public Component getDisplayName() {
-        return Component.translatable("block.ruralroutes.rumor_board");
-    }
-
-    @Override
-    public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
-        // TODO: 第一阶段暂不实现 GUI
-        return null;
+    /**
+     * 获取布局周期索引
+     */
+    public long getLayoutCycleIndex() {
+        return layoutCycleIndex;
     }
 }

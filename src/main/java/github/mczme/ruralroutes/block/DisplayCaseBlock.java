@@ -1,6 +1,6 @@
 package github.mczme.ruralroutes.block;
 
-import github.mczme.ruralroutes.blockentity.DisplayCaseBlockEntity;
+import github.mczme.ruralroutes.blockentity.TradeNodeBlockEntity;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.register.RRBlockEntities;
@@ -61,19 +61,29 @@ public class DisplayCaseBlock extends BaseEntityBlock {
             Player player, BlockHitResult hit) {
         if (!level.isClientSide) {
             BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof DisplayCaseBlockEntity displayCase) {
-                // 检查区块是否已有商业节点数据
-                if (!CommercialNodeManager.hasNodeData(level, pos)) {
+            if (be instanceof TradeNodeBlockEntity nodeEntity) {
+                // 获取贸易站位置
+                BlockPos stationPos = nodeEntity.getTradeStationPos();
+                if (stationPos == null) {
+                    // 尚未同步，提示激活贸易站
                     player.displayClientMessage(
                         Component.translatable("block.ruralroutes.display_case.not_activated"),
                         true);
                     return InteractionResult.FAIL;
                 }
 
-                CommercialNodeData nodeData = CommercialNodeManager.getNodeData(level, pos);
+                // 检查贸易站所在区块是否已有商业节点数据
+                if (!CommercialNodeManager.hasNodeData(level, stationPos)) {
+                    player.displayClientMessage(
+                        Component.translatable("block.ruralroutes.display_case.not_activated"),
+                        true);
+                    return InteractionResult.FAIL;
+                }
+
+                CommercialNodeData nodeData = CommercialNodeManager.getNodeData(level, stationPos);
 
                 // 校验节点ID一致性
-                if (!validateDisplayCase(displayCase, nodeData)) {
+                if (!validateNodeEntity(nodeEntity, nodeData)) {
                     player.displayClientMessage(
                         Component.translatable("block.ruralroutes.display_case.mismatch"),
                         true);
@@ -92,21 +102,21 @@ public class DisplayCaseBlock extends BaseEntityBlock {
     }
 
     /**
-     * 校验展示柜与区块数据的一致性
+     * 校验节点实体与区块数据的一致性
      */
-    private boolean validateDisplayCase(DisplayCaseBlockEntity displayCase, CommercialNodeData nodeData) {
-        if (displayCase == null || nodeData == null) {
+    private boolean validateNodeEntity(TradeNodeBlockEntity nodeEntity, CommercialNodeData nodeData) {
+        if (nodeEntity == null || nodeData == null) {
             return false;
         }
 
-        UUID caseId = displayCase.getTradeNodeId();
-        // 如果展示柜没有节点ID，说明尚未同步，允许通过（等待贸易站同步）
-        if (caseId == null) {
+        UUID entityId = nodeEntity.getTradeNodeId();
+        // 如果实体没有节点ID，说明尚未同步，允许通过（等待贸易站同步）
+        if (entityId == null) {
             return true;
         }
 
         // 如果有节点ID，必须与区块数据一致
-        return caseId.equals(nodeData.tradeNodeId());
+        return entityId.equals(nodeData.tradeNodeId());
     }
 
     @Override
