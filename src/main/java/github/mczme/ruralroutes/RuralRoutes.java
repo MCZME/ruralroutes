@@ -23,6 +23,7 @@ import github.mczme.ruralroutes.register.RRAttachments;
 import github.mczme.ruralroutes.register.RRBlockEntities;
 import github.mczme.ruralroutes.register.RRBlocks;
 import github.mczme.ruralroutes.register.RRCreativeTabs;
+import github.mczme.ruralroutes.register.RRDataComponents;
 import github.mczme.ruralroutes.register.RRDataMaps;
 import github.mczme.ruralroutes.register.RRItems;
 import github.mczme.ruralroutes.register.RRMenuTypes;
@@ -49,13 +50,14 @@ public class RuralRoutes {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public RuralRoutes(IEventBus modEventBus, ModContainer modContainer) {
-        // 注册方块、物品、BlockEntity、创造模式标签页、菜单类型、Attachment
+        // 注册方块、物品、BlockEntity、创造模式标签页、菜单类型、Attachment、DataComponents
         RRBlocks.register(modEventBus);
         RRItems.register(modEventBus);
         RRBlockEntities.register(modEventBus);
         RRCreativeTabs.register(modEventBus);
         RRMenuTypes.register(modEventBus);
         RRAttachments.register(modEventBus);
+        RRDataComponents.register(modEventBus);
 
         modEventBus.addListener(this::gatherData);
         modEventBus.addListener(RRDataMaps::register);
