@@ -144,11 +144,12 @@ public record ThemeTemplate(
 
         String typeString();
 
-        /** 使用 dispatchMap 创建 Codec */
+        /** 使用 dispatch 创建 Codec */
+        @SuppressWarnings("unchecked")
         Codec<TradeContractEntry> CODEC = Codec.STRING.dispatch(
             "type",
             TradeContractEntry::typeString,
-            type -> (MapCodec<TradeContractEntry>) mapCodecFor(type)
+            type -> (MapCodec<TradeContractEntry>) (Object) mapCodecFor(type)
         );
 
         static MapCodec<? extends TradeContractEntry> mapCodecFor(String type) {

@@ -110,6 +110,16 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_station.success", "Trade successful!");
         add("gui.ruralroutes.trade_station.error.no_data", "Unable to get village data");
 
+        // Trade card UI
+        add("gui.ruralroutes.trade_card.stock", "Stock %d");
+        add("gui.ruralroutes.trade_card.can_buy", "Buy %d");
+        add("gui.ruralroutes.trade_card.price_per", "/ea");
+        add("gui.ruralroutes.trade_card.tooltip.stock", "Stock: %d");
+        add("gui.ruralroutes.trade_card.tooltip.can_buy", "Can buy: %d");
+        add("gui.ruralroutes.trade_card.tooltip.price", "Price:");
+        add("gui.ruralroutes.trade_card.tooltip.need", "Need:");
+        add("gui.ruralroutes.trade_card.empty_slot", "Empty slot");
+
         // 创造模式标签页
         add("itemGroup.ruralroutes", "Rural Routes");
 

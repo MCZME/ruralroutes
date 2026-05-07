@@ -17,8 +17,6 @@
     "#minecraft:planks",
     "#minecraft:logs",
     "#minecraft:swords",
-    "#minecraft:axes",
-    "#minecraft:pickaxes",
     "#ruralroutes:currency"
   ],
   "stock": {
@@ -35,5 +33,34 @@
   },
   "theme_specialties": [
     "minecraft:golden_carrot"
+  ],
+  "trade_contracts": [
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:copper_coin",
+        "ruralroutes:iron_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "minecraft:diamond_sword"
+      ],
+      "side": "sell_to_player"
+    },
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 8,
+          "item": "minecraft:wheat"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 4,
+          "item": "minecraft:bread"
+        }
+      ]
+    }
   ]
 }

@@ -1,8 +1,10 @@
 package github.mczme.ruralroutes.data;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.trade.TradeSide;
 import github.mczme.ruralroutes.data.builder.ThemeBuilder;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.data.PackOutput;
@@ -24,18 +26,30 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
 
     @Override
     protected void gather() {
-        // 平原粮仓主题
+        // 平原粮仓主题 - 货币篮 + 固定交换契约测试
         theme("plains_granary")
             .biome("minecraft:plains")
-            .sell("minecraft:bread","#minecraft:planks","#minecraft:logs",
-                        "#minecraft:swords","#minecraft:axes","#minecraft:pickaxes"
-            )
-            .buy("minecraft:wheat","minecraft:bread")
+            .sell("minecraft:bread", "#minecraft:planks", "#minecraft:logs", "#minecraft:swords")
+            .buy("minecraft:wheat", "minecraft:bread")
             .specialty("minecraft:golden_carrot")
             .stock(8, 16)
             .stockSpecific("minecraft:golden_carrot", 1, 3)
             .priceModifier("minecraft:bread", 1.2f, 0.8f)
             .withCurrency()
+            .addCurrencyBasketTrade(
+                TradeSide.SELL_TO_PLAYER,
+                List.of("minecraft:diamond_sword"),
+                List.of("ruralroutes:copper_coin", "ruralroutes:iron_coin"),
+                ThemeTemplate.CompositionStrategy.LARGEST_FIRST
+            )
+            .addFixedTrade(
+                List.of(
+                    new ThemeTemplate.InputEntry("minecraft:wheat", 8)
+                ),
+                List.of(
+                    new ThemeTemplate.OutputEntry("minecraft:bread", 4)
+                )
+            )
             .register();
     }
 

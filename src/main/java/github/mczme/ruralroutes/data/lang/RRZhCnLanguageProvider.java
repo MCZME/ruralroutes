@@ -110,6 +110,16 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_station.success", "交易成功！");
         add("gui.ruralroutes.trade_station.error.no_data", "无法获取村庄数据");
 
+        // 交易卡片 UI
+        add("gui.ruralroutes.trade_card.stock", "库存 %d");
+        add("gui.ruralroutes.trade_card.can_buy", "可收 %d");
+        add("gui.ruralroutes.trade_card.price_per", "/个");
+        add("gui.ruralroutes.trade_card.tooltip.stock", "库存: %d");
+        add("gui.ruralroutes.trade_card.tooltip.can_buy", "可收购: %d");
+        add("gui.ruralroutes.trade_card.tooltip.price", "价格:");
+        add("gui.ruralroutes.trade_card.tooltip.need", "需要:");
+        add("gui.ruralroutes.trade_card.empty_slot", "空槽位");
+
         // 创造模式标签页
         add("itemGroup.ruralroutes", "乡野商路");
 
