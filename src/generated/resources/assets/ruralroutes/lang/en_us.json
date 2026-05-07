@@ -28,6 +28,8 @@
   "gui.ruralroutes.rumor_board.time_days": "%d days",
   "gui.ruralroutes.rumor_board.time_hours": "%d hours",
   "gui.ruralroutes.rumor_board.time_soon": "soon",
+  "gui.ruralroutes.trade.currency_payment": "Currency Payment",
+  "gui.ruralroutes.trade.currency_reward": "Currency Reward",
   "gui.ruralroutes.trade_station.buy": "Buying",
   "gui.ruralroutes.trade_station.coin_exchange": "Coin Exchange",
   "gui.ruralroutes.trade_station.confirm": "Confirm Trade",

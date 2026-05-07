@@ -22,6 +22,14 @@ public class ValueDataProvider extends DataMapProvider {
     protected void gather() {
         var builder = this.builder(RRDataMaps.ITEM_VALUE);
 
+        // ===== 货币价值定义 =====
+        // 基础货币单位：铜板 = 1
+        builder.add(ResourceLocation.parse("ruralroutes:copper_coin"), new ItemValue(1), false);
+        // 铁币 = 10 铜板
+        builder.add(ResourceLocation.parse("ruralroutes:iron_coin"), new ItemValue(10), false);
+        // 金币 = 100 铜板
+        builder.add(ResourceLocation.parse("ruralroutes:gold_coin"), new ItemValue(100), false);
+
         // ===== plains_granary 主题物品价值 =====
         // 村庄收购物品
         builder.add(ResourceLocation.parse("minecraft:wheat"), new ItemValue(2), false);

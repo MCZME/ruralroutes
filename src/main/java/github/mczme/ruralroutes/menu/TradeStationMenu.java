@@ -5,7 +5,7 @@ import github.mczme.ruralroutes.core.cycle.CycleManager;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.node.StockEntry;
-import github.mczme.ruralroutes.core.trade.TradeEngineImpl;
+import github.mczme.ruralroutes.core.trade.TradeContractExecutor;
 import github.mczme.ruralroutes.core.trade.TradePricingService;
 import github.mczme.ruralroutes.core.trade.TradeResult;
 import github.mczme.ruralroutes.core.trade.TradeSide;
@@ -560,8 +560,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
         }
 
         // 执行交易（直接从 pendingSlots 读取）
-        TradeEngineImpl engine = TradeEngineImpl.INSTANCE;
-        TradeResult result = engine.executeTrade(
+        TradeResult result = TradeContractExecutor.INSTANCE.executeMixedTrade(
             serverPlayer.serverLevel(),
             nodeData,
             serverPlayer,

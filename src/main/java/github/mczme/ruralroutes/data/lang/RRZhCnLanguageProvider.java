@@ -102,6 +102,10 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("trade.fail.village_insufficient", "村庄库存不满足交易条件");
         add("trade.fail.invalid_request", "无效交易请求");
 
+        // 契约交易
+        add("gui.ruralroutes.trade.currency_payment", "货币支付");
+        add("gui.ruralroutes.trade.currency_reward", "货币奖励");
+
         // 交易站交易结果
         add("gui.ruralroutes.trade_station.success", "交易成功！");
         add("gui.ruralroutes.trade_station.error.no_data", "无法获取村庄数据");

@@ -9,6 +9,7 @@ import java.util.function.BiConsumer;
 
 import github.mczme.ruralroutes.RuralRoutes;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.trade.TradeSide;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -25,6 +26,7 @@ public class ThemeBuilder {
     private ThemeTemplate.StockRange defaultStock;
     private final Map<String, ThemeTemplate.StockRange> stockSpecific = new HashMap<>();
     private final Map<String, ThemeTemplate.PriceModifier> priceModifiers = new HashMap<>();
+    private final List<ThemeTemplate.TradeContractEntry> tradeContracts = new ArrayList<>();
     private boolean withCurrency = false;
 
     private BiConsumer<ResourceLocation, ThemeTemplate> registrar;
@@ -115,6 +117,26 @@ public class ThemeBuilder {
     }
 
     /**
+     * 添加固定交换契约
+     */
+    public ThemeBuilder addFixedTrade(List<ThemeTemplate.InputEntry> inputs, List<ThemeTemplate.OutputEntry> outputs) {
+        tradeContracts.add(new ThemeTemplate.FixedTradeEntry(inputs, outputs));
+        return this;
+    }
+
+    /**
+     * 添加动态货币篮契约
+     */
+    public ThemeBuilder addCurrencyBasketTrade(
+            TradeSide side,
+            List<String> items,
+            List<String> acceptedCurrencies,
+            ThemeTemplate.CompositionStrategy composition) {
+        tradeContracts.add(new ThemeTemplate.CurrencyBasketEntry(side, items, acceptedCurrencies, composition));
+        return this;
+    }
+
+    /**
      * 获取资源位置
      */
     public ResourceLocation getId() {
@@ -146,7 +168,8 @@ public class ThemeBuilder {
                     Optional.ofNullable(defaultStock),
                     stockSpecific.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(stockSpecific))
                 )),
-            priceModifiers.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(priceModifiers))
+            priceModifiers.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(priceModifiers)),
+            tradeContracts.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(tradeContracts))
         );
     }
 

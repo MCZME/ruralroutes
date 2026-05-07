@@ -80,6 +80,15 @@
     },
     "minecraft:wooden_sword": {
       "value": 6
+    },
+    "ruralroutes:copper_coin": {
+      "value": 1
+    },
+    "ruralroutes:gold_coin": {
+      "value": 100
+    },
+    "ruralroutes:iron_coin": {
+      "value": 10
     }
   }
 }

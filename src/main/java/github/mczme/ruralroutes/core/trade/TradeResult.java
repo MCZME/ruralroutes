@@ -4,44 +4,21 @@ import net.minecraft.world.item.ItemStack;
 import java.util.List;
 
 /**
- * 交易结果
+ * 统一交易结果
+ * 用于混合交易和单一契约执行
  */
 public record TradeResult(
     Reason reason,
-    List<ItemStack> shortfall,
-    int totalValueExchanged
+    List<ItemStack> outputs,         // 玩家获得的物品
+    List<ItemStack> consumed,        // 玩家消耗的物品
+    List<ItemStack> shortfall,       // 失败时的不足物品
+    int totalValueExchanged          // 交易总价值（净货币差额）
 ) {
-    /**
-     * 创建成功结果
-     * @param sellValueTotal 玩家需支付的货币（购买物品总价）
-     * @param buyValueTotal 玩家将获得的货币（出售物品总价）
-     */
-    public static TradeResult success(int sellValueTotal, int buyValueTotal) {
-        int netValue = sellValueTotal - buyValueTotal;
-        return new TradeResult(Reason.SUCCESS, List.of(), netValue);
-    }
-
-    /**
-     * 创建失败结果
-     */
-    public static TradeResult fail(Reason reason, List<ItemStack> shortfall) {
-        return new TradeResult(reason, shortfall, 0);
-    }
-
-    /**
-     * 是否成功
-     */
-    public boolean isSuccess() {
-        return reason == Reason.SUCCESS;
-    }
-
-    /**
-     * 交易原因枚举
-     */
     public enum Reason {
         SUCCESS("trade.success"),
         PLAYER_INSUFFICIENT("trade.fail.player_insufficient"),
         VILLAGE_INSUFFICIENT("trade.fail.village_insufficient"),
+        INVALID_INPUT("trade.fail.invalid_request"),
         INVALID_REQUEST("trade.fail.invalid_request"),
         CYCLE_CHANGED("trade.fail.cycle_changed");
 
@@ -54,5 +31,51 @@ public record TradeResult(
         public String getTranslationKey() {
             return translationKey;
         }
+    }
+
+    // ===== 成功结果工厂方法 =====
+
+    /**
+     * 创建契约执行成功结果
+     */
+    public static TradeResult success(List<ItemStack> outputs, List<ItemStack> consumed) {
+        return new TradeResult(Reason.SUCCESS, outputs, consumed, List.of(), 0);
+    }
+
+    /**
+     * 创建混合交易成功结果
+     */
+    public static TradeResult success(int sellValueTotal, int buyValueTotal) {
+        int netValue = sellValueTotal - buyValueTotal;
+        return new TradeResult(Reason.SUCCESS, List.of(), List.of(), List.of(), netValue);
+    }
+
+    // ===== 失败结果工厂方法 =====
+
+    /**
+     * 创建失败结果（带不足物品）
+     */
+    public static TradeResult fail(Reason reason, List<ItemStack> shortfall) {
+        return new TradeResult(reason, List.of(), List.of(), shortfall, 0);
+    }
+
+    /**
+     * 创建失败结果（无不足物品）
+     */
+    public static TradeResult fail(Reason reason) {
+        return new TradeResult(reason, List.of(), List.of(), List.of(), 0);
+    }
+
+    // ===== 便捷方法 =====
+
+    public boolean isSuccess() {
+        return reason == Reason.SUCCESS;
+    }
+
+    /**
+     * 获取用于 GUI 显示的翻译键
+     */
+    public String getTranslationKey() {
+        return reason.getTranslationKey();
     }
 }

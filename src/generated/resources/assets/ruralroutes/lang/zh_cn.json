@@ -28,6 +28,8 @@
   "gui.ruralroutes.rumor_board.time_days": "%d 天",
   "gui.ruralroutes.rumor_board.time_hours": "%d 小时",
   "gui.ruralroutes.rumor_board.time_soon": "即将刷新",
+  "gui.ruralroutes.trade.currency_payment": "货币支付",
+  "gui.ruralroutes.trade.currency_reward": "货币奖励",
   "gui.ruralroutes.trade_station.buy": "收购",
   "gui.ruralroutes.trade_station.coin_exchange": "铸币",
   "gui.ruralroutes.trade_station.confirm": "确认交换",
