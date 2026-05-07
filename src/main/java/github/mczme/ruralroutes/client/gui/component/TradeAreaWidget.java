@@ -1,8 +1,7 @@
 package github.mczme.ruralroutes.client.gui.component;
 
+import github.mczme.ruralroutes.core.trade.TradeContractType;
 import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
-import github.mczme.ruralroutes.menu.slot.TradeSlot;
-import github.mczme.ruralroutes.register.RRItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -18,8 +17,8 @@ import java.util.function.Consumer;
 
 /**
  * 交易区组件 - 两栏布局
- * - 左侧：玩家想要的（获得）- 包含买入的物品卡片 + 卖出获得的货币卡片
- * - 右侧：玩家支付的（付出）- 包含卖出的物品卡片 + 买入支付的货币卡片
+ * - 左侧：玩家想要的（获得）- 包含买入的物品 + 卖出获得的货币
+ * - 右侧：玩家支付的（付出）- 包含卖出的物品 + 买入支付的货币/输入物品
  * - 底部：确认按钮
  */
 public class TradeAreaWidget extends AbstractWidget {
@@ -28,6 +27,10 @@ public class TradeAreaWidget extends AbstractWidget {
     private static final int LABEL_COLOR = 0xFFFFFF;
     private static final int WANT_AREA_COLOR = 0x4000AAFF;    // 蓝色 - 玩家获得
     private static final int PAY_AREA_COLOR = 0x40FFAA00;     // 橙色 - 玩家付出
+    private static final int CARD_BG_COLOR = 0x40FFFFFF;
+    private static final int CARD_HOVER_COLOR = 0x80FFFFFF;
+    private static final int STOCK_COLOR = 0xFFFFFF;
+    private static final int OUT_OF_STOCK_COLOR = 0xFF5555;
     private static final int PADDING = 4;
     private static final int CARD_SIZE = 18;
     private static final int CARD_SPACING = 2;
@@ -36,17 +39,13 @@ public class TradeAreaWidget extends AbstractWidget {
 
     private Button confirmButton;
 
-    // 物品卡片（可点击取消）
-    private List<ItemCardWidget> wantItemCards = new ArrayList<>();  // 买入的物品（玩家获得）
-    private List<ItemCardWidget> payItemCards = new ArrayList<>();   // 卖出的物品（玩家付出）
+    // 暂存槽位数据
+    private List<PendingTradeSlot> wantItemSlots = new ArrayList<>();
+    private List<PendingTradeSlot> payItemSlots = new ArrayList<>();
 
-    // 货币卡片（不可点击）
-    private ItemCardWidget wantCoinCard;  // 卖出获得的货币总额
-    private ItemCardWidget payCoinCard;   // 买入支付的货币总额
-
-    // 货币总额
-    private int wantCoinValue = 0;  // 玩家获得的货币
-    private int payCoinValue = 0;   // 玩家支付的货币
+    // 缓存的卡片列表
+    private List<CardInfo> cachedWantCards = new ArrayList<>();
+    private List<CardInfo> cachedPayCards = new ArrayList<>();
 
     // 回调
     private Consumer<PendingTradeSlot> onRemoveSlot;
@@ -77,88 +76,28 @@ public class TradeAreaWidget extends AbstractWidget {
 
     /**
      * 设置暂存区槽位
-     * 根据 slot.isBuy() 分配物品卡片和货币卡片
      */
     public void setPendingSlots(List<PendingTradeSlot> slots, boolean isBuyTrade) {
-        this.wantItemCards.clear();
-        this.payItemCards.clear();
-        this.wantCoinCard = null;
-        this.payCoinCard = null;
-        this.wantCoinValue = 0;
-        this.payCoinValue = 0;
+        this.wantItemSlots.clear();
+        this.payItemSlots.clear();
 
         for (PendingTradeSlot slot : slots) {
-            int value = slot.getPrice() * slot.getBaseStock();
-
             if (slot.isBuy()) {
-                // 买入：物品在左侧，货币在右侧
-                ItemCardWidget itemCard = createClickableItemCard(slot);
-                wantItemCards.add(itemCard);
-                payCoinValue += value;
+                wantItemSlots.add(slot);
             } else {
-                // 卖出：物品在右侧，货币在左侧
-                ItemCardWidget itemCard = createClickablePayItemCard(slot);
-                payItemCards.add(itemCard);
-                wantCoinValue += value;
+                payItemSlots.add(slot);
             }
         }
 
-        // 创建货币卡片（仅当总额 > 0）
-        if (wantCoinValue > 0) {
-            wantCoinCard = createCoinCard(wantCoinValue);
-        }
-        if (payCoinValue > 0) {
-            payCoinCard = createCoinCard(payCoinValue);
-        }
+        rebuildCardCache();
     }
 
     /**
-     * 创建可点击的物品卡片（左侧买入物品）
+     * 重建卡片缓存
      */
-    private ItemCardWidget createClickableItemCard(PendingTradeSlot slot) {
-        ItemCardWidget card = new ItemCardWidget(0, 0, CARD_SIZE, CARD_SIZE);
-        card.setTradeSlot(slot);
-        card.setOnClick(c -> {
-            if (onRemoveSlot != null) {
-                onRemoveSlot.accept(slot);
-            }
-        });
-        return card;
-    }
-
-    /**
-     * 创建可点击的物品卡片（右侧卖出物品）
-     */
-    private ItemCardWidget createClickablePayItemCard(PendingTradeSlot slot) {
-        ItemCardWidget card = new ItemCardWidget(0, 0, CARD_SIZE, CARD_SIZE);
-        card.setTradeSlot(slot);
-        card.setOnClick(c -> {
-            if (onRemoveSlot != null) {
-                onRemoveSlot.accept(slot);
-            }
-        });
-        return card;
-    }
-
-    /**
-     * 创建货币卡片（不可点击）
-     */
-    private ItemCardWidget createCoinCard(int value) {
-        ItemCardWidget card = new ItemCardWidget(0, 0, CARD_SIZE, CARD_SIZE);
-        TradeSlot coinSlot = new TradeSlot(null, -1, 0, 0);
-        coinSlot.setDisplayStack(new ItemStack(RRItems.COPPER_COIN.get()));
-        coinSlot.setBaseStock(value);
-        coinSlot.setPrice(value);
-        card.setTradeSlot(coinSlot);
-        // 不设置点击回调，货币卡片不可点击
-        return card;
-    }
-
-    /**
-     * 设置总价（兼容旧接口）
-     */
-    public void setTotalPrice(int totalPrice) {
-        // 不再使用，保留兼容性
+    private void rebuildCardCache() {
+        cachedWantCards = buildWantCards();
+        cachedPayCards = buildPayCards();
     }
 
     public Button getConfirmButton() {
@@ -169,56 +108,24 @@ public class TradeAreaWidget extends AbstractWidget {
      * 清空交易区内容
      */
     public void clearContent() {
-        wantItemCards.clear();
-        payItemCards.clear();
-        wantCoinCard = null;
-        payCoinCard = null;
-        wantCoinValue = 0;
-        payCoinValue = 0;
+        wantItemSlots.clear();
+        payItemSlots.clear();
+        cachedWantCards.clear();
+        cachedPayCards.clear();
     }
 
     /**
      * 是否有交易内容
      */
     public boolean hasContent() {
-        return !wantItemCards.isEmpty() || !payItemCards.isEmpty() ||
-               wantCoinCard != null || payCoinCard != null;
+        return !wantItemSlots.isEmpty() || !payItemSlots.isEmpty();
     }
 
     /**
      * 获取条目数量
      */
     public int getEntryCount() {
-        return wantItemCards.size() + payItemCards.size();
-    }
-
-    /**
-     * 获取净货币价值（正值=玩家获得货币，负值=玩家付出货币）
-     */
-    public int getNetValue() {
-        return wantCoinValue - payCoinValue;
-    }
-
-    /**
-     * 获取左侧所有卡片（用于渲染工具提示）
-     */
-    public List<ItemCardWidget> getWantCards() {
-        List<ItemCardWidget> cards = new ArrayList<>(wantItemCards);
-        if (wantCoinCard != null) {
-            cards.add(wantCoinCard);
-        }
-        return cards;
-    }
-
-    /**
-     * 获取右侧所有卡片（用于渲染工具提示）
-     */
-    public List<ItemCardWidget> getPayCards() {
-        List<ItemCardWidget> cards = new ArrayList<>(payItemCards);
-        if (payCoinCard != null) {
-            cards.add(payCoinCard);
-        }
-        return cards;
+        return wantItemSlots.size() + payItemSlots.size();
     }
 
     @Override
@@ -241,32 +148,20 @@ public class TradeAreaWidget extends AbstractWidget {
         int wantAreaX = getX() + PADDING;
         fill(guiGraphics, wantAreaX, wantAreaY, sideWidth, areaHeight, WANT_AREA_COLOR);
 
-        // 计算左侧卡片数量
-        int wantCardCount = wantItemCards.size() + (wantCoinCard != null ? 1 : 0);
-        int wantContentWidth = wantCardCount * (CARD_SIZE + CARD_SPACING) - CARD_SPACING;
+        // 使用缓存的左侧卡片
+        int wantContentWidth = cachedWantCards.size() * (CARD_SIZE + CARD_SPACING) - CARD_SPACING;
         int wantStartX = wantAreaX + Math.max(0, (sideWidth - wantContentWidth) / 2);
         int wantItemY = wantAreaY + (areaHeight - CARD_SIZE) / 2;
 
-        // 渲染左侧物品卡片
-        int cardIndex = 0;
-        for (int i = 0; i < wantItemCards.size() && cardIndex < MAX_VISIBLE_CARDS; i++, cardIndex++) {
-            ItemCardWidget card = wantItemCards.get(i);
-            int cardX = wantStartX + cardIndex * (CARD_SIZE + CARD_SPACING);
-            card.setX(cardX);
-            card.setY(wantItemY);
-            card.render(guiGraphics, mouseX, mouseY, partialTick);
+        for (int i = 0; i < cachedWantCards.size() && i < MAX_VISIBLE_CARDS; i++) {
+            CardInfo card = cachedWantCards.get(i);
+            int cardX = wantStartX + i * (CARD_SIZE + CARD_SPACING);
+            boolean isHovered = isCardHovered(cardX, wantItemY, mouseX, mouseY);
+            renderItemCard(guiGraphics, card.stack, card.count, cardX, wantItemY, isHovered);
         }
 
-        // 渲染左侧货币卡片
-        if (wantCoinCard != null && cardIndex < MAX_VISIBLE_CARDS) {
-            int cardX = wantStartX + cardIndex * (CARD_SIZE + CARD_SPACING);
-            wantCoinCard.setX(cardX);
-            wantCoinCard.setY(wantItemY);
-            wantCoinCard.render(guiGraphics, mouseX, mouseY, partialTick);
-        }
-
-        if (wantCardCount > MAX_VISIBLE_CARDS) {
-            String moreText = "+" + (wantCardCount - MAX_VISIBLE_CARDS);
+        if (cachedWantCards.size() > MAX_VISIBLE_CARDS) {
+            String moreText = "+" + (cachedWantCards.size() - MAX_VISIBLE_CARDS);
             int moreX = wantStartX + MAX_VISIBLE_CARDS * (CARD_SIZE + CARD_SPACING);
             guiGraphics.drawString(font, moreText, moreX, wantItemY + 5, LABEL_COLOR);
         }
@@ -280,32 +175,20 @@ public class TradeAreaWidget extends AbstractWidget {
         int payAreaY = contentY + titleHeight;
         fill(guiGraphics, payAreaX, payAreaY, sideWidth, areaHeight, PAY_AREA_COLOR);
 
-        // 计算右侧卡片数量
-        int payCardCount = payItemCards.size() + (payCoinCard != null ? 1 : 0);
-        int payContentWidth = payCardCount * (CARD_SIZE + CARD_SPACING) - CARD_SPACING;
+        // 使用缓存的右侧卡片
+        int payContentWidth = cachedPayCards.size() * (CARD_SIZE + CARD_SPACING) - CARD_SPACING;
         int payStartX = payAreaX + Math.max(0, (sideWidth - payContentWidth) / 2);
         int payItemY = payAreaY + (areaHeight - CARD_SIZE) / 2;
 
-        // 渲染右侧物品卡片
-        cardIndex = 0;
-        for (int i = 0; i < payItemCards.size() && cardIndex < MAX_VISIBLE_CARDS; i++, cardIndex++) {
-            ItemCardWidget card = payItemCards.get(i);
-            int cardX = payStartX + cardIndex * (CARD_SIZE + CARD_SPACING);
-            card.setX(cardX);
-            card.setY(payItemY);
-            card.render(guiGraphics, mouseX, mouseY, partialTick);
+        for (int i = 0; i < cachedPayCards.size() && i < MAX_VISIBLE_CARDS; i++) {
+            CardInfo card = cachedPayCards.get(i);
+            int cardX = payStartX + i * (CARD_SIZE + CARD_SPACING);
+            boolean isHovered = isCardHovered(cardX, payItemY, mouseX, mouseY);
+            renderItemCard(guiGraphics, card.stack, card.count, cardX, payItemY, isHovered);
         }
 
-        // 渲染右侧货币卡片
-        if (payCoinCard != null && cardIndex < MAX_VISIBLE_CARDS) {
-            int cardX = payStartX + cardIndex * (CARD_SIZE + CARD_SPACING);
-            payCoinCard.setX(cardX);
-            payCoinCard.setY(payItemY);
-            payCoinCard.render(guiGraphics, mouseX, mouseY, partialTick);
-        }
-
-        if (payCardCount > MAX_VISIBLE_CARDS) {
-            String moreText = "+" + (payCardCount - MAX_VISIBLE_CARDS);
+        if (cachedPayCards.size() > MAX_VISIBLE_CARDS) {
+            String moreText = "+" + (cachedPayCards.size() - MAX_VISIBLE_CARDS);
             int moreX = payStartX + MAX_VISIBLE_CARDS * (CARD_SIZE + CARD_SPACING);
             guiGraphics.drawString(font, moreText, moreX, payItemY + 5, LABEL_COLOR);
         }
@@ -316,27 +199,142 @@ public class TradeAreaWidget extends AbstractWidget {
         }
     }
 
+    /**
+     * 卡片信息
+     */
+    private record CardInfo(ItemStack stack, int count) {}
+
+    /**
+     * 构建左侧（玩家获得）卡片列表
+     */
+    private List<CardInfo> buildWantCards() {
+        List<CardInfo> cards = new ArrayList<>();
+
+        // 买入的物品
+        for (PendingTradeSlot slot : wantItemSlots) {
+            cards.add(new CardInfo(slot.getDisplayStack(), slot.getBaseStock()));
+        }
+
+        // 卖出获得的货币（仅货币篮类型）
+        for (PendingTradeSlot slot : payItemSlots) {
+            if (slot.getTradeType() == TradeContractType.CURRENCY_BASKET_DYNAMIC) {
+                int multiplier = slot.getBaseStock();
+                for (ItemStack priceStack : slot.getPriceStacks()) {
+                    ItemStack scaled = priceStack.copy();
+                    scaled.setCount(priceStack.getCount() * multiplier);
+                    cards.add(new CardInfo(scaled, scaled.getCount()));
+                }
+            }
+        }
+
+        return cards;
+    }
+
+    /**
+     * 构建右侧（玩家支付）卡片列表
+     */
+    private List<CardInfo> buildPayCards() {
+        List<CardInfo> cards = new ArrayList<>();
+
+        // 卖出的物品
+        for (PendingTradeSlot slot : payItemSlots) {
+            cards.add(new CardInfo(slot.getDisplayStack(), slot.getBaseStock()));
+        }
+
+        // 买入支付的货币/输入物品
+        for (PendingTradeSlot slot : wantItemSlots) {
+            int multiplier = slot.getBaseStock();
+            TradeContractType tradeType = slot.getTradeType();
+
+            if (tradeType == TradeContractType.FIXED) {
+                // 固定交换：按数量缩放输入物品
+                for (ItemStack inputStack : slot.getInputStacks()) {
+                    ItemStack scaled = inputStack.copy();
+                    scaled.setCount(inputStack.getCount() * multiplier);
+                    cards.add(new CardInfo(scaled, scaled.getCount()));
+                }
+            } else {
+                // 货币篮（包括默认）：按数量缩放价格
+                for (ItemStack priceStack : slot.getPriceStacks()) {
+                    ItemStack scaled = priceStack.copy();
+                    scaled.setCount(priceStack.getCount() * multiplier);
+                    cards.add(new CardInfo(scaled, scaled.getCount()));
+                }
+            }
+        }
+
+        return cards;
+    }
+
+    /**
+     * 渲染物品卡片
+     */
+    private void renderItemCard(GuiGraphics guiGraphics, ItemStack stack, int count, int x, int y, boolean hovered) {
+        int bgColor = hovered ? CARD_HOVER_COLOR : CARD_BG_COLOR;
+        fill(guiGraphics, x, y, CARD_SIZE, CARD_SIZE, bgColor);
+
+        if (stack != null && !stack.isEmpty()) {
+            guiGraphics.renderItem(stack, x + 1, y + 1);
+        }
+
+        String countText = String.valueOf(count);
+        int countX = x + CARD_SIZE - Minecraft.getInstance().font.width(countText) - 1;
+        int countY = y + CARD_SIZE - 8;
+        int countColor = count > 0 ? STOCK_COLOR : OUT_OF_STOCK_COLOR;
+        guiGraphics.drawString(Minecraft.getInstance().font, countText, countX, countY, countColor);
+    }
+
+    /**
+     * 检查卡片是否悬停
+     */
+    private boolean isCardHovered(int cardX, int cardY, int mouseX, int mouseY) {
+        return mouseX >= cardX && mouseX < cardX + CARD_SIZE &&
+               mouseY >= cardY && mouseY < cardY + CARD_SIZE;
+    }
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!isMouseOver(mouseX, mouseY)) return false;
 
-        // 左侧物品卡片可点击
-        for (int i = 0; i < wantItemCards.size() && i < MAX_VISIBLE_CARDS; i++) {
-            ItemCardWidget card = wantItemCards.get(i);
-            if (card.mouseClicked(mouseX, mouseY, button)) {
+        int sideWidth = getWidth() / 2 - PADDING * 2;
+        int titleHeight = 12;
+        int areaHeight = getHeight() - PADDING * 3 - titleHeight - SETTLEMENT_HEIGHT;
+        int contentY = getY() + PADDING;
+
+        int wantAreaY = contentY + titleHeight;
+        int wantAreaX = getX() + PADDING;
+        int wantItemY = wantAreaY + (areaHeight - CARD_SIZE) / 2;
+
+        int wantContentWidth = cachedWantCards.size() * (CARD_SIZE + CARD_SPACING) - CARD_SPACING;
+        int wantStartX = wantAreaX + Math.max(0, (sideWidth - wantContentWidth) / 2);
+
+        for (int i = 0; i < wantItemSlots.size() && i < MAX_VISIBLE_CARDS; i++) {
+            int cardX = wantStartX + i * (CARD_SIZE + CARD_SPACING);
+            if (isCardHovered(cardX, wantItemY, (int) mouseX, (int) mouseY)) {
+                if (onRemoveSlot != null) {
+                    onRemoveSlot.accept(wantItemSlots.get(i));
+                }
                 return true;
             }
         }
 
-        // 右侧物品卡片可点击
-        for (int i = 0; i < payItemCards.size() && i < MAX_VISIBLE_CARDS; i++) {
-            ItemCardWidget card = payItemCards.get(i);
-            if (card.mouseClicked(mouseX, mouseY, button)) {
+        int payAreaX = getX() + getWidth() / 2 + PADDING;
+        int payAreaY = contentY + titleHeight;
+        int payItemY = payAreaY + (areaHeight - CARD_SIZE) / 2;
+
+        int payContentWidth = cachedPayCards.size() * (CARD_SIZE + CARD_SPACING) - CARD_SPACING;
+        int payStartX = payAreaX + Math.max(0, (sideWidth - payContentWidth) / 2);
+
+        for (int i = 0; i < payItemSlots.size() && i < MAX_VISIBLE_CARDS; i++) {
+            int cardX = payStartX + i * (CARD_SIZE + CARD_SPACING);
+            if (isCardHovered(cardX, payItemY, (int) mouseX, (int) mouseY)) {
+                if (onRemoveSlot != null) {
+                    onRemoveSlot.accept(payItemSlots.get(i));
+                }
                 return true;
             }
         }
 
-        // 检查确认按钮点击
         if (confirmButton != null && confirmButton.isMouseOver(mouseX, mouseY)) {
             return confirmButton.mouseClicked(mouseX, mouseY, button);
         }
