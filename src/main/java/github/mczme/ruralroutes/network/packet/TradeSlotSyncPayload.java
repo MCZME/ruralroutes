@@ -1,6 +1,7 @@
 package github.mczme.ruralroutes.network.packet;
 
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.core.trade.TradeContractType;
 import github.mczme.ruralroutes.menu.TradeStationMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -37,20 +38,36 @@ public record TradeSlotSyncPayload(
         ItemStack displayStack,
         int stockCount,
         int maxStock,
-        int price,
-        boolean isBuy
+        int basePrice,                      // 基础价格（用于排序/调试）
+        List<ItemStack> priceStacks,        // 货币篮报价
+        List<ItemStack> inputStacks,        // 以物易物输入物品
+        boolean isBuy,
+        TradeContractType tradeType         // 交易类型
     ) {
         /**
          * 序列化 SlotData
          */
         public static void encode(RegistryFriendlyByteBuf buf, SlotData data) {
             buf.writeVarInt(data.slotIndex);
-            // 使用标准 ItemStack codec 序列化（支持组件数据）
             ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, data.displayStack);
             buf.writeVarInt(data.stockCount);
             buf.writeVarInt(data.maxStock);
-            buf.writeVarInt(data.price);
+            buf.writeVarInt(data.basePrice);
+
+            // 序列化 priceStacks
+            buf.writeVarInt(data.priceStacks.size());
+            for (ItemStack stack : data.priceStacks) {
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, stack);
+            }
+
+            // 序列化 inputStacks
+            buf.writeVarInt(data.inputStacks.size());
+            for (ItemStack stack : data.inputStacks) {
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, stack);
+            }
+
             buf.writeBoolean(data.isBuy);
+            buf.writeEnum(data.tradeType);
         }
 
         /**
@@ -61,9 +78,27 @@ public record TradeSlotSyncPayload(
             ItemStack displayStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(buf);
             int stockCount = buf.readVarInt();
             int maxStock = buf.readVarInt();
-            int price = buf.readVarInt();
+            int basePrice = buf.readVarInt();
+
+            // 反序列化 priceStacks
+            List<ItemStack> priceStacks = new ArrayList<>();
+            int priceSize = buf.readVarInt();
+            for (int i = 0; i < priceSize; i++) {
+                priceStacks.add(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf));
+            }
+
+            // 反序列化 inputStacks
+            List<ItemStack> inputStacks = new ArrayList<>();
+            int inputSize = buf.readVarInt();
+            for (int i = 0; i < inputSize; i++) {
+                inputStacks.add(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf));
+            }
+
             boolean isBuy = buf.readBoolean();
-            return new SlotData(slotIndex, displayStack, stockCount, maxStock, price, isBuy);
+            TradeContractType tradeType = buf.readEnum(TradeContractType.class);
+
+            return new SlotData(slotIndex, displayStack, stockCount, maxStock, basePrice,
+                priceStacks, inputStacks, isBuy, tradeType);
         }
     }
 

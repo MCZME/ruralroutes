@@ -1,6 +1,7 @@
 package github.mczme.ruralroutes.network.packet;
 
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.core.trade.TradeContractType;
 import github.mczme.ruralroutes.menu.TradeStationMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -38,7 +39,10 @@ public record PendingTradeSyncPayload(
         int stockCount,      // 数量（baseStock）
         int price,
         boolean isBuy,
-        int sourceSlotIndex
+        int sourceSlotIndex,
+        TradeContractType tradeType,
+        List<ItemStack> priceStacks,
+        List<ItemStack> inputStacks
     ) {
         /**
          * 序列化 PendingSlotData
@@ -51,6 +55,17 @@ public record PendingTradeSyncPayload(
             buf.writeVarInt(data.price);
             buf.writeBoolean(data.isBuy);
             buf.writeVarInt(data.sourceSlotIndex);
+            buf.writeEnum(data.tradeType);
+            // 序列化 priceStacks
+            buf.writeVarInt(data.priceStacks.size());
+            for (ItemStack stack : data.priceStacks) {
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, stack);
+            }
+            // 序列化 inputStacks
+            buf.writeVarInt(data.inputStacks.size());
+            for (ItemStack stack : data.inputStacks) {
+                ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, stack);
+            }
         }
 
         /**
@@ -63,7 +78,20 @@ public record PendingTradeSyncPayload(
             int price = buf.readVarInt();
             boolean isBuy = buf.readBoolean();
             int sourceSlotIndex = buf.readVarInt();
-            return new PendingSlotData(itemId, displayStack, stockCount, price, isBuy, sourceSlotIndex);
+            TradeContractType tradeType = buf.readEnum(TradeContractType.class);
+            // 反序列化 priceStacks
+            int priceCount = buf.readVarInt();
+            List<ItemStack> priceStacks = new ArrayList<>();
+            for (int i = 0; i < priceCount; i++) {
+                priceStacks.add(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf));
+            }
+            // 反序列化 inputStacks
+            int inputCount = buf.readVarInt();
+            List<ItemStack> inputStacks = new ArrayList<>();
+            for (int i = 0; i < inputCount; i++) {
+                inputStacks.add(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf));
+            }
+            return new PendingSlotData(itemId, displayStack, stockCount, price, isBuy, sourceSlotIndex, tradeType, priceStacks, inputStacks);
         }
     }
 
