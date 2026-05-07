@@ -52,6 +52,11 @@ public final class TradeContractExecutor {
         }
 
         try {
+            // 先校验玩家输入
+            if (!contract.validateInput(player, List.of())) {
+                return TradeResult.fail(TradeResult.Reason.PLAYER_INSUFFICIENT);
+            }
+
             TradeResult result = contract.execute(level, nodeData, player, List.of());
 
             if (result.isSuccess()) {
@@ -185,7 +190,7 @@ public final class TradeContractExecutor {
             return TradeResult.fail(TradeResult.Reason.VILLAGE_INSUFFICIENT, villageShortfall);
         }
 
-        executeTransfer(level, nodeData, player, plan, pendingSlots, blockPos);
+        executeTransfer(level, nodeData, player, plan, blockPos);
 
         return TradeResult.success(sellValueTotal, buyValueTotal);
     }
@@ -201,6 +206,8 @@ public final class TradeContractExecutor {
 
         List<ItemStack> playerInputs = new ArrayList<>(buyFromPlayerItems);
         List<ItemStack> playerOutputs = new ArrayList<>(sellToPlayerItems);
+        List<ItemStack> villageInputs = new ArrayList<>(sellToPlayerItems);
+        List<ItemStack> villageOutputs = new ArrayList<>(buyFromPlayerItems);
 
         if (netCoinValue != 0) {
             // 获取基础货币物品（通常是铜板）
@@ -212,8 +219,12 @@ public final class TradeContractExecutor {
                     if (count > 0) {
                         ItemStack currencyStack = new ItemStack(baseCurrency.getItem(), count);
                         if (netCoinValue > 0) {
+                            // 玩家净支付货币 -> 玩家输入货币，村庄输出货币
                             playerInputs.add(currencyStack);
+                            villageOutputs.add(currencyStack.copy());
                         } else {
+                            // 村庄净支付货币 -> 村庄输入货币，玩家输出货币
+                            villageInputs.add(currencyStack.copy());
                             playerOutputs.add(currencyStack);
                         }
                     }
@@ -224,8 +235,8 @@ public final class TradeContractExecutor {
         return new TradePaymentPlan(
             playerInputs,
             playerOutputs,
-            sellToPlayerItems,
-            buyFromPlayerItems
+            villageInputs,
+            villageOutputs
         );
     }
 
@@ -278,7 +289,6 @@ public final class TradeContractExecutor {
             CommercialNodeData nodeData,
             ServerPlayer player,
             TradePaymentPlan plan,
-            List<PendingTradeSlot> pendingSlots,
             net.minecraft.core.BlockPos blockPos) {
 
         for (ItemStack item : plan.playerInputs()) {
@@ -289,7 +299,7 @@ public final class TradeContractExecutor {
             addItemToPlayer(player, item.copy());
         }
 
-        updateVillageStocks(level, nodeData, pendingSlots, blockPos);
+        updateVillageStocks(level, nodeData, plan, blockPos);
     }
 
     /**
@@ -298,22 +308,26 @@ public final class TradeContractExecutor {
     private void updateVillageStocks(
             ServerLevel level,
             CommercialNodeData nodeData,
-            List<PendingTradeSlot> pendingSlots,
+            TradePaymentPlan plan,
             net.minecraft.core.BlockPos blockPos) {
 
         Map<ResourceLocation, StockEntry> stocks = new HashMap<>(nodeData.stocks());
 
-        for (PendingTradeSlot slot : pendingSlots) {
-            ResourceLocation itemId = slot.getItemId();
-            int count = slot.getBaseStock();
+        // 村庄输入：扣除库存（村庄卖出的商品 + 村庄支付的货币）
+        for (ItemStack item : plan.villageInputs()) {
+            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item.getItem());
             StockEntry current = stocks.get(itemId);
-
             if (current != null) {
-                if (slot.isBuy()) {
-                    stocks.put(itemId, current.decrease(count));
-                } else {
-                    stocks.put(itemId, current.increase(count));
-                }
+                stocks.put(itemId, current.decrease(item.getCount()));
+            }
+        }
+
+        // 村庄输出：增加库存（村庄买入的商品 + 村庄收到的货币）
+        for (ItemStack item : plan.villageOutputs()) {
+            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item.getItem());
+            StockEntry current = stocks.get(itemId);
+            if (current != null) {
+                stocks.put(itemId, current.increase(item.getCount()));
             }
         }
 

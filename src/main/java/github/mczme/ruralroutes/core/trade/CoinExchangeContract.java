@@ -40,20 +40,43 @@ public record CoinExchangeContract(
         }
 
         /**
-         * 获取输入物品数量（基于价值计算）
+         * 判断是否为向下兑换（高面额 → 低面额）
+         */
+        public boolean isDownwardExchange() {
+            int inputValue = ValueTableManager.queryBaseValue(new ItemStack(inputItem));
+            int outputValue = ValueTableManager.queryBaseValue(new ItemStack(outputItem));
+            return inputValue > outputValue;
+        }
+
+        /**
+         * 获取输入物品数量
+         * - 向上兑换（低→高）：按价值比计算，如 10 铜板 → 1 铁币
+         * - 向下兑换（高→低）：固定为 1，如 1 铁币 → 10 铜板
          */
         public int getInputCount() {
+            if (isDownwardExchange()) {
+                return 1;
+            }
             int inputValue = ValueTableManager.queryBaseValue(new ItemStack(inputItem));
             int outputValue = ValueTableManager.queryBaseValue(new ItemStack(outputItem));
             if (inputValue <= 0 || outputValue <= 0) return 0;
-            // 输入数量 = 输出价值 / 输入价值（向上取整，确保等值或超值兑换）
+            // 向上兑换：输入数量 = 输出价值 / 输入价值（向上取整）
             return (outputValue + inputValue - 1) / inputValue;
         }
 
         /**
-         * 获取输出物品数量（固定为1）
+         * 获取输出物品数量
+         * - 向上兑换（低→高）：固定为 1
+         * - 向下兑换（高→低）：按价值比计算，如 1 铁币 → 10 铜板
          */
         public int getOutputCount() {
+            if (isDownwardExchange()) {
+                int inputValue = ValueTableManager.queryBaseValue(new ItemStack(inputItem));
+                int outputValue = ValueTableManager.queryBaseValue(new ItemStack(outputItem));
+                if (inputValue <= 0 || outputValue <= 0) return 0;
+                // 向下兑换：输出数量 = 输入价值 / 输出价值
+                return inputValue / outputValue;
+            }
             return 1;
         }
     }
