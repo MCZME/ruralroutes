@@ -1,10 +1,13 @@
 package github.mczme.ruralroutes.menu.slot;
 
+import github.mczme.ruralroutes.core.trade.TradeContractType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
 
 /**
  * 贸易展示槽位
@@ -22,8 +25,11 @@ public class TradeSlot extends Slot {
     private int baseStock;              // 原始库存（出售区=当前库存，收购区=已收购数量）
     private int maxStock;               // 最大库存（收购区使用）
     private int pendingCount;           // 暂存数量
-    private int price;                  // 价格
+    private int price;                  // 价格（基础价格）
     private boolean isBuy;              // true=购买（村庄卖给玩家），false=出售（玩家卖给村庄）
+    private List<ItemStack> priceStacks = List.of();  // 货币篮报价
+    private List<ItemStack> inputStacks = List.of();   // 以物易物输入物品
+    private TradeContractType tradeType = TradeContractType.CURRENCY_BASKET_DYNAMIC;  // 交易类型
 
     /**
      * 创建空的贸易槽位
@@ -186,6 +192,48 @@ public class TradeSlot extends Slot {
     }
 
     /**
+     * 设置货币篮报价
+     */
+    public void setPriceStacks(List<ItemStack> stacks) {
+        this.priceStacks = stacks != null ? List.copyOf(stacks) : List.of();
+    }
+
+    /**
+     * 获取货币篮报价
+     */
+    public List<ItemStack> getPriceStacks() {
+        return priceStacks;
+    }
+
+    /**
+     * 设置以物易物输入物品
+     */
+    public void setInputStacks(List<ItemStack> stacks) {
+        this.inputStacks = stacks != null ? List.copyOf(stacks) : List.of();
+    }
+
+    /**
+     * 获取以物易物输入物品
+     */
+    public List<ItemStack> getInputStacks() {
+        return inputStacks;
+    }
+
+    /**
+     * 设置交易类型
+     */
+    public void setTradeType(TradeContractType type) {
+        this.tradeType = type;
+    }
+
+    /**
+     * 获取交易类型
+     */
+    public TradeContractType getTradeType() {
+        return tradeType;
+    }
+
+    /**
      * 获取展示用物品堆（数量为 stockCount）
      */
     @Override
@@ -249,10 +297,15 @@ public class TradeSlot extends Slot {
         this.pendingCount = 0;
         this.price = 0;
         this.isBuy = true;
+        this.priceStacks = List.of();
+        this.inputStacks = List.of();
+        this.tradeType = TradeContractType.CURRENCY_BASKET_DYNAMIC;
     }
 
     /**
      * 复制另一个槽位的数据
+     * 注意：priceStacks 和 inputStacks 直接赋值，因为 setter 已通过 List.copyOf()
+     * 创建不可变列表，无需再次拷贝
      */
     public void copyFrom(TradeSlot other) {
         this.itemId = other.itemId;
@@ -262,5 +315,8 @@ public class TradeSlot extends Slot {
         this.pendingCount = other.pendingCount;
         this.price = other.price;
         this.isBuy = other.isBuy;
+        this.priceStacks = other.priceStacks;  // 不可变列表，直接赋值
+        this.inputStacks = other.inputStacks;  // 不可变列表，直接赋值
+        this.tradeType = other.tradeType;
     }
 }
