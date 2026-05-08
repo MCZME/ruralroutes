@@ -84,7 +84,8 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         // 展示柜交互
         add("block.ruralroutes.display_case.not_activated", "请先激活贸易站");
         add("block.ruralroutes.display_case.mismatch", "展示柜数据不匹配");
-        add("block.ruralroutes.display_case.sell_items", "本村出售物品 (%d 种)");
+        add("block.ruralroutes.display_case.displaying", "展示: %s");
+        add("block.ruralroutes.display_case.empty", "无展示物品");
 
         // 传闻板交互
         add("block.ruralroutes.rumor_board.not_activated", "请先激活贸易站");

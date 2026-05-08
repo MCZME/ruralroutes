@@ -84,7 +84,8 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         // 展示柜交互
         add("block.ruralroutes.display_case.not_activated", "Please activate the trade station first");
         add("block.ruralroutes.display_case.mismatch", "Display case data mismatch");
-        add("block.ruralroutes.display_case.sell_items", "Village Selling Items (%d kinds)");
+        add("block.ruralroutes.display_case.displaying", "Displaying: %s");
+        add("block.ruralroutes.display_case.empty", "No display item");
 
         // 传闻板交互
         add("block.ruralroutes.rumor_board.not_activated", "Please activate the trade station first");

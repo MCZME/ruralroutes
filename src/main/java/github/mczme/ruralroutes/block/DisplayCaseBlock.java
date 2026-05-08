@@ -1,9 +1,11 @@
 package github.mczme.ruralroutes.block;
 
-import github.mczme.ruralroutes.blockentity.TradeNodeBlockEntity;
+import github.mczme.ruralroutes.blockentity.DisplayCaseBlockEntity;
+import github.mczme.ruralroutes.client.gui.screen.DisplayCaseScreen;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.register.RRBlockEntities;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
@@ -59,20 +61,26 @@ public class DisplayCaseBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
             Player player, BlockHitResult hit) {
-        if (!level.isClientSide) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof TradeNodeBlockEntity nodeEntity) {
-                // 获取贸易站位置
-                BlockPos stationPos = nodeEntity.getTradeStationPos();
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof DisplayCaseBlockEntity displayCase) {
+            if (level.isClientSide) {
+                // 客户端：检查是否已激活
+                if (displayCase.getTradeStationPos() == null) {
+                    return InteractionResult.PASS;
+                }
+                // 打开 Screen
+                Minecraft.getInstance().setScreen(new DisplayCaseScreen(displayCase.getDisplayItem()));
+                return InteractionResult.SUCCESS;
+            } else {
+                // 服务端：校验数据
+                BlockPos stationPos = displayCase.getTradeStationPos();
                 if (stationPos == null) {
-                    // 尚未同步，提示激活贸易站
                     player.displayClientMessage(
                         Component.translatable("block.ruralroutes.display_case.not_activated"),
                         true);
                     return InteractionResult.FAIL;
                 }
 
-                // 检查贸易站所在区块是否已有商业节点数据
                 if (!CommercialNodeManager.hasNodeData(level, stationPos)) {
                     player.displayClientMessage(
                         Component.translatable("block.ruralroutes.display_case.not_activated"),
@@ -82,29 +90,23 @@ public class DisplayCaseBlock extends BaseEntityBlock {
 
                 CommercialNodeData nodeData = CommercialNodeManager.getNodeData(level, stationPos);
 
-                // 校验节点ID一致性
-                if (!validateNodeEntity(nodeEntity, nodeData)) {
+                if (!validateNodeEntity(displayCase, nodeData)) {
                     player.displayClientMessage(
                         Component.translatable("block.ruralroutes.display_case.mismatch"),
                         true);
                     return InteractionResult.FAIL;
                 }
 
-                // 第一阶段：显示出售物品列表信息
-                player.displayClientMessage(
-                    Component.translatable("block.ruralroutes.display_case.sell_items",
-                        nodeData.sellItems().size()),
-                    false);
                 return InteractionResult.CONSUME;
             }
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.PASS;
     }
 
     /**
      * 校验节点实体与区块数据的一致性
      */
-    private boolean validateNodeEntity(TradeNodeBlockEntity nodeEntity, CommercialNodeData nodeData) {
+    private boolean validateNodeEntity(DisplayCaseBlockEntity nodeEntity, CommercialNodeData nodeData) {
         if (nodeEntity == null || nodeData == null) {
             return false;
         }

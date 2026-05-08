@@ -105,10 +105,16 @@ public class CommercialNodeManager {
         UUID tradeNodeId = UUID.randomUUID();
         List<ResourceLocation> sellItems = generateSellItems(template);
         List<ResourceLocation> buyItems = generateBuyItems(template);
+        List<ResourceLocation> specialties = generateSpecialties(template);
         Map<ResourceLocation, StockEntry> stocks = initializeStocks(template);
+
+        // 将特产加入出售列表和库存
+        addSpecialtiesToSellItems(sellItems, specialties);
+        addSpecialtiesToStocks(stocks, template, specialties);
+
         long timestamp = level.getGameTime();
 
-        CommercialNodeData data = CommercialNodeData.create(tradeNodeId, themeName, sellItems, buyItems, stocks, timestamp);
+        CommercialNodeData data = CommercialNodeData.create(tradeNodeId, themeName, sellItems, buyItems, specialties, stocks, timestamp);
 
         // 存储到区块
         ChunkAccess chunk = level.getChunk(pos);
@@ -118,6 +124,85 @@ public class CommercialNodeManager {
             tradeNodeId, themeName, pos);
 
         return data;
+    }
+
+    /**
+     * 生成特产列表
+     * @param template 主题模板
+     * @return 特产ID列表（主题特产 + 随机特产）
+     */
+    private static List<ResourceLocation> generateSpecialties(ThemeTemplate template) {
+        List<ResourceLocation> specialties = new ArrayList<>();
+
+        // 1. 主题特产
+        if (template.themeSpecialties().isPresent()) {
+            List<ResourceLocation> themeSpecialties = template.themeSpecialties().get();
+            for (ResourceLocation specialtyId : themeSpecialties) {
+                if (!specialties.contains(specialtyId)) {
+                    specialties.add(specialtyId);
+                }
+            }
+        }
+
+        // 2. 随机特产
+        Set<Item> poolItems = TagLookupCache.getItems("#ruralroutes:pool/specialty");
+        if (!poolItems.isEmpty()) {
+            List<Item> poolList = new ArrayList<>(poolItems);
+            Collections.shuffle(poolList);
+
+            // 随机抽取 1-3 种
+            int count = 1 + new Random().nextInt(3);
+            int added = 0;
+            for (Item item : poolList) {
+                if (added >= count) break;
+
+                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+                if (!specialties.contains(itemId)) {
+                    specialties.add(itemId);
+                    added++;
+                }
+            }
+        }
+
+        return specialties;
+    }
+
+    /**
+     * 将特产加入出售列表
+     */
+    private static void addSpecialtiesToSellItems(List<ResourceLocation> sellItems, List<ResourceLocation> specialties) {
+        for (ResourceLocation specialtyId : specialties) {
+            if (!sellItems.contains(specialtyId)) {
+                sellItems.add(specialtyId);
+            }
+        }
+    }
+
+    /**
+     * 将特产加入库存（作为出售物品，初始满库存）
+     */
+    private static void addSpecialtiesToStocks(Map<ResourceLocation, StockEntry> stocks,
+            ThemeTemplate template, List<ResourceLocation> specialties) {
+
+        // 默认库存范围
+        int defaultMin = 8;
+        int defaultMax = 16;
+
+        if (template.stock().isPresent()) {
+            ThemeTemplate.StockConfig stockConfig = template.stock().get();
+            if (stockConfig.defaultRange().isPresent()) {
+                ThemeTemplate.StockRange range = stockConfig.defaultRange().get();
+                defaultMin = range.min();
+                defaultMax = range.max();
+            }
+        }
+
+        for (ResourceLocation specialtyId : specialties) {
+            if (!stocks.containsKey(specialtyId)) {
+                int max = defaultMin + (int)(Math.random() * (defaultMax - defaultMin + 1));
+                stocks.put(specialtyId, StockEntry.full(max));
+            }
+        }
     }
 
     /**
@@ -344,7 +429,7 @@ public class CommercialNodeManager {
 
     /**
      * 刷新节点数据
-     * 恢复库存到基准值，更新刷新时间戳
+     * 恢复库存到基准值，重新生成特产，更新刷新时间戳
      */
     private static CommercialNodeData refreshNodeData(ServerLevel level, BlockPos pos,
             CommercialNodeData oldData, long currentGameTime) {
@@ -358,12 +443,21 @@ public class CommercialNodeManager {
         // 重新初始化库存（全量恢复）
         Map<ResourceLocation, StockEntry> newStocks = initializeStocks(template);
 
+        // 重新生成特产
+        List<ResourceLocation> newSpecialties = generateSpecialties(template);
+
+        // 重新生成出售列表（包含新特产）
+        List<ResourceLocation> newSellItems = generateSellItems(template);
+        addSpecialtiesToSellItems(newSellItems, newSpecialties);
+        addSpecialtiesToStocks(newStocks, template, newSpecialties);
+
         // 创建新数据，更新时间戳
         CommercialNodeData newData = CommercialNodeData.create(
             oldData.tradeNodeId(),
             oldData.themeName(),
-            oldData.sellItems(),
+            newSellItems,
             oldData.buyItems(),
+            newSpecialties,
             newStocks,
             currentGameTime
         );
@@ -372,8 +466,8 @@ public class CommercialNodeManager {
         ChunkAccess chunk = level.getChunk(pos);
         chunk.setData(RRAttachments.COMMERCIAL_NODE.get(), newData);
 
-        RuralRoutes.LOGGER.debug("Refreshed node {} with {} stock entries",
-                newData.tradeNodeId(), newStocks.size());
+        RuralRoutes.LOGGER.debug("Refreshed node {} with {} stock entries and {} specialties",
+                newData.tradeNodeId(), newStocks.size(), newSpecialties.size());
 
         return newData;
     }

@@ -36,5 +36,14 @@ public class RRItemTagsProvider extends ItemTagsProvider {
 
         tag(RRItemTags.CURRENCY_BASE)
                 .add(RRItems.COPPER_COIN.get());
+
+        // 特产池（开发阶段示例物品）
+        tag(RRItemTags.POOL_SPECIALTY)
+                .add(net.minecraft.world.item.Items.DIAMOND)
+                .add(net.minecraft.world.item.Items.EMERALD)
+                .add(net.minecraft.world.item.Items.GOLD_INGOT)
+                .add(net.minecraft.world.item.Items.IRON_INGOT)
+                .add(net.minecraft.world.item.Items.REDSTONE)
+                .add(net.minecraft.world.item.Items.LAPIS_LAZULI);
     }
 }

@@ -22,6 +22,8 @@ public class RRItemTags {
     // 自定义物品池标签（当没有合适的现有标签时定义）
     // 命名规范：pool/<池名>，但这只是内部规范，非强制
 
+    /** 全局特产池，用于随机特产抽取 */
+    public static final TagKey<Item> POOL_SPECIALTY = tag("pool/specialty");
 
     private static TagKey<Item> tag(String path) {
         return TagKey.create(Registries.ITEM,
