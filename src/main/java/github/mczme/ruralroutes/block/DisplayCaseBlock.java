@@ -15,13 +15,18 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
 
 import java.util.UUID;
 
@@ -34,7 +39,11 @@ public class DisplayCaseBlock extends BaseEntityBlock {
     public static final MapCodec<DisplayCaseBlock> CODEC =
         simpleCodec(DisplayCaseBlock::new);
 
-    private static final VoxelShape SHAPE = Block.box(1, 0, 1, 15, 12, 15);
+    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+
+    private static final VoxelShape SHAPE = Block.box(
+        2, 0, 2, 14, 13, 14
+    );
 
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
@@ -46,6 +55,17 @@ public class DisplayCaseBlock extends BaseEntityBlock {
             .strength(1.5f)
             .noOcclusion()
             .isViewBlocking((state, level, pos) -> false));
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(FACING);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override

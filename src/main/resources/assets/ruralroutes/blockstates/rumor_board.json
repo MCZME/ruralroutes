@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "ruralroutes:block/rumor_board" },
+    "facing=south": { "model": "ruralroutes:block/rumor_board", "y": 180 },
+    "facing=west": { "model": "ruralroutes:block/rumor_board", "y": 270 },
+    "facing=east": { "model": "ruralroutes:block/rumor_board", "y": 90 }
+  }
+}

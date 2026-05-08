@@ -23,12 +23,18 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.core.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +51,8 @@ public class TradeStationBlock extends BaseEntityBlock {
     public static final MapCodec<TradeStationBlock> CODEC =
         simpleCodec(TradeStationBlock::new);
 
+    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+
     /** 同步范围：贸易站周围查找展示柜和传闻板的半径 */
     private static final int SYNC_RADIUS = 16;
 
@@ -58,6 +66,17 @@ public class TradeStationBlock extends BaseEntityBlock {
             .strength(3.5f)
             .requiresCorrectToolForDrops()
             .noOcclusion());
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(FACING);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override

@@ -16,6 +16,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -27,6 +28,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.UUID;
 
@@ -40,6 +43,11 @@ public class RumorBoardBlock extends BaseEntityBlock {
         simpleCodec(RumorBoardBlock::new);
 
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+
+    private static final VoxelShape NORTH_SHAPE = Block.box(0, 0, 14, 16, 12, 16);
+    private static final VoxelShape SOUTH_SHAPE = Block.box(0, 0, 0, 16, 12, 2);
+    private static final VoxelShape EAST_SHAPE = Block.box(0, 0, 0, 2, 12, 16);
+    private static final VoxelShape WEST_SHAPE = Block.box(14, 0, 0, 16, 12, 16);
 
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
@@ -150,5 +158,16 @@ public class RumorBoardBlock extends BaseEntityBlock {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+    }
+
+    @Override
+    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return switch (state.getValue(FACING)) {
+            case NORTH -> NORTH_SHAPE;
+            case SOUTH -> SOUTH_SHAPE;
+            case EAST -> EAST_SHAPE;
+            case WEST -> WEST_SHAPE;
+            default -> NORTH_SHAPE;
+        };
     }
 }
