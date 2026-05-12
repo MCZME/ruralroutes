@@ -1,0 +1,13 @@
+{
+  "biome": "minecraft:snowy_plains",
+  "buy_items": [
+    "minecraft:iron_sword"
+  ],
+  "name": "ruralroutes:snowy_hunter",
+  "sell_items": [
+    "minecraft:beef"
+  ],
+  "theme_specialties": [
+    "minecraft:bone_block"
+  ]
+}

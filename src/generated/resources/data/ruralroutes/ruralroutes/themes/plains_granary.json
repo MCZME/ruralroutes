@@ -1,66 +1,13 @@
 {
   "biome": "minecraft:plains",
   "buy_items": [
-    "minecraft:wheat",
-    "minecraft:bread",
-    "#ruralroutes:currency"
+    "minecraft:wheat"
   ],
   "name": "ruralroutes:plains_granary",
-  "price_modifiers": {
-    "minecraft:bread": {
-      "buy": 0.8,
-      "sell": 1.2
-    }
-  },
   "sell_items": [
-    "minecraft:bread",
-    "#minecraft:planks",
-    "#minecraft:logs",
-    "#minecraft:swords",
-    "#ruralroutes:currency"
+    "minecraft:bread"
   ],
-  "stock": {
-    "default": {
-      "max": 16,
-      "min": 8
-    },
-    "specific": {
-      "minecraft:golden_carrot": {
-        "max": 3,
-        "min": 1
-      }
-    }
-  },
   "theme_specialties": [
     "minecraft:golden_carrot"
-  ],
-  "trade_contracts": [
-    {
-      "type": "currency_basket_dynamic",
-      "accepted_currencies": [
-        "ruralroutes:copper_coin",
-        "ruralroutes:iron_coin"
-      ],
-      "composition": "largest_first",
-      "items": [
-        "minecraft:diamond_sword"
-      ],
-      "side": "sell_to_player"
-    },
-    {
-      "type": "fixed",
-      "inputs": [
-        {
-          "count": 8,
-          "item": "minecraft:wheat"
-        }
-      ],
-      "outputs": [
-        {
-          "count": 4,
-          "item": "minecraft:bread"
-        }
-      ]
-    }
   ]
 }

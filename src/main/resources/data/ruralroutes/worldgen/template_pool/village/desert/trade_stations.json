@@ -1,12 +1,12 @@
 {
-  "name": "ruralroutes:village/plains/trade_stations",
+  "name": "ruralroutes:village/desert/trade_stations",
   "fallback": "minecraft:village/plains/terminators",
   "elements": [
     {
       "weight": 1,
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "ruralroutes:village/plains/plains_granary",
+        "location": "ruralroutes:village/desert/desert_quarry",
         "processors": {"processors": []},
         "projection": "rigid"
       }
@@ -15,7 +15,7 @@
       "weight": 1,
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "ruralroutes:village/plains/plains_pasture",
+        "location": "ruralroutes:village/desert/desert_oasis",
         "processors": {"processors": []},
         "projection": "rigid"
       }
@@ -24,7 +24,7 @@
       "weight": 1,
       "element": {
         "element_type": "minecraft:single_pool_element",
-        "location": "ruralroutes:village/plains/plains_workshop",
+        "location": "ruralroutes:village/desert/desert_dyeworks",
         "processors": {"processors": []},
         "projection": "rigid"
       }

@@ -1,0 +1,13 @@
+{
+  "biome": "minecraft:snowy_plains",
+  "buy_items": [
+    "minecraft:iron_ingot"
+  ],
+  "name": "ruralroutes:snowy_waystation",
+  "sell_items": [
+    "minecraft:bread"
+  ],
+  "theme_specialties": [
+    "minecraft:campfire"
+  ]
+}

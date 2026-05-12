@@ -1,0 +1,13 @@
+{
+  "biome": "minecraft:plains",
+  "buy_items": [
+    "minecraft:iron_ingot"
+  ],
+  "name": "ruralroutes:plains_workshop",
+  "sell_items": [
+    "minecraft:iron_pickaxe"
+  ],
+  "theme_specialties": [
+    "minecraft:anvil"
+  ]
+}

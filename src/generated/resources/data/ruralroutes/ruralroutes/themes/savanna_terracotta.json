@@ -1,0 +1,13 @@
+{
+  "biome": "minecraft:savanna",
+  "buy_items": [
+    "minecraft:bread"
+  ],
+  "name": "ruralroutes:savanna_terracotta",
+  "sell_items": [
+    "minecraft:terracotta"
+  ],
+  "theme_specialties": [
+    "minecraft:yellow_glazed_terracotta"
+  ]
+}

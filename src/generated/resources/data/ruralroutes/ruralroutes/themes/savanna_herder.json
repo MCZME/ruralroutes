@@ -1,0 +1,13 @@
+{
+  "biome": "minecraft:savanna",
+  "buy_items": [
+    "minecraft:iron_sword"
+  ],
+  "name": "ruralroutes:savanna_herder",
+  "sell_items": [
+    "minecraft:leather"
+  ],
+  "theme_specialties": [
+    "minecraft:rabbit_hide"
+  ]
+}

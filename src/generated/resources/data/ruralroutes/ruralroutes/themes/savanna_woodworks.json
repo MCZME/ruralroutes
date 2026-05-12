@@ -1,0 +1,13 @@
+{
+  "biome": "minecraft:savanna",
+  "buy_items": [
+    "minecraft:iron_ingot"
+  ],
+  "name": "ruralroutes:savanna_woodworks",
+  "sell_items": [
+    "minecraft:acacia_log"
+  ],
+  "theme_specialties": [
+    "minecraft:saddle"
+  ]
+}

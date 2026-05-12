@@ -1,0 +1,13 @@
+{
+  "biome": "minecraft:desert",
+  "buy_items": [
+    "minecraft:clay_ball"
+  ],
+  "name": "ruralroutes:desert_dyeworks",
+  "sell_items": [
+    "minecraft:cyan_dye"
+  ],
+  "theme_specialties": [
+    "minecraft:cyan_dye"
+  ]
+}

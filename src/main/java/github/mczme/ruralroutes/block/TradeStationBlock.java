@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -262,7 +263,8 @@ public class TradeStationBlock extends BaseEntityBlock {
         if (player instanceof ServerPlayer serverPlayer) {
             // 获取商业节点数据，提取槽位数量（过滤货币物品）
             CommercialNodeData nodeData = CommercialNodeManager.getNodeData(serverPlayer.level(), pos);
-            final int sellSlotCount = nodeData != null ? TradeStationMenu.countNonCurrencyItems(nodeData.sellItems()) : 0;
+            final int sellSlotCount = nodeData != null ? TradeStationMenu.countNonCurrencyItems(nodeData.sellItems())
+                    : 0;
             final int buySlotCount = nodeData != null ? TradeStationMenu.countNonCurrencyItems(nodeData.buyItems()) : 0;
 
             // 使用 openMenu 的返回值获取创建的 Menu
@@ -287,5 +289,10 @@ public class TradeStationBlock extends BaseEntityBlock {
                 tradeMenu.syncSlotDataToClient(serverPlayer);
             }
         }
+    }
+    
+    @Override
+    protected BlockState rotate(BlockState state, Rotation rotation) {
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 }

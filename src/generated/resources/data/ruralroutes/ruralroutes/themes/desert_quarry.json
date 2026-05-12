@@ -1,0 +1,13 @@
+{
+  "biome": "minecraft:desert",
+  "buy_items": [
+    "minecraft:bread"
+  ],
+  "name": "ruralroutes:desert_quarry",
+  "sell_items": [
+    "minecraft:sandstone"
+  ],
+  "theme_specialties": [
+    "minecraft:chiseled_sandstone"
+  ]
+}

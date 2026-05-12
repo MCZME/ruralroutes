@@ -1,0 +1,13 @@
+{
+  "biome": "minecraft:taiga",
+  "buy_items": [
+    "minecraft:iron_ingot"
+  ],
+  "name": "ruralroutes:taiga_berries",
+  "sell_items": [
+    "minecraft:sweet_berries"
+  ],
+  "theme_specialties": [
+    "minecraft:glow_berries"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "biome": "minecraft:desert",
+  "buy_items": [
+    "minecraft:iron_ingot"
+  ],
+  "name": "ruralroutes:desert_oasis",
+  "sell_items": [
+    "minecraft:wheat"
+  ],
+  "theme_specialties": [
+    "minecraft:golden_carrot"
+  ]
+}

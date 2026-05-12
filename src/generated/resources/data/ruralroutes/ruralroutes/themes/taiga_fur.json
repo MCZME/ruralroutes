@@ -1,0 +1,13 @@
+{
+  "biome": "minecraft:taiga",
+  "buy_items": [
+    "minecraft:iron_sword"
+  ],
+  "name": "ruralroutes:taiga_fur",
+  "sell_items": [
+    "minecraft:leather"
+  ],
+  "theme_specialties": [
+    "minecraft:campfire"
+  ]
+}

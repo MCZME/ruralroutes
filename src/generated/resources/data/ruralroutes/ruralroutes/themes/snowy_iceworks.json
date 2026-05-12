@@ -1,0 +1,13 @@
+{
+  "biome": "minecraft:snowy_plains",
+  "buy_items": [
+    "minecraft:bread"
+  ],
+  "name": "ruralroutes:snowy_iceworks",
+  "sell_items": [
+    "minecraft:ice"
+  ],
+  "theme_specialties": [
+    "minecraft:blue_ice"
+  ]
+}
