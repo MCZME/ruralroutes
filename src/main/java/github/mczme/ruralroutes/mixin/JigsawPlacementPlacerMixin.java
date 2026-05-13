@@ -13,17 +13,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-
-import java.util.List;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
  * Mixin 到 JigsawPlacement.Placer，拦截 houses 池访问，实现贸易站的必定且唯一生成。
  *
- * 关键设计：1.21.1 的 jigsaw 使用队列机制而非递归。
- * tryPlacingChildren 中成功放置的片段先加入 this.pieces 列表，然后加入 processing
- * 队列延后处理。同一 piece 的多个 houses junctions 在同一个 tryPlacingChildren
- * 调用中依次处理，因此 HEAD 注入无法及时检测放置——必须通过扫描 this.pieces
- * 来判断贸易站是否已被本调用中更早的 junction 放置。
+ * 关键设计：只在贸易站 piece 真正成功加入 pieces 后才标记已生成。
+ * 这样可以避免把“候选池被替换”误认为“结构已经放置成功”。
  */
 @Mixin(targets = "net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement$Placer")
 public class JigsawPlacementPlacerMixin {
@@ -32,18 +28,32 @@ public class JigsawPlacementPlacerMixin {
     @Shadow
     private Registry<StructureTemplatePool> pools;
 
-    @Final
-    @Shadow
-    private List<PoolElementStructurePiece> pieces;
-
-    @Unique
-    private int ruralroutes$tradeStationSwapCount = 0;
-    private static final int MAX_SWAP_ATTEMPTS = 5;
     private static final String MODID_STR = RuralRoutes.MODID;
+    @Unique
+    private boolean ruralroutes$tradeStationPlaced = false;
+
+    @Redirect(
+        method = "tryPlacingChildren(Lnet/minecraft/world/level/levelgen/structure/PoolElementStructurePiece;Lorg/apache/commons/lang3/mutable/MutableObject;IZLnet/minecraft/world/level/LevelHeightAccessor;Lnet/minecraft/world/level/levelgen/RandomState;Lnet/minecraft/world/level/levelgen/structure/pools/alias/PoolAliasLookup;Lnet/minecraft/world/level/levelgen/structure/templatesystem/LiquidSettings;)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Ljava/util/List;add(Ljava/lang/Object;)Z"
+        )
+    )
+    private boolean ruralroutes$markTradeStationPlaced(
+        java.util.List<Object> pieces,
+        Object addedPiece
+    ) {
+        boolean added = pieces.add(addedPiece);
+        if (!ruralroutes$tradeStationPlaced && addedPiece instanceof PoolElementStructurePiece piece
+            && piece.getElement().toString().contains(MODID_STR)) {
+            ruralroutes$tradeStationPlaced = true;
+        }
+        return added;
+    }
 
     /**
      * 拦截 Registry.getHolder() 调用，将 houses 池替换为贸易站池。
-     * 替换前扫描 this.pieces 确认贸易站未被本次调用中已处理的 junction 放置。
+     * 只有在尚未处理到贸易站片段时才进行替换。
      */
     @ModifyArg(
         method = "tryPlacingChildren(Lnet/minecraft/world/level/levelgen/structure/PoolElementStructurePiece;Lorg/apache/commons/lang3/mutable/MutableObject;IZLnet/minecraft/world/level/LevelHeightAccessor;Lnet/minecraft/world/level/levelgen/RandomState;Lnet/minecraft/world/level/levelgen/structure/pools/alias/PoolAliasLookup;Lnet/minecraft/world/level/levelgen/structure/templatesystem/LiquidSettings;)V",
@@ -53,16 +63,10 @@ public class JigsawPlacementPlacerMixin {
         )
     )
     private ResourceKey<StructureTemplatePool> ruralroutes$forceTradeStationPool(ResourceKey<StructureTemplatePool> resourceKey) {
-        if (ruralroutes$tradeStationSwapCount >= MAX_SWAP_ATTEMPTS) {
-            return resourceKey;
-        }
-
         String poolPath = resourceKey.location().getPath();
         if (poolPath.endsWith("/houses")) {
-            // 扫描已放置的 pieces，检查贸易站是否已被同一 tryPlacingChildren 中
-            // 更早的 junction 放置。1.21.1 使用队列而非递归，必须在 getHolder 时检查。
-            if (hasTradeStationInPieces()) {
-                ruralroutes$tradeStationSwapCount = MAX_SWAP_ATTEMPTS; // 阻止后续替换
+            // 只要已经处理到贸易站片段，就不再替换后续 houses。
+            if (ruralroutes$tradeStationPlaced) {
                 return resourceKey;
             }
 
@@ -78,24 +82,13 @@ public class JigsawPlacementPlacerMixin {
                 );
 
                 if (pools.getHolder(tradeStationPoolKey).isPresent()) {
-                    ruralroutes$tradeStationSwapCount++;
-                    RuralRoutes.LOGGER.debug("第{}次尝试将 {} houses 替换为贸易站池", ruralroutes$tradeStationSwapCount, villageType);
+                    RuralRoutes.LOGGER.debug("尝试将 {} houses 替换为贸易站池", villageType);
                     return tradeStationPoolKey;
                 }
             }
         }
 
         return resourceKey;
-    }
-
-    @Unique
-    private boolean hasTradeStationInPieces() {
-        for (PoolElementStructurePiece piece : pieces) {
-            if (piece.getElement().toString().contains(MODID_STR)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Unique
