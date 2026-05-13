@@ -69,6 +69,21 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.paste_node_info", "粘贴节点信息: %s");
         add("gui.ruralroutes.config_tool.copied_node_info", "已复制节点: %s");
         add("gui.ruralroutes.config_tool.copy_node_info", "复制节点信息: %s");
+        add("gui.ruralroutes.config_tool.copy_action", "复制节点");
+        add("gui.ruralroutes.config_tool.paste_action", "粘贴节点");
+        add("gui.ruralroutes.config_tool.section.block_info", "目标信息");
+        add("gui.ruralroutes.config_tool.section.current_config", "当前配置");
+        add("gui.ruralroutes.config_tool.section.clipboard", "剪贴板");
+        add("gui.ruralroutes.config_tool.section.available_themes", "可用主题");
+        add("gui.ruralroutes.config_tool.section.link_target", "关联说明");
+        add("gui.ruralroutes.config_tool.no_selection", "点击右侧主题列表选择后再应用");
+        add("gui.ruralroutes.config_tool.clipboard_empty", "剪贴板中还没有节点信息");
+        add("gui.ruralroutes.config_tool.clipboard_source", "来源贸易站: %s");
+        add("gui.ruralroutes.config_tool.paste_ready", "可将剪贴板中的节点绑定到当前方块");
+        add("gui.ruralroutes.config_tool.paste_missing", "先从贸易站复制节点后才能粘贴");
+        add("gui.ruralroutes.config_tool.theme_biome", "群系: %s");
+        add("gui.ruralroutes.config_tool.theme_list_empty", "没有加载到主题");
+        add("gui.ruralroutes.config_tool.unknown_block", "未知方块");
 
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "主题: %s");

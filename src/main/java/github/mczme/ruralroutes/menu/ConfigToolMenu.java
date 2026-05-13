@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,6 +51,7 @@ public class ConfigToolMenu extends AbstractContainerMenu {
         super(RRMenuTypes.CONFIG_TOOL.get(), containerId);
         this.blockPos = blockPos;
         this.availableThemes = new ArrayList<>(ThemeManager.INSTANCE.getAllThemes().keySet());
+        this.availableThemes.sort(Comparator.comparing(ResourceLocation::toString));
         this.selectedTheme = null;
 
         // 从玩家手持物品读取复制的节点信息

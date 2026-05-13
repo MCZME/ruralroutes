@@ -42,6 +42,7 @@ repo/
 ### ai ###
 CLAUDE.md
 .claude/
+.codex/
 
 #### Other ###
 bbmodel/

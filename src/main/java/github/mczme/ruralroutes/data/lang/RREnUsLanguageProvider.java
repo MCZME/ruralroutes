@@ -69,6 +69,21 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.paste_node_info", "Paste Node Info: %s");
         add("gui.ruralroutes.config_tool.copied_node_info", "Clipboard: %s");
         add("gui.ruralroutes.config_tool.copy_node_info", "Copy Node Info: %s");
+        add("gui.ruralroutes.config_tool.copy_action", "Copy Node");
+        add("gui.ruralroutes.config_tool.paste_action", "Paste Node");
+        add("gui.ruralroutes.config_tool.section.block_info", "Target Info");
+        add("gui.ruralroutes.config_tool.section.current_config", "Current Setup");
+        add("gui.ruralroutes.config_tool.section.clipboard", "Clipboard");
+        add("gui.ruralroutes.config_tool.section.available_themes", "Themes");
+        add("gui.ruralroutes.config_tool.section.link_target", "Linking");
+        add("gui.ruralroutes.config_tool.no_selection", "Choose a theme from the list before applying");
+        add("gui.ruralroutes.config_tool.clipboard_empty", "No node info is stored in the clipboard yet");
+        add("gui.ruralroutes.config_tool.clipboard_source", "Source station: %s");
+        add("gui.ruralroutes.config_tool.paste_ready", "The clipboard node can be linked to this block");
+        add("gui.ruralroutes.config_tool.paste_missing", "Copy a node from a trade station before pasting here");
+        add("gui.ruralroutes.config_tool.theme_biome", "Biome: %s");
+        add("gui.ruralroutes.config_tool.theme_list_empty", "No themes loaded");
+        add("gui.ruralroutes.config_tool.unknown_block", "Unknown Block");
 
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "Theme: %s");
