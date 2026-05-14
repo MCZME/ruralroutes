@@ -1,11 +1,20 @@
 {
   "biome": "minecraft:desert",
   "buy_items": [
-    "minecraft:clay_ball"
+    "minecraft:clay_ball",
+    "minecraft:bone_meal"
   ],
   "name": "ruralroutes:desert_dyeworks",
   "sell_items": [
-    "minecraft:cyan_dye"
+    "minecraft:terracotta",
+    {
+      "id": "#ruralroutes:candidate/biome/desert/dye_decor",
+      "pick": 1
+    },
+    {
+      "id": "#ruralroutes:candidate/theme/desert_dyeworks/finished_goods",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:cyan_dye"

@@ -1,0 +1,12 @@
+{
+  "values": [
+    "#c:crops/wheat",
+    "#c:crops/carrot",
+    "#c:crops/potato",
+    "#c:crops/beetroot",
+    "#c:crops/pumpkin",
+    "#c:crops/melon",
+    "#c:crops/sugar_cane",
+    "#c:crops/cactus"
+  ]
+}

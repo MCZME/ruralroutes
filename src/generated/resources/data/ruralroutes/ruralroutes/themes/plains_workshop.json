@@ -1,11 +1,21 @@
 {
   "biome": "minecraft:plains",
   "buy_items": [
-    "minecraft:iron_ingot"
+    "minecraft:iron_ingot",
+    "minecraft:coal",
+    "minecraft:diamond"
   ],
   "name": "ruralroutes:plains_workshop",
   "sell_items": [
-    "minecraft:iron_pickaxe"
+    "minecraft:iron_pickaxe",
+    {
+      "id": "#ruralroutes:candidate/biome/plains/wood",
+      "pick": 1
+    },
+    {
+      "id": "#ruralroutes:candidate/theme/plains_workshop/tool_goods",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:anvil"

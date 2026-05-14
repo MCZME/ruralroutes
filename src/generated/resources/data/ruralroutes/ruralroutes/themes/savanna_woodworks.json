@@ -1,11 +1,17 @@
 {
   "biome": "minecraft:savanna",
   "buy_items": [
-    "minecraft:iron_ingot"
+    "minecraft:iron_ingot",
+    "minecraft:coal"
   ],
   "name": "ruralroutes:savanna_woodworks",
   "sell_items": [
-    "minecraft:acacia_log"
+    "minecraft:acacia_log",
+    "minecraft:charcoal",
+    {
+      "id": "#ruralroutes:candidate/biome/savanna/wood",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:saddle"

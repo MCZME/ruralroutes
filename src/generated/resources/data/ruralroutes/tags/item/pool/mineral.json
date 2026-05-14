@@ -1,0 +1,15 @@
+{
+  "values": [
+    "minecraft:coal",
+    "#c:raw_materials/iron",
+    "#c:raw_materials/copper",
+    "#c:raw_materials/gold",
+    "#c:ingots/iron",
+    "#c:ingots/copper",
+    "#c:ingots/gold",
+    "#c:dusts/redstone",
+    "#c:gems/lapis",
+    "#c:gems/diamond",
+    "#c:gems/emerald"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "values": [
+    "#minecraft:logs",
+    "#c:stripped_logs",
+    "#c:stripped_woods",
+    "#minecraft:planks",
+    "#c:rods/wooden",
+    "minecraft:charcoal"
+  ]
+}

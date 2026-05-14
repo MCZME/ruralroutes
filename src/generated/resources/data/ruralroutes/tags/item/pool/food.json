@@ -1,0 +1,13 @@
+{
+  "values": [
+    "#c:foods/bread",
+    "#c:foods/raw_meat",
+    "#c:foods/cooked_meat",
+    "#c:foods/berry",
+    "minecraft:cod",
+    "minecraft:cooked_cod",
+    "minecraft:salmon",
+    "minecraft:cooked_salmon",
+    "minecraft:golden_carrot"
+  ]
+}

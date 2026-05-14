@@ -1,11 +1,18 @@
 {
   "biome": "minecraft:plains",
   "buy_items": [
-    "minecraft:wheat"
+    "minecraft:wheat",
+    "minecraft:iron_ingot",
+    "minecraft:coal"
   ],
   "name": "ruralroutes:plains_granary",
   "sell_items": [
-    "minecraft:bread"
+    "minecraft:bread",
+    "minecraft:oak_planks",
+    {
+      "id": "#ruralroutes:candidate/biome/plains/crop",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:golden_carrot"

@@ -1,11 +1,20 @@
 {
   "biome": "minecraft:desert",
   "buy_items": [
-    "minecraft:bread"
+    "minecraft:bread",
+    "minecraft:oak_log"
   ],
   "name": "ruralroutes:desert_quarry",
   "sell_items": [
-    "minecraft:sandstone"
+    "minecraft:sandstone",
+    {
+      "id": "#ruralroutes:candidate/biome/desert/stone",
+      "pick": 1
+    },
+    {
+      "id": "#ruralroutes:candidate/theme/desert_quarry/stonework",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:chiseled_sandstone"

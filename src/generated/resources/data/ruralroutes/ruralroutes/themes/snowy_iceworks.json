@@ -1,11 +1,20 @@
 {
   "biome": "minecraft:snowy_plains",
   "buy_items": [
-    "minecraft:bread"
+    "minecraft:bread",
+    "minecraft:spruce_log"
   ],
   "name": "ruralroutes:snowy_iceworks",
   "sell_items": [
-    "minecraft:ice"
+    "minecraft:ice",
+    {
+      "id": "#ruralroutes:candidate/biome/snowy/ice_snow",
+      "pick": 1
+    },
+    {
+      "id": "#ruralroutes:candidate/theme/snowy_iceworks/ice_goods",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:blue_ice"

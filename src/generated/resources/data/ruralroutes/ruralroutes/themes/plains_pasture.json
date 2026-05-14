@@ -1,11 +1,20 @@
 {
   "biome": "minecraft:plains",
   "buy_items": [
+    "minecraft:stone_axe",
     "minecraft:iron_sword"
   ],
   "name": "ruralroutes:plains_pasture",
   "sell_items": [
-    "minecraft:leather"
+    "minecraft:leather",
+    {
+      "id": "#ruralroutes:candidate/biome/plains/leather_fiber",
+      "pick": 1
+    },
+    {
+      "id": "#ruralroutes:candidate/biome/plains/food",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:saddle"

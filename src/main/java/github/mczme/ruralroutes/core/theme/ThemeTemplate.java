@@ -1,5 +1,6 @@
 package github.mczme.ruralroutes.core.theme;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -38,14 +39,30 @@ public record ThemeTemplate(
     );
 
     /**
-     * 物品引用，支持标签或精确物品
-     * 通过 # 前缀标识标签，如 "#ruralroutes:pool/crop" 或 "minecraft:bread"
+     * 物品引用，支持标签或精确物品。
+     * 可使用纯字符串，也可使用对象格式声明候选抽样数量。
      */
     public record ItemReference(
-        String id     // 如 "#ruralroutes:pool/crop" 或 "minecraft:bread"
+        String id,               // 如 "#ruralroutes:pool/crop" 或 "minecraft:bread"
+        Optional<Integer> pick   // 展开候选后随机抽取的数量；缺省表示全部纳入
     ) {
-        public static final Codec<ItemReference> CODEC = Codec.STRING
-            .xmap(ItemReference::new, ItemReference::id);
+        private static final Codec<ItemReference> OBJECT_CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                Codec.STRING.fieldOf("id").forGetter(ItemReference::id),
+                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("pick").forGetter(ItemReference::pick)
+            ).apply(instance, ItemReference::new)
+        );
+
+        public static final Codec<ItemReference> CODEC = Codec.either(Codec.STRING, OBJECT_CODEC)
+            .xmap(
+                either -> either.map(
+                    id -> new ItemReference(id, Optional.empty()),
+                    ref -> ref
+                ),
+                ref -> ref.pick().isPresent()
+                    ? Either.right(ref)
+                    : Either.left(ref.id())
+            );
 
         /** 是否为标签引用 */
         public boolean isTag() {
@@ -55,6 +72,11 @@ public record ThemeTemplate(
         /** 获取物品/标签 ID（不含 # 前缀） */
         public String itemId() {
             return isTag() ? id.substring(1) : id;
+        }
+
+        /** 是否在展开候选后进行抽样 */
+        public boolean hasPickLimit() {
+            return pick.isPresent();
         }
     }
 

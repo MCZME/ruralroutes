@@ -1,11 +1,16 @@
 {
   "biome": "minecraft:desert",
   "buy_items": [
-    "minecraft:iron_ingot"
+    "minecraft:iron_ingot",
+    "minecraft:coal"
   ],
   "name": "ruralroutes:desert_oasis",
   "sell_items": [
-    "minecraft:wheat"
+    "minecraft:wheat",
+    {
+      "id": "#ruralroutes:candidate/biome/desert/crop",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:golden_carrot"

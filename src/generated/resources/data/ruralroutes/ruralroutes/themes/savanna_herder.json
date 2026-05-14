@@ -1,11 +1,20 @@
 {
   "biome": "minecraft:savanna",
   "buy_items": [
+    "minecraft:stone_axe",
     "minecraft:iron_sword"
   ],
   "name": "ruralroutes:savanna_herder",
   "sell_items": [
-    "minecraft:leather"
+    "minecraft:leather",
+    {
+      "id": "#ruralroutes:candidate/biome/savanna/leather_fiber",
+      "pick": 1
+    },
+    {
+      "id": "#ruralroutes:candidate/biome/savanna/food",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:rabbit_hide"

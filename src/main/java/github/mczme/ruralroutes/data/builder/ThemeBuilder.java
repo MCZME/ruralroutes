@@ -1,7 +1,8 @@
 package github.mczme.ruralroutes.data.builder;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,8 +25,8 @@ public class ThemeBuilder {
     private final List<ThemeTemplate.ItemReference> buyItems = new ArrayList<>();
     private final List<ResourceLocation> specialties = new ArrayList<>();
     private ThemeTemplate.StockRange defaultStock;
-    private final Map<String, ThemeTemplate.StockRange> stockSpecific = new HashMap<>();
-    private final Map<String, ThemeTemplate.PriceModifier> priceModifiers = new HashMap<>();
+    private final Map<String, ThemeTemplate.StockRange> stockSpecific = new LinkedHashMap<>();
+    private final Map<String, ThemeTemplate.PriceModifier> priceModifiers = new LinkedHashMap<>();
     private final List<ThemeTemplate.TradeContractEntry> tradeContracts = new ArrayList<>();
     private boolean withCurrency = false;
 
@@ -73,12 +74,29 @@ public class ThemeBuilder {
     }
 
     /**
+     * 添加出售候选，并在展开后随机抽取指定数量。
+     * 适合标签引用；精确物品引用即使设置 pick 也只会得到单个物品。
+     */
+    public ThemeBuilder sellPick(String item, int pick) {
+        sellItems.add(parseItemRef(item, pick));
+        return this;
+    }
+
+    /**
      * 添加收购物品
      */
     public ThemeBuilder buy(String... items) {
         for (String item : items) {
             buyItems.add(parseItemRef(item));
         }
+        return this;
+    }
+
+    /**
+     * 添加收购候选，并在展开后随机抽取指定数量。
+     */
+    public ThemeBuilder buyPick(String item, int pick) {
+        buyItems.add(parseItemRef(item, pick));
         return this;
     }
 
@@ -152,8 +170,8 @@ public class ThemeBuilder {
 
         // 添加默认货币到出售池和收购池
         if (withCurrency) {
-            finalSellItems.add(new ThemeTemplate.ItemReference("#ruralroutes:currency"));
-            finalBuyItems.add(new ThemeTemplate.ItemReference("#ruralroutes:currency"));
+            finalSellItems.add(new ThemeTemplate.ItemReference("#ruralroutes:currency", Optional.empty()));
+            finalBuyItems.add(new ThemeTemplate.ItemReference("#ruralroutes:currency", Optional.empty()));
         }
 
         return new ThemeTemplate(
@@ -166,9 +184,11 @@ public class ThemeBuilder {
                 ? Optional.empty()
                 : Optional.of(new ThemeTemplate.StockConfig(
                     Optional.ofNullable(defaultStock),
-                    stockSpecific.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(stockSpecific))
+                    stockSpecific.isEmpty() ? Optional.empty()
+                        : Optional.of(Collections.unmodifiableMap(new LinkedHashMap<>(stockSpecific)))
                 )),
-            priceModifiers.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(priceModifiers)),
+            priceModifiers.isEmpty() ? Optional.empty()
+                : Optional.of(Collections.unmodifiableMap(new LinkedHashMap<>(priceModifiers))),
             tradeContracts.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(tradeContracts))
         );
     }
@@ -188,15 +208,19 @@ public class ThemeBuilder {
      * "xxx" -> "xxx"（物品）
      */
     private static ThemeTemplate.ItemReference parseItemRef(String str) {
+        return parseItemRef(str, null);
+    }
+
+    private static ThemeTemplate.ItemReference parseItemRef(String str, Integer pick) {
         if (str.startsWith("tag:")) {
             String tagId = str.substring(4);
             // 如果已经有#前缀则保留，否则添加
             if (!tagId.startsWith("#")) {
                 tagId = "#" + tagId;
             }
-            return new ThemeTemplate.ItemReference(tagId);
+            return new ThemeTemplate.ItemReference(tagId, Optional.ofNullable(pick));
         } else {
-            return new ThemeTemplate.ItemReference(str);
+            return new ThemeTemplate.ItemReference(str, Optional.ofNullable(pick));
         }
     }
 }

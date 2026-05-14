@@ -1,11 +1,20 @@
 {
   "biome": "minecraft:savanna",
   "buy_items": [
-    "minecraft:bread"
+    "minecraft:bread",
+    "minecraft:cooked_beef"
   ],
   "name": "ruralroutes:savanna_terracotta",
   "sell_items": [
-    "minecraft:terracotta"
+    "minecraft:terracotta",
+    {
+      "id": "#ruralroutes:candidate/biome/savanna/dye_decor",
+      "pick": 1
+    },
+    {
+      "id": "#ruralroutes:candidate/theme/savanna_terracotta/kiln_goods",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:yellow_glazed_terracotta"

@@ -1,0 +1,20 @@
+{
+  "values": [
+    "#c:netherracks",
+    "#c:bricks/nether",
+    "#c:gems/quartz",
+    "#c:dusts/glowstone",
+    "#c:crops/nether_wart",
+    "#c:rods/blaze",
+    "#c:ingots/netherite",
+    "#minecraft:crimson_stems",
+    "#minecraft:warped_stems",
+    "minecraft:soul_sand",
+    "minecraft:soul_soil",
+    "minecraft:blackstone",
+    "minecraft:crimson_planks",
+    "minecraft:warped_planks",
+    "minecraft:magma_cream",
+    "minecraft:ghast_tear"
+  ]
+}

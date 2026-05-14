@@ -1,11 +1,20 @@
 {
   "biome": "minecraft:taiga",
   "buy_items": [
-    "minecraft:iron_sword"
+    "minecraft:iron_sword",
+    "minecraft:iron_axe"
   ],
   "name": "ruralroutes:taiga_fur",
   "sell_items": [
-    "minecraft:leather"
+    "minecraft:leather",
+    {
+      "id": "#ruralroutes:candidate/biome/taiga/leather_fiber",
+      "pick": 1
+    },
+    {
+      "id": "#ruralroutes:candidate/theme/taiga_fur/fur_goods",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:campfire"

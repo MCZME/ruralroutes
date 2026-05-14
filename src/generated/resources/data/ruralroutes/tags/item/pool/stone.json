@@ -1,0 +1,11 @@
+{
+  "values": [
+    "#c:stones",
+    "#c:cobblestones/normal",
+    "#c:cobblestones/deepslate",
+    "#c:sands",
+    "#c:gravels",
+    "#c:sandstone/uncolored_blocks",
+    "#c:sandstone/red_blocks"
+  ]
+}

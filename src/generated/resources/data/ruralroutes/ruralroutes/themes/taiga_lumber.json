@@ -1,11 +1,17 @@
 {
   "biome": "minecraft:taiga",
   "buy_items": [
-    "minecraft:iron_ingot"
+    "minecraft:iron_ingot",
+    "minecraft:coal"
   ],
   "name": "ruralroutes:taiga_lumber",
   "sell_items": [
-    "minecraft:spruce_log"
+    "minecraft:spruce_log",
+    "minecraft:charcoal",
+    {
+      "id": "#ruralroutes:candidate/biome/taiga/wood",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:spruce_boat"

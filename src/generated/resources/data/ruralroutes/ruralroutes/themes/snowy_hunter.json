@@ -1,11 +1,20 @@
 {
   "biome": "minecraft:snowy_plains",
   "buy_items": [
-    "minecraft:iron_sword"
+    "minecraft:iron_sword",
+    "minecraft:spruce_log"
   ],
   "name": "ruralroutes:snowy_hunter",
   "sell_items": [
-    "minecraft:beef"
+    "minecraft:beef",
+    {
+      "id": "#ruralroutes:candidate/biome/snowy/leather_fiber",
+      "pick": 1
+    },
+    {
+      "id": "#ruralroutes:candidate/theme/snowy_hunter/hunter_goods",
+      "pick": 1
+    }
   ],
   "theme_specialties": [
     "minecraft:bone_block"

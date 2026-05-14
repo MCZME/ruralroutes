@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 主题价格修正解析器
  * 缓存主题下物品的价格修正，避免每个槽位反复遍历 price_modifiers。
+ * 主题修正只应用首个命中的规则；市场事件的叠加在其他模块单独处理。
  * 缓存在主题 reload 和标签 reload 时失效。
  */
 public final class ThemePriceModifierResolver {
@@ -32,7 +33,7 @@ public final class ThemePriceModifierResolver {
      * 解析规则：
      * 1. 精确物品修正优先（如 "minecraft:bread"）
      * 2. 标签修正其次（如 "#ruralroutes:pool/crop"）
-     * 3. 多标签命中时使用主题文件中第一个匹配项
+     * 3. 多标签命中时使用主题文件中第一个匹配项，后续规则不再生效
      * 4. 无匹配时返回默认修正（sell=1.0, buy=1.0）
      *
      * @param template 主题模板
@@ -88,7 +89,7 @@ public final class ThemePriceModifierResolver {
         }
 
         // 2. 遍历标签匹配（使用第一个匹配项）
-        // price_modifiers 使用 LinkedHashMap 保证 JSON 顺序
+        // 规则声明顺序有业务意义：首个命中后即停止继续匹配
         for (Map.Entry<String, ThemeTemplate.PriceModifier> entry : modifiers.entrySet()) {
             String ref = entry.getKey();
             if (ref.startsWith("#") && TagLookupCache.matchesItem(stack, ref)) {
