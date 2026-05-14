@@ -1,22 +1,30 @@
 package github.mczme.ruralroutes.client.gui.screen;
 
+import github.mczme.ruralroutes.Config;
+import github.mczme.ruralroutes.blockentity.RumorBoardBlockEntity;
 import github.mczme.ruralroutes.client.gui.component.StickyNoteWidget;
+import github.mczme.ruralroutes.core.cycle.CycleManager;
+import github.mczme.ruralroutes.core.market.MarketState;
+import github.mczme.ruralroutes.core.rumor.RumorEntry;
+import github.mczme.ruralroutes.core.rumor.RumorGenerator;
 import github.mczme.ruralroutes.core.rumor.StickyNoteLayout;
 import github.mczme.ruralroutes.core.rumor.StickyNoteLayoutGenerator;
-import github.mczme.ruralroutes.menu.RumorBoardMenu;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * 传闻板 GUI 屏幕
  * 便签风格，杂乱分布，奇偶分层
  */
-public class RumorBoardScreen extends AbstractContainerScreen<RumorBoardMenu> {
+public class RumorBoardScreen extends Screen {
 
     // GUI 尺寸常量
     private static final int GUI_WIDTH = 280;
@@ -42,34 +50,44 @@ public class RumorBoardScreen extends AbstractContainerScreen<RumorBoardMenu> {
     private static final int BACKGROUND_COLOR = 0xCC4A3728;  // 深棕木纹
     private static final int BORDER_COLOR = 0xFF8B7355;      // 边框颜色
 
+    private final BlockPos blockPos;
+    private final MarketState marketState;
+    private final Random random = new Random();
     private final List<StickyNoteWidget> noteWidgets = new ArrayList<>();
+    private final List<Component> displayTexts = new ArrayList<>();
+    private List<StickyNoteLayout> layouts = new ArrayList<>();
+    private String timeRemainingDesc = "";
+    private int leftPos;
+    private int topPos;
     private boolean dataCollected = false;
 
-    public RumorBoardScreen(RumorBoardMenu menu, Inventory playerInventory, Component title) {
-        super(menu, playerInventory, title);
-        this.imageWidth = GUI_WIDTH;
-        this.imageHeight = GUI_HEIGHT;
+    public RumorBoardScreen(BlockPos blockPos, MarketState marketState) {
+        super(Component.translatable("block.ruralroutes.rumor_board"));
+        this.blockPos = blockPos;
+        this.marketState = marketState;
     }
 
     @Override
     protected void init() {
         super.init();
-        leftPos = (this.width - GUI_WIDTH) / 2;
-        topPos = (this.height - GUI_HEIGHT) / 2;
+        this.leftPos = (this.width - GUI_WIDTH) / 2;
+        this.topPos = (this.height - GUI_HEIGHT) / 2;
 
         // 清除旧组件
         noteWidgets.clear();
+        displayTexts.clear();
+        layouts = new ArrayList<>();
+        timeRemainingDesc = "";
         dataCollected = false;
     }
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        renderBg(guiGraphics, partialTick, mouseX, mouseY);
+        renderBoard(guiGraphics);
 
         // 首次渲染时收集数据
-        if (!dataCollected) {
-            menu.collectClientData();
+        if (!dataCollected && collectClientData()) {
             dataCollected = true;
             buildNoteWidgets();
         }
@@ -86,9 +104,6 @@ public class RumorBoardScreen extends AbstractContainerScreen<RumorBoardMenu> {
      */
     private void buildNoteWidgets() {
         noteWidgets.clear();
-
-        List<Component> displayTexts = menu.getDisplayTexts();
-        List<StickyNoteLayout> layouts = menu.getLayouts();
 
         for (int i = 0; i < displayTexts.size(); i++) {
             StickyNoteLayout layout = (i < layouts.size()) ? layouts.get(i) : null;
@@ -115,8 +130,6 @@ public class RumorBoardScreen extends AbstractContainerScreen<RumorBoardMenu> {
      * 按层级渲染便签
      */
     private void renderNotesByLayer(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        List<StickyNoteLayout> layouts = menu.getLayouts();
-
         // 先渲染底层（layer 0）
         for (int i = 0; i < noteWidgets.size(); i++) {
             StickyNoteWidget widget = noteWidgets.get(i);
@@ -152,22 +165,88 @@ public class RumorBoardScreen extends AbstractContainerScreen<RumorBoardMenu> {
         guiGraphics.drawCenteredString(font, this.title, leftPos + GUI_WIDTH / 2, topPos + 5, 0xFFFFFF);
 
         // 绘制周期剩余时间
-        String timeDesc = menu.getTimeRemainingDesc();
-        if (!timeDesc.isEmpty()) {
+        if (!timeRemainingDesc.isEmpty()) {
             guiGraphics.drawCenteredString(font,
-                    Component.translatable("gui.ruralroutes.rumor_board.refresh_in", timeDesc),
+                    Component.translatable("gui.ruralroutes.rumor_board.refresh_in", timeRemainingDesc),
                     leftPos + GUI_WIDTH / 2, topPos + GUI_HEIGHT - 12,
                     0xAAAAAA);
         }
     }
 
-    @Override
-    protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
+    private void renderBoard(GuiGraphics guiGraphics) {
         // 绘制木板背景
         guiGraphics.fill(leftPos, topPos, leftPos + GUI_WIDTH, topPos + GUI_HEIGHT, BACKGROUND_COLOR);
 
         // 绘制边框
         guiGraphics.renderOutline(leftPos, topPos, GUI_WIDTH, GUI_HEIGHT, BORDER_COLOR);
+    }
+
+    /**
+     * 客户端：收集数据
+     * 在 Screen 渲染时调用，确保客户端已完全初始化
+     */
+    private boolean collectClientData() {
+        if (minecraft == null || minecraft.level == null) {
+            return false;
+        }
+
+        Level level = minecraft.level;
+        long effectiveTime = CycleManager.getEffectiveTime(level);
+        long cycleIndex = marketState.cycleIndex();
+
+        BlockEntity be = level.getBlockEntity(blockPos);
+
+        // 缓存命中：周期未变，复用已有数据
+        if (be instanceof RumorBoardBlockEntity rumorBoard && rumorBoard.hasRumorCacheFor(cycleIndex)) {
+            List<RumorEntry> cachedRumors = rumorBoard.getCachedRumors();
+            displayTexts.clear();
+            random.setSeed(StickyNoteLayoutGenerator.generateSeed(cycleIndex, blockPos));
+            for (RumorEntry rumor : cachedRumors) {
+                displayTexts.add(rumor.getDisplayText(random));
+            }
+            layouts = rumorBoard.getLayouts();
+            timeRemainingDesc = calculateTimeRemaining(effectiveTime);
+            return true;
+        }
+
+        random.setSeed(StickyNoteLayoutGenerator.generateSeed(cycleIndex, blockPos));
+
+        List<RumorEntry> rumors = RumorGenerator.generateFromMarketState(marketState, random);
+
+        displayTexts.clear();
+        for (RumorEntry rumor : rumors) {
+            displayTexts.add(rumor.getDisplayText(random));
+        }
+
+        if (be instanceof RumorBoardBlockEntity rumorBoard) {
+            layouts = rumorBoard.getOrGenerateLayouts(rumors.size(), cycleIndex, random);
+            rumorBoard.setRumorCache(cycleIndex, rumors);
+        } else {
+            layouts = StickyNoteLayoutGenerator.generate(rumors.size(), random);
+        }
+
+        timeRemainingDesc = calculateTimeRemaining(effectiveTime);
+        return true;
+    }
+
+    /**
+     * 计算周期剩余时间描述
+     */
+    private String calculateTimeRemaining(long effectiveTime) {
+        long cycleLength = Config.getCycleLengthInTicks();
+        long ticksRemaining = cycleLength - (effectiveTime % cycleLength);
+
+        // 转换为游戏日和小时（24000 ticks = 1 游戏日，1000 ticks = 1 小时）
+        long daysRemaining = ticksRemaining / 24000;
+        long hoursRemaining = (ticksRemaining % 24000) / 1000;
+
+        if (daysRemaining > 0) {
+            return Component.translatable("gui.ruralroutes.rumor_board.time_days", daysRemaining).getString();
+        } else if (hoursRemaining > 0) {
+            return Component.translatable("gui.ruralroutes.rumor_board.time_hours", hoursRemaining).getString();
+        } else {
+            return Component.translatable("gui.ruralroutes.rumor_board.time_soon").getString();
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package github.mczme.ruralroutes.network;
 
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.network.packet.OpenRumorBoardPayload;
 import github.mczme.ruralroutes.network.packet.PendingTradeSyncPayload;
 import github.mczme.ruralroutes.network.packet.TradeRequestPayload;
 import github.mczme.ruralroutes.network.packet.TradeSlotSyncPayload;
@@ -32,5 +33,9 @@ public class NetworkHandler {
         // 暂存区交易同步（服务端→客户端）
         registrar.playToClient(PendingTradeSyncPayload.TYPE, PendingTradeSyncPayload.STREAM_CODEC,
             PendingTradeSyncPayload::handleClient);
+
+        // 打开传闻板界面（服务端→客户端）
+        registrar.playToClient(OpenRumorBoardPayload.TYPE, OpenRumorBoardPayload.STREAM_CODEC,
+            OpenRumorBoardPayload::handleClient);
     }
 }

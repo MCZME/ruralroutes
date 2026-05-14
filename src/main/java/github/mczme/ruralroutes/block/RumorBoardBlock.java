@@ -1,10 +1,12 @@
 package github.mczme.ruralroutes.block;
 
 import github.mczme.ruralroutes.blockentity.RumorBoardBlockEntity;
+import github.mczme.ruralroutes.core.cycle.CycleManager;
+import github.mczme.ruralroutes.core.market.MarketState;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
-import github.mczme.ruralroutes.menu.RumorBoardMenu;
+import github.mczme.ruralroutes.network.packet.OpenRumorBoardPayload;
 import github.mczme.ruralroutes.register.RRBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,10 +14,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -36,6 +35,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.UUID;
+
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * 传闻板方块 - 显示市场波动情报
@@ -81,62 +82,55 @@ public class RumorBoardBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
             Player player, BlockHitResult hit) {
-        if (!level.isClientSide) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof RumorBoardBlockEntity rumorBoard) {
-                // 获取贸易站位置
-                BlockPos stationPos = rumorBoard.getTradeStationPos();
-                if (stationPos == null) {
-                    // 尚未同步，提示激活贸易站
-                    player.displayClientMessage(
-                        Component.translatable("block.ruralroutes.rumor_board.not_activated"),
-                        true);
-                    return InteractionResult.FAIL;
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof RumorBoardBlockEntity rumorBoard) {
+            if (level.isClientSide) {
+                if (rumorBoard.getTradeStationPos() == null) {
+                    return InteractionResult.PASS;
                 }
 
-                // 检查贸易站所在区块是否已有商业节点数据
-                if (!CommercialNodeManager.hasNodeData(level, stationPos)) {
-                    player.displayClientMessage(
-                        Component.translatable("block.ruralroutes.rumor_board.not_activated"),
-                        true);
-                    return InteractionResult.FAIL;
-                }
-
-                CommercialNodeData nodeData = CommercialNodeManager.getNodeData(level, stationPos);
-
-                // 校验节点ID一致性
-                if (!validateRumorBoard(rumorBoard, nodeData)) {
-                    player.displayClientMessage(
-                        Component.translatable("block.ruralroutes.rumor_board.mismatch"),
-                        true);
-                    return InteractionResult.FAIL;
-                }
-
-                // 打开 GUI
-                openMenu(player, pos);
-                return InteractionResult.CONSUME;
+                return InteractionResult.SUCCESS;
             }
-        }
-        return InteractionResult.sidedSuccess(level.isClientSide);
-    }
 
-    /**
-     * 打开传闻板菜单
-     */
-    private void openMenu(Player player, BlockPos pos) {
-        if (player instanceof ServerPlayer) {
-            player.openMenu(new MenuProvider() {
-                @Override
-                public Component getDisplayName() {
-                    return Component.translatable("block.ruralroutes.rumor_board");
-                }
+            // 获取贸易站位置
+            BlockPos stationPos = rumorBoard.getTradeStationPos();
+            if (stationPos == null) {
+                // 尚未同步，提示激活贸易站
+                player.displayClientMessage(
+                    Component.translatable("block.ruralroutes.rumor_board.not_activated"),
+                    true);
+                return InteractionResult.FAIL;
+            }
 
-                @Override
-                public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
-                    return new RumorBoardMenu(containerId, inventory, pos);
-                }
-            }, buffer -> buffer.writeBlockPos(pos));
+            // 检查贸易站所在区块是否已有商业节点数据
+            if (!CommercialNodeManager.hasNodeData(level, stationPos)) {
+                player.displayClientMessage(
+                    Component.translatable("block.ruralroutes.rumor_board.not_activated"),
+                    true);
+                return InteractionResult.FAIL;
+            }
+
+            CommercialNodeData nodeData = CommercialNodeManager.getNodeData(level, stationPos);
+
+            // 校验节点ID一致性
+            if (!validateRumorBoard(rumorBoard, nodeData)) {
+                player.displayClientMessage(
+                    Component.translatable("block.ruralroutes.rumor_board.mismatch"),
+                    true);
+                return InteractionResult.FAIL;
+            }
+
+            if (player instanceof ServerPlayer serverPlayer) {
+                CycleManager cycleManager = CycleManager.get(serverPlayer.serverLevel());
+                MarketState marketState = cycleManager.getOrInitMarketState();
+                PacketDistributor.sendToPlayer(serverPlayer,
+                    new OpenRumorBoardPayload(pos, marketState));
+            }
+
+            return InteractionResult.CONSUME;
         }
+
+        return InteractionResult.PASS;
     }
 
     /**

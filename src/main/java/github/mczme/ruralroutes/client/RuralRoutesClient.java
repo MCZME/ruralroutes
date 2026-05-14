@@ -1,7 +1,6 @@
 package github.mczme.ruralroutes.client;
 
 import github.mczme.ruralroutes.client.gui.screen.ConfigToolScreen;
-import github.mczme.ruralroutes.client.gui.screen.RumorBoardScreen;
 import github.mczme.ruralroutes.client.gui.screen.TradeStationScreen;
 import github.mczme.ruralroutes.register.RRMenuTypes;
 import net.neoforged.api.distmarker.Dist;
@@ -19,6 +18,5 @@ public class RuralRoutesClient {
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(RRMenuTypes.CONFIG_TOOL.get(), ConfigToolScreen::new);
         event.register(RRMenuTypes.TRADE_STATION.get(), TradeStationScreen::new);
-        event.register(RRMenuTypes.RUMOR_BOARD.get(), RumorBoardScreen::new);
     }
 }

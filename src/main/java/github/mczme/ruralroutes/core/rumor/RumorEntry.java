@@ -3,6 +3,7 @@ package github.mczme.ruralroutes.core.rumor;
 import github.mczme.ruralroutes.core.market.MarketScopeType;
 import net.minecraft.network.chat.Component;
 
+import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -17,6 +18,7 @@ public record RumorEntry(
         String scopeTargetName,
         String directionKey
 ) {
+
     private static final String[] TEMPLATE_KEYS = {
             "rumor.template.1",
             "rumor.template.2",
@@ -24,6 +26,32 @@ public record RumorEntry(
             "rumor.template.4",
             "rumor.template.5"
     };
+
+    private static final String SEPARATOR = "|";
+
+    /**
+     * 序列化为字符串
+     */
+    public String serialize() {
+        return targetNameKey + SEPARATOR
+                + scopeType.name() + SEPARATOR
+                + scopeTargetName + SEPARATOR
+                + directionKey;
+    }
+
+    /**
+     * 从字符串反序列化
+     */
+    public static Optional<RumorEntry> deserialize(String data) {
+        String[] parts = data.split("\\|", -1);
+        if (parts.length != 4) return Optional.empty();
+        try {
+            MarketScopeType scopeType = MarketScopeType.valueOf(parts[1]);
+            return Optional.of(new RumorEntry(parts[0], scopeType, parts[2], parts[3]));
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
 
     /**
      * 获取完整的显示文本
