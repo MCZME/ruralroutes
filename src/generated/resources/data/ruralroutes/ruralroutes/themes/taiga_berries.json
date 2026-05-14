@@ -2,17 +2,105 @@
   "biome": "minecraft:taiga",
   "buy_items": [
     "minecraft:iron_ingot",
-    "minecraft:cyan_dye"
-  ],
-  "name": "ruralroutes:taiga_berries",
-  "sell_items": [
-    "minecraft:sweet_berries",
+    "minecraft:cyan_dye",
     {
-      "id": "#ruralroutes:candidate/biome/taiga/food",
-      "pick": 1
+      "items": [
+        "minecraft:bone_meal",
+        "minecraft:stone_hoe",
+        "minecraft:iron_hoe"
+      ],
+      "key": "taiga_berries/farming",
+      "pick": 2
     }
   ],
+  "name": "ruralroutes:taiga_berries",
+  "price_modifiers": {
+    "#ruralroutes:candidate/biome/taiga/food": {
+      "buy": 0.78,
+      "sell": 0.84
+    },
+    "#ruralroutes:pool/mineral": {
+      "buy": 1.14,
+      "sell": 1.06
+    },
+    "minecraft:glow_berries": {
+      "buy": 0.88,
+      "sell": 1.1
+    }
+  },
+  "sell_items": [
+    {
+      "items": [
+        "#ruralroutes:candidate/biome/taiga/food",
+        "minecraft:glow_berries"
+      ],
+      "key": "taiga_berries/produce",
+      "pick": 3
+    }
+  ],
+  "stock": {
+    "default": {
+      "max": 13,
+      "min": 7
+    },
+    "specific": {
+      "minecraft:cyan_dye": {
+        "max": 8,
+        "min": 4
+      },
+      "minecraft:glow_berries": {
+        "max": 6,
+        "min": 3
+      },
+      "minecraft:iron_ingot": {
+        "max": 14,
+        "min": 8
+      },
+      "taiga_berries/farming": {
+        "max": 14,
+        "min": 8
+      },
+      "taiga_berries/produce": {
+        "max": 22,
+        "min": 14
+      }
+    }
+  },
   "theme_specialties": [
     "minecraft:glow_berries"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 1,
+          "item": "minecraft:sweet_berries"
+        },
+        {
+          "count": 1,
+          "item": "minecraft:bone_meal"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:glow_berries"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "minecraft:iron_ingot",
+        "minecraft:iron_hoe"
+      ],
+      "side": "buy_from_player"
+    }
   ]
 }

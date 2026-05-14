@@ -83,6 +83,23 @@ public class ThemeBuilder {
     }
 
     /**
+     * 添加出售候选组，并在展开后随机抽取指定数量。
+     * 候选组可混用标签与精确物品。
+     */
+    public ThemeBuilder sellPick(int pick, String... items) {
+        sellItems.add(parseItemGroup(null, pick, items));
+        return this;
+    }
+
+    /**
+     * 添加带稳定来源键的出售候选组，并在展开后随机抽取指定数量。
+     */
+    public ThemeBuilder sellPick(String key, int pick, String... items) {
+        sellItems.add(parseItemGroup(key, pick, items));
+        return this;
+    }
+
+    /**
      * 添加收购物品
      */
     public ThemeBuilder buy(String... items) {
@@ -97,6 +114,23 @@ public class ThemeBuilder {
      */
     public ThemeBuilder buyPick(String item, int pick) {
         buyItems.add(parseItemRef(item, pick));
+        return this;
+    }
+
+    /**
+     * 添加收购候选组，并在展开后随机抽取指定数量。
+     * 候选组可混用标签与精确物品。
+     */
+    public ThemeBuilder buyPick(int pick, String... items) {
+        buyItems.add(parseItemGroup(null, pick, items));
+        return this;
+    }
+
+    /**
+     * 添加带稳定来源键的收购候选组，并在展开后随机抽取指定数量。
+     */
+    public ThemeBuilder buyPick(String key, int pick, String... items) {
+        buyItems.add(parseItemGroup(key, pick, items));
         return this;
     }
 
@@ -170,8 +204,8 @@ public class ThemeBuilder {
 
         // 添加默认货币到出售池和收购池
         if (withCurrency) {
-            finalSellItems.add(new ThemeTemplate.ItemReference("#ruralroutes:currency", Optional.empty()));
-            finalBuyItems.add(new ThemeTemplate.ItemReference("#ruralroutes:currency", Optional.empty()));
+            finalSellItems.add(ThemeTemplate.ItemReference.single("#ruralroutes:currency"));
+            finalBuyItems.add(ThemeTemplate.ItemReference.single("#ruralroutes:currency"));
         }
 
         return new ThemeTemplate(
@@ -212,15 +246,23 @@ public class ThemeBuilder {
     }
 
     private static ThemeTemplate.ItemReference parseItemRef(String str, Integer pick) {
+        return ThemeTemplate.ItemReference.single(normalizeRef(str), pick);
+    }
+
+    private static ThemeTemplate.ItemReference parseItemGroup(String key, int pick, String... items) {
+        List<String> refs = new ArrayList<>(items.length);
+        for (String item : items) {
+            refs.add(normalizeRef(item));
+        }
+        return ThemeTemplate.ItemReference.group(refs, pick, key);
+    }
+
+    private static String normalizeRef(String str) {
         if (str.startsWith("tag:")) {
             String tagId = str.substring(4);
-            // 如果已经有#前缀则保留，否则添加
-            if (!tagId.startsWith("#")) {
-                tagId = "#" + tagId;
-            }
-            return new ThemeTemplate.ItemReference(tagId, Optional.ofNullable(pick));
-        } else {
-            return new ThemeTemplate.ItemReference(str, Optional.ofNullable(pick));
+            return tagId.startsWith("#") ? tagId : "#" + tagId;
         }
+        return str;
     }
+
 }

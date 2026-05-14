@@ -2,21 +2,107 @@
   "biome": "minecraft:taiga",
   "buy_items": [
     "minecraft:iron_sword",
-    "minecraft:iron_axe"
+    "minecraft:iron_axe",
+    {
+      "items": [
+        "minecraft:stone_axe",
+        "minecraft:shears",
+        "minecraft:charcoal"
+      ],
+      "key": "taiga_fur/tools",
+      "pick": 2
+    }
   ],
   "name": "ruralroutes:taiga_fur",
+  "price_modifiers": {
+    "#ruralroutes:candidate/biome/taiga/leather_fiber": {
+      "buy": 0.76,
+      "sell": 0.82
+    },
+    "#ruralroutes:candidate/theme/taiga_fur/fur_goods": {
+      "buy": 0.82,
+      "sell": 0.88
+    },
+    "minecraft:campfire": {
+      "buy": 0.9,
+      "sell": 1.08
+    }
+  },
   "sell_items": [
     "minecraft:leather",
     {
       "id": "#ruralroutes:candidate/biome/taiga/leather_fiber",
-      "pick": 1
+      "pick": 2
     },
     {
       "id": "#ruralroutes:candidate/theme/taiga_fur/fur_goods",
-      "pick": 1
+      "pick": 2
     }
   ],
+  "stock": {
+    "default": {
+      "max": 13,
+      "min": 7
+    },
+    "specific": {
+      "#ruralroutes:candidate/biome/taiga/leather_fiber": {
+        "max": 22,
+        "min": 14
+      },
+      "#ruralroutes:candidate/theme/taiga_fur/fur_goods": {
+        "max": 20,
+        "min": 12
+      },
+      "minecraft:campfire": {
+        "max": 3,
+        "min": 1
+      },
+      "minecraft:leather": {
+        "max": 18,
+        "min": 12
+      },
+      "taiga_fur/tools": {
+        "max": 14,
+        "min": 8
+      }
+    }
+  },
   "theme_specialties": [
     "minecraft:campfire"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 1,
+          "item": "minecraft:leather"
+        },
+        {
+          "count": 1,
+          "item": "minecraft:charcoal"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:campfire"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "minecraft:iron_sword",
+        "minecraft:iron_axe",
+        "minecraft:shears"
+      ],
+      "side": "buy_from_player"
+    }
   ]
 }

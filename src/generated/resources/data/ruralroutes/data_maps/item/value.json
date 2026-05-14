@@ -1,85 +1,217 @@
 {
   "values": {
+    "#ruralroutes:pool/crop": {
+      "value": 2
+    },
+    "#ruralroutes:pool/dye_decor": {
+      "value": 4
+    },
+    "#ruralroutes:pool/end_goods": {
+      "value": 12
+    },
+    "#ruralroutes:pool/food": {
+      "value": 4
+    },
+    "#ruralroutes:pool/ice_snow": {
+      "value": 3
+    },
+    "#ruralroutes:pool/leather_fiber": {
+      "value": 4
+    },
+    "#ruralroutes:pool/mineral": {
+      "value": 8
+    },
+    "#ruralroutes:pool/nether_goods": {
+      "value": 10
+    },
+    "#ruralroutes:pool/ocean_goods": {
+      "value": 8
+    },
+    "#ruralroutes:pool/precious": {
+      "value": 60
+    },
+    "#ruralroutes:pool/stone": {
+      "value": 1
+    },
+    "#ruralroutes:pool/wood": {
+      "value": 2
+    },
     "minecraft:acacia_log": {
+      "value": 3
+    },
+    "minecraft:anvil": {
+      "value": 96
+    },
+    "minecraft:beef": {
       "value": 4
     },
-    "minecraft:birch_log": {
-      "value": 4
+    "minecraft:blue_ice": {
+      "value": 18
     },
-    "minecraft:bread": {
+    "minecraft:bone": {
+      "value": 2
+    },
+    "minecraft:bone_block": {
       "value": 6
     },
-    "minecraft:cherry_log": {
+    "minecraft:bone_meal": {
+      "value": 3
+    },
+    "minecraft:bread": {
+      "value": 5
+    },
+    "minecraft:bucket": {
+      "value": 12
+    },
+    "minecraft:cactus": {
+      "value": 2
+    },
+    "minecraft:campfire": {
+      "value": 8
+    },
+    "minecraft:carrot": {
+      "value": 2
+    },
+    "minecraft:charcoal": {
       "value": 4
     },
-    "minecraft:dark_oak_log": {
+    "minecraft:chiseled_sandstone": {
+      "value": 5
+    },
+    "minecraft:clay_ball": {
+      "value": 2
+    },
+    "minecraft:coal": {
       "value": 4
     },
-    "minecraft:diamond_axe": {
-      "value": 200
+    "minecraft:cooked_beef": {
+      "value": 6
     },
-    "minecraft:diamond_pickaxe": {
-      "value": 300
+    "minecraft:copper_ingot": {
+      "value": 8
     },
-    "minecraft:diamond_sword": {
-      "value": 200
+    "minecraft:cyan_dye": {
+      "value": 5
     },
-    "minecraft:golden_axe": {
-      "value": 80
+    "minecraft:diamond": {
+      "value": 40
+    },
+    "minecraft:emerald": {
+      "value": 24
+    },
+    "minecraft:feather": {
+      "value": 3
+    },
+    "minecraft:glass": {
+      "value": 4
+    },
+    "minecraft:glow_berries": {
+      "value": 8
+    },
+    "minecraft:gold_ingot": {
+      "value": 16
     },
     "minecraft:golden_carrot": {
-      "value": 100
+      "value": 40
     },
-    "minecraft:golden_pickaxe": {
-      "value": 120
-    },
-    "minecraft:golden_sword": {
-      "value": 80
+    "minecraft:ice": {
+      "value": 3
     },
     "minecraft:iron_axe": {
-      "value": 50
+      "value": 18
+    },
+    "minecraft:iron_hoe": {
+      "value": 14
+    },
+    "minecraft:iron_ingot": {
+      "value": 12
     },
     "minecraft:iron_pickaxe": {
-      "value": 75
+      "value": 20
     },
     "minecraft:iron_sword": {
-      "value": 50
+      "value": 18
     },
-    "minecraft:jungle_log": {
-      "value": 4
+    "minecraft:lapis_lazuli": {
+      "value": 6
     },
-    "minecraft:mangrove_log": {
-      "value": 4
+    "minecraft:leather": {
+      "value": 5
+    },
+    "minecraft:melon": {
+      "value": 2
     },
     "minecraft:oak_log": {
-      "value": 4
+      "value": 3
     },
     "minecraft:oak_planks": {
       "value": 2
     },
+    "minecraft:packed_ice": {
+      "value": 6
+    },
+    "minecraft:rabbit_hide": {
+      "value": 6
+    },
+    "minecraft:raw_copper": {
+      "value": 6
+    },
+    "minecraft:raw_gold": {
+      "value": 12
+    },
+    "minecraft:raw_iron": {
+      "value": 8
+    },
+    "minecraft:red_sandstone": {
+      "value": 2
+    },
+    "minecraft:redstone": {
+      "value": 6
+    },
+    "minecraft:saddle": {
+      "value": 48
+    },
+    "minecraft:salmon": {
+      "value": 5
+    },
+    "minecraft:sandstone": {
+      "value": 2
+    },
+    "minecraft:shears": {
+      "value": 14
+    },
+    "minecraft:spruce_boat": {
+      "value": 10
+    },
     "minecraft:spruce_log": {
-      "value": 4
+      "value": 3
+    },
+    "minecraft:stick": {
+      "value": 1
     },
     "minecraft:stone_axe": {
-      "value": 10
+      "value": 8
     },
-    "minecraft:stone_pickaxe": {
-      "value": 15
+    "minecraft:stone_hoe": {
+      "value": 6
     },
     "minecraft:stone_sword": {
-      "value": 10
+      "value": 8
+    },
+    "minecraft:sweet_berries": {
+      "value": 4
+    },
+    "minecraft:terracotta": {
+      "value": 4
     },
     "minecraft:wheat": {
       "value": 2
     },
-    "minecraft:wooden_axe": {
-      "value": 6
+    "minecraft:white_wool": {
+      "value": 4
     },
-    "minecraft:wooden_pickaxe": {
-      "value": 9
-    },
-    "minecraft:wooden_sword": {
-      "value": 6
+    "minecraft:yellow_glazed_terracotta": {
+      "value": 8
     },
     "ruralroutes:copper_coin": {
       "value": 1

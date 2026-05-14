@@ -2,21 +2,93 @@
   "biome": "minecraft:snowy_plains",
   "buy_items": [
     "minecraft:bread",
-    "minecraft:spruce_log"
+    "minecraft:spruce_log",
+    {
+      "items": [
+        "minecraft:charcoal",
+        "minecraft:cooked_beef",
+        "minecraft:oak_log"
+      ],
+      "key": "snowy_iceworks/supplies",
+      "pick": 2
+    }
   ],
   "name": "ruralroutes:snowy_iceworks",
+  "price_modifiers": {
+    "#ruralroutes:candidate/biome/snowy/ice_snow": {
+      "buy": 0.72,
+      "sell": 0.78
+    },
+    "#ruralroutes:candidate/theme/snowy_iceworks/ice_goods": {
+      "buy": 0.78,
+      "sell": 0.84
+    },
+    "minecraft:blue_ice": {
+      "buy": 0.86,
+      "sell": 1.14
+    }
+  },
   "sell_items": [
     "minecraft:ice",
     {
       "id": "#ruralroutes:candidate/biome/snowy/ice_snow",
-      "pick": 1
+      "pick": 2
     },
     {
       "id": "#ruralroutes:candidate/theme/snowy_iceworks/ice_goods",
-      "pick": 1
+      "pick": 2
     }
   ],
+  "stock": {
+    "default": {
+      "max": 12,
+      "min": 6
+    },
+    "specific": {
+      "#ruralroutes:candidate/biome/snowy/ice_snow": {
+        "max": 22,
+        "min": 14
+      },
+      "#ruralroutes:candidate/theme/snowy_iceworks/ice_goods": {
+        "max": 18,
+        "min": 12
+      },
+      "minecraft:blue_ice": {
+        "max": 2,
+        "min": 1
+      },
+      "minecraft:ice": {
+        "max": 18,
+        "min": 12
+      },
+      "snowy_iceworks/supplies": {
+        "max": 14,
+        "min": 8
+      }
+    }
+  },
   "theme_specialties": [
     "minecraft:blue_ice"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 2,
+          "item": "minecraft:packed_ice"
+        },
+        {
+          "count": 1,
+          "item": "minecraft:cooked_beef"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:blue_ice"
+        }
+      ]
+    }
   ]
 }

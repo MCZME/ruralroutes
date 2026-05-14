@@ -2,21 +2,101 @@
   "biome": "minecraft:desert",
   "buy_items": [
     "minecraft:bread",
-    "minecraft:oak_log"
+    "minecraft:oak_log",
+    {
+      "items": [
+        "minecraft:charcoal",
+        "minecraft:stick",
+        "minecraft:cooked_beef"
+      ],
+      "key": "desert_quarry/supplies",
+      "pick": 2
+    }
   ],
   "name": "ruralroutes:desert_quarry",
+  "price_modifiers": {
+    "#ruralroutes:candidate/biome/desert/stone": {
+      "buy": 0.72,
+      "sell": 0.78
+    },
+    "#ruralroutes:candidate/theme/desert_quarry/stonework": {
+      "buy": 0.78,
+      "sell": 0.84
+    },
+    "#ruralroutes:pool/food": {
+      "buy": 1.12,
+      "sell": 1.04
+    },
+    "#ruralroutes:pool/wood": {
+      "buy": 1.12,
+      "sell": 1.06
+    },
+    "minecraft:chiseled_sandstone": {
+      "buy": 0.86,
+      "sell": 1.1
+    }
+  },
   "sell_items": [
     "minecraft:sandstone",
     {
       "id": "#ruralroutes:candidate/biome/desert/stone",
-      "pick": 1
+      "pick": 3
     },
     {
       "id": "#ruralroutes:candidate/theme/desert_quarry/stonework",
-      "pick": 1
+      "pick": 2
     }
   ],
+  "stock": {
+    "default": {
+      "max": 18,
+      "min": 10
+    },
+    "specific": {
+      "#ruralroutes:candidate/biome/desert/stone": {
+        "max": 34,
+        "min": 22
+      },
+      "#ruralroutes:candidate/theme/desert_quarry/stonework": {
+        "max": 26,
+        "min": 16
+      },
+      "desert_quarry/supplies": {
+        "max": 16,
+        "min": 10
+      },
+      "minecraft:chiseled_sandstone": {
+        "max": 4,
+        "min": 2
+      },
+      "minecraft:sandstone": {
+        "max": 28,
+        "min": 18
+      }
+    }
+  },
   "theme_specialties": [
     "minecraft:chiseled_sandstone"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 2,
+          "item": "minecraft:red_sandstone"
+        },
+        {
+          "count": 1,
+          "item": "minecraft:stick"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:chiseled_sandstone"
+        }
+      ]
+    }
   ]
 }

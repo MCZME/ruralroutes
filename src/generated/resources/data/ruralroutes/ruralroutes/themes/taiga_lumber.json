@@ -2,18 +2,103 @@
   "biome": "minecraft:taiga",
   "buy_items": [
     "minecraft:iron_ingot",
-    "minecraft:coal"
+    "minecraft:coal",
+    {
+      "items": [
+        "minecraft:stone_axe",
+        "minecraft:iron_axe",
+        "minecraft:raw_iron"
+      ],
+      "key": "taiga_lumber/tools",
+      "pick": 2
+    }
   ],
   "name": "ruralroutes:taiga_lumber",
+  "price_modifiers": {
+    "#ruralroutes:candidate/biome/taiga/wood": {
+      "buy": 0.74,
+      "sell": 0.8
+    },
+    "#ruralroutes:pool/mineral": {
+      "buy": 1.16,
+      "sell": 1.08
+    },
+    "minecraft:spruce_boat": {
+      "buy": 0.88,
+      "sell": 1.1
+    }
+  },
   "sell_items": [
     "minecraft:spruce_log",
     "minecraft:charcoal",
     {
       "id": "#ruralroutes:candidate/biome/taiga/wood",
-      "pick": 1
+      "pick": 3
     }
   ],
+  "stock": {
+    "default": {
+      "max": 18,
+      "min": 10
+    },
+    "specific": {
+      "#ruralroutes:candidate/biome/taiga/wood": {
+        "max": 32,
+        "min": 20
+      },
+      "minecraft:charcoal": {
+        "max": 24,
+        "min": 14
+      },
+      "minecraft:spruce_boat": {
+        "max": 3,
+        "min": 1
+      },
+      "minecraft:spruce_log": {
+        "max": 26,
+        "min": 16
+      },
+      "taiga_lumber/tools": {
+        "max": 14,
+        "min": 8
+      }
+    }
+  },
   "theme_specialties": [
     "minecraft:spruce_boat"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 2,
+          "item": "minecraft:spruce_log"
+        },
+        {
+          "count": 1,
+          "item": "minecraft:charcoal"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:spruce_boat"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "#ruralroutes:pool/mineral",
+        "minecraft:iron_axe"
+      ],
+      "side": "buy_from_player"
+    }
   ]
 }

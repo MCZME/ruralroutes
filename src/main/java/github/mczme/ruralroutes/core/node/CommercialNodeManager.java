@@ -30,7 +30,7 @@ public class CommercialNodeManager {
 
     /**
      * 当前周期内实际入选的交易物品。
-     * sourceRefId 保留来源引用，便于 stock.specific 等规则继续按原引用匹配。
+     * sourceRefId 保留来源键，便于 stock.specific 等规则继续按原引用或候选组匹配。
      */
     private record SelectedTradeItem(
         String sourceRefId,
@@ -212,7 +212,7 @@ public class CommercialNodeManager {
 
         for (ResourceLocation specialtyId : specialties) {
             if (!stocks.containsKey(specialtyId)) {
-                int max = defaultMin + (int)(Math.random() * (defaultMax - defaultMin + 1));
+                int max = getStockMax(template, specialtyId.toString(), specialtyId, defaultMin, defaultMax);
                 stocks.put(specialtyId, StockEntry.full(max));
             }
         }
@@ -222,7 +222,7 @@ public class CommercialNodeManager {
      * 从主题模板候选中选出当前周期的实际交易物品。
      * 规则：
      * 1. 先展开引用为候选物品集合
-     * 2. 若引用声明了 pick，则从候选中随机抽取指定数量
+     * 2. 若引用声明了 pick，则从单引用或候选组展开后的全集中随机抽取指定数量
      * 3. 不同引用命中同一物品时，保留先出现的那条引用
      */
     private static List<SelectedTradeItem> selectTradeItems(List<ThemeTemplate.ItemReference> itemRefs) {
@@ -237,7 +237,7 @@ public class CommercialNodeManager {
 
             List<ResourceLocation> chosen = chooseItems(itemRef, candidates, random);
             for (ResourceLocation itemId : chosen) {
-                selected.putIfAbsent(itemId, new SelectedTradeItem(itemRef.id(), itemId));
+                selected.putIfAbsent(itemId, new SelectedTradeItem(itemRef.sourceKey(), itemId));
             }
         }
 
@@ -245,17 +245,23 @@ public class CommercialNodeManager {
     }
 
     private static List<ResourceLocation> resolveItemCandidates(ThemeTemplate.ItemReference itemRef) {
-        List<ResourceLocation> candidates = TagLookupCache.getItems(itemRef.id()).stream()
-            .map(BuiltInRegistries.ITEM::getKey)
-            .filter(Objects::nonNull)
-            .sorted(Comparator.comparing(ResourceLocation::toString))
-            .toList();
-
-        if (candidates.isEmpty()) {
-            RuralRoutes.LOGGER.warn("Theme item reference resolved to empty set: {}", itemRef.id());
+        Set<ResourceLocation> candidates = new LinkedHashSet<>();
+        for (String ref : itemRef.refs()) {
+            for (Item item : TagLookupCache.getItems(ref)) {
+                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+                if (itemId != null) {
+                    candidates.add(itemId);
+                }
+            }
         }
 
-        return candidates;
+        if (candidates.isEmpty()) {
+            RuralRoutes.LOGGER.warn("Theme item reference resolved to empty set: {}", itemRef.debugLabel());
+        }
+
+        return candidates.stream()
+            .sorted(Comparator.comparing(ResourceLocation::toString))
+            .toList();
     }
 
     private static List<ResourceLocation> chooseItems(ThemeTemplate.ItemReference itemRef,
@@ -274,9 +280,11 @@ public class CommercialNodeManager {
     }
 
     private static List<ResourceLocation> toItemIds(List<SelectedTradeItem> selectedItems) {
-        return selectedItems.stream()
-            .map(SelectedTradeItem::itemId)
-            .toList();
+        List<ResourceLocation> itemIds = new ArrayList<>(selectedItems.size());
+        for (SelectedTradeItem selectedItem : selectedItems) {
+            itemIds.add(selectedItem.itemId());
+        }
+        return itemIds;
     }
 
     /**
@@ -360,17 +368,25 @@ public class CommercialNodeManager {
                     return randomInRange(range);
                 }
 
-                // 其次匹配标签ID（带#前缀）
-                String tagKeyWithPrefix = itemRefId.startsWith("#") ? itemRefId : "#" + itemRefId;
-                if (specific.containsKey(tagKeyWithPrefix)) {
-                    ThemeTemplate.StockRange range = specific.get(tagKeyWithPrefix);
+                // 其次匹配来源键原样（适用于显式 key 或单引用）
+                if (specific.containsKey(itemRefId)) {
+                    ThemeTemplate.StockRange range = specific.get(itemRefId);
                     return randomInRange(range);
                 }
 
-                // 最后匹配标签ID（不带#前缀）
-                String tagKeyNoPrefix = itemRefId.startsWith("#") ? itemRefId.substring(1) : itemRefId;
-                if (specific.containsKey(tagKeyNoPrefix)) {
-                    ThemeTemplate.StockRange range = specific.get(tagKeyNoPrefix);
+                // 最后匹配标签ID去前缀形式（仅对标签来源生效）
+                if (itemRefId.startsWith("#")) {
+                    String tagKeyNoPrefix = itemRefId.substring(1);
+                    if (specific.containsKey(tagKeyNoPrefix)) {
+                        ThemeTemplate.StockRange range = specific.get(tagKeyNoPrefix);
+                        return randomInRange(range);
+                    }
+                }
+
+                // 兼容旧逻辑：对单标签来源继续允许不带#写入后自动补前缀匹配
+                String legacyTagKeyWithPrefix = itemRefId.startsWith("#") ? itemRefId : "#" + itemRefId;
+                if (!legacyTagKeyWithPrefix.equals(itemRefId) && specific.containsKey(legacyTagKeyWithPrefix)) {
+                    ThemeTemplate.StockRange range = specific.get(legacyTagKeyWithPrefix);
                     return randomInRange(range);
                 }
             }

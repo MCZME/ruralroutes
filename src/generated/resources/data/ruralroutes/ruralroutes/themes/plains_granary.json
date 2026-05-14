@@ -3,18 +3,113 @@
   "buy_items": [
     "minecraft:wheat",
     "minecraft:iron_ingot",
-    "minecraft:coal"
-  ],
-  "name": "ruralroutes:plains_granary",
-  "sell_items": [
-    "minecraft:bread",
-    "minecraft:oak_planks",
+    "minecraft:coal",
     {
-      "id": "#ruralroutes:candidate/biome/plains/crop",
-      "pick": 1
+      "items": [
+        "minecraft:raw_iron",
+        "minecraft:charcoal",
+        "minecraft:stone_hoe"
+      ],
+      "key": "plains_granary/procurement",
+      "pick": 2
     }
   ],
+  "name": "ruralroutes:plains_granary",
+  "price_modifiers": {
+    "#ruralroutes:candidate/biome/plains/crop": {
+      "buy": 0.76,
+      "sell": 0.82
+    },
+    "#ruralroutes:candidate/biome/plains/food": {
+      "buy": 0.86,
+      "sell": 0.92
+    },
+    "#ruralroutes:pool/mineral": {
+      "buy": 1.16,
+      "sell": 1.1
+    },
+    "minecraft:golden_carrot": {
+      "buy": 0.84,
+      "sell": 1.12
+    }
+  },
+  "sell_items": [
+    "minecraft:oak_planks",
+    {
+      "items": [
+        "minecraft:bread",
+        "#ruralroutes:candidate/biome/plains/crop"
+      ],
+      "key": "plains_granary/staples",
+      "pick": 3
+    }
+  ],
+  "stock": {
+    "default": {
+      "max": 18,
+      "min": 10
+    },
+    "specific": {
+      "minecraft:golden_carrot": {
+        "max": 3,
+        "min": 1
+      },
+      "minecraft:oak_planks": {
+        "max": 20,
+        "min": 12
+      },
+      "minecraft:wheat": {
+        "max": 30,
+        "min": 18
+      },
+      "plains_granary/procurement": {
+        "max": 16,
+        "min": 10
+      },
+      "plains_granary/staples": {
+        "max": 34,
+        "min": 22
+      }
+    }
+  },
   "theme_specialties": [
     "minecraft:golden_carrot"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 8,
+          "item": "minecraft:carrot"
+        },
+        {
+          "count": 2,
+          "item": "minecraft:bread"
+        },
+        {
+          "count": 6,
+          "item": "minecraft:wheat"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:golden_carrot"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "#ruralroutes:pool/mineral"
+      ],
+      "side": "buy_from_player"
+    }
   ]
 }

@@ -13,6 +13,7 @@ import github.mczme.ruralroutes.core.trade.TradeSide;
 import github.mczme.ruralroutes.core.trade.CurrencyBasketComposer;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
+import github.mczme.ruralroutes.core.util.TagLookupCache;
 import github.mczme.ruralroutes.menu.container.TradeDisplayContainer;
 import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
 import github.mczme.ruralroutes.menu.slot.TradeSlot;
@@ -254,6 +255,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
         }
 
         String itemIdStr = itemId.toString();
+        ItemStack contractStack = createItemStack(itemId);
 
         for (ThemeTemplate.TradeContractEntry entry : theme.tradeContracts().get()) {
             if (entry instanceof ThemeTemplate.FixedTradeEntry fixedEntry) {
@@ -274,7 +276,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
                 // 动态货币篮：检查 side 和 items
                 if (basketEntry.side() == side) {
                     for (String itemPattern : basketEntry.items()) {
-                        if (itemPattern.equals(itemIdStr) || itemPattern.equals("*")) {
+                        if (itemPattern.equals("*") || TagLookupCache.matchesItem(contractStack, itemPattern)) {
                             int price = calculatePriceForContract(itemId, side);
                             List<ItemStack> priceStacks = CurrencyBasketComposer.compose(
                                 price,
@@ -427,7 +429,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
             side
         );
 
-        // 使用默认货币篮配置
+        // 使用默认货币篮配置：仅基础货币
         List<String> acceptedCurrencies = List.of("#ruralroutes:currency_base");
         ThemeTemplate.CompositionStrategy strategy = ThemeTemplate.CompositionStrategy.LARGEST_FIRST;
 

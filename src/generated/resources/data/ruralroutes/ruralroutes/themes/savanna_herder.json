@@ -2,21 +2,107 @@
   "biome": "minecraft:savanna",
   "buy_items": [
     "minecraft:stone_axe",
-    "minecraft:iron_sword"
+    "minecraft:iron_sword",
+    {
+      "items": [
+        "minecraft:iron_axe",
+        "minecraft:shears",
+        "minecraft:stone_sword"
+      ],
+      "key": "savanna_herder/tools",
+      "pick": 2
+    }
   ],
   "name": "ruralroutes:savanna_herder",
+  "price_modifiers": {
+    "#ruralroutes:candidate/biome/savanna/food": {
+      "buy": 0.88,
+      "sell": 0.94
+    },
+    "#ruralroutes:candidate/biome/savanna/leather_fiber": {
+      "buy": 0.76,
+      "sell": 0.82
+    },
+    "minecraft:rabbit_hide": {
+      "buy": 0.88,
+      "sell": 1.08
+    }
+  },
   "sell_items": [
     "minecraft:leather",
     {
       "id": "#ruralroutes:candidate/biome/savanna/leather_fiber",
-      "pick": 1
+      "pick": 2
     },
     {
       "id": "#ruralroutes:candidate/biome/savanna/food",
-      "pick": 1
+      "pick": 2
     }
   ],
+  "stock": {
+    "default": {
+      "max": 14,
+      "min": 8
+    },
+    "specific": {
+      "#ruralroutes:candidate/biome/savanna/food": {
+        "max": 20,
+        "min": 12
+      },
+      "#ruralroutes:candidate/biome/savanna/leather_fiber": {
+        "max": 24,
+        "min": 16
+      },
+      "minecraft:leather": {
+        "max": 20,
+        "min": 14
+      },
+      "minecraft:rabbit_hide": {
+        "max": 4,
+        "min": 2
+      },
+      "savanna_herder/tools": {
+        "max": 14,
+        "min": 8
+      }
+    }
+  },
   "theme_specialties": [
     "minecraft:rabbit_hide"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 1,
+          "item": "minecraft:feather"
+        },
+        {
+          "count": 1,
+          "item": "minecraft:cooked_beef"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:rabbit_hide"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "minecraft:iron_sword",
+        "minecraft:iron_axe",
+        "minecraft:shears"
+      ],
+      "side": "buy_from_player"
+    }
   ]
 }

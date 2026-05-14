@@ -2,18 +2,107 @@
   "biome": "minecraft:savanna",
   "buy_items": [
     "minecraft:iron_ingot",
-    "minecraft:coal"
+    "minecraft:coal",
+    {
+      "items": [
+        "minecraft:stone_axe",
+        "minecraft:iron_axe",
+        "minecraft:raw_iron"
+      ],
+      "key": "savanna_woodworks/tools",
+      "pick": 2
+    }
   ],
   "name": "ruralroutes:savanna_woodworks",
+  "price_modifiers": {
+    "#ruralroutes:candidate/biome/savanna/wood": {
+      "buy": 0.74,
+      "sell": 0.8
+    },
+    "#ruralroutes:pool/mineral": {
+      "buy": 1.16,
+      "sell": 1.08
+    },
+    "minecraft:saddle": {
+      "buy": 0.86,
+      "sell": 1.12
+    }
+  },
   "sell_items": [
     "minecraft:acacia_log",
     "minecraft:charcoal",
     {
       "id": "#ruralroutes:candidate/biome/savanna/wood",
-      "pick": 1
+      "pick": 3
     }
   ],
+  "stock": {
+    "default": {
+      "max": 18,
+      "min": 10
+    },
+    "specific": {
+      "#ruralroutes:candidate/biome/savanna/wood": {
+        "max": 32,
+        "min": 20
+      },
+      "minecraft:acacia_log": {
+        "max": 26,
+        "min": 16
+      },
+      "minecraft:charcoal": {
+        "max": 24,
+        "min": 14
+      },
+      "minecraft:saddle": {
+        "max": 2,
+        "min": 1
+      },
+      "savanna_woodworks/tools": {
+        "max": 14,
+        "min": 8
+      }
+    }
+  },
   "theme_specialties": [
     "minecraft:saddle"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 4,
+          "item": "minecraft:leather"
+        },
+        {
+          "count": 4,
+          "item": "minecraft:acacia_log"
+        },
+        {
+          "count": 4,
+          "item": "minecraft:charcoal"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:saddle"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "#ruralroutes:pool/mineral",
+        "minecraft:iron_axe"
+      ],
+      "side": "buy_from_player"
+    }
   ]
 }

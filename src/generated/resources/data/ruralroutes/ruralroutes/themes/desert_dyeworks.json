@@ -2,21 +2,101 @@
   "biome": "minecraft:desert",
   "buy_items": [
     "minecraft:clay_ball",
-    "minecraft:bone_meal"
+    "minecraft:bone_meal",
+    {
+      "items": [
+        "minecraft:cactus",
+        "minecraft:sand",
+        "minecraft:charcoal"
+      ],
+      "key": "desert_dyeworks/inputs",
+      "pick": 2
+    }
   ],
   "name": "ruralroutes:desert_dyeworks",
+  "price_modifiers": {
+    "#ruralroutes:candidate/biome/desert/dye_decor": {
+      "buy": 0.78,
+      "sell": 0.84
+    },
+    "#ruralroutes:candidate/theme/desert_dyeworks/finished_goods": {
+      "buy": 0.84,
+      "sell": 0.9
+    },
+    "minecraft:cyan_dye": {
+      "buy": 0.88,
+      "sell": 1.08
+    }
+  },
   "sell_items": [
     "minecraft:terracotta",
     {
       "id": "#ruralroutes:candidate/biome/desert/dye_decor",
-      "pick": 1
+      "pick": 2
     },
     {
       "id": "#ruralroutes:candidate/theme/desert_dyeworks/finished_goods",
-      "pick": 1
+      "pick": 2
     }
   ],
+  "stock": {
+    "default": {
+      "max": 12,
+      "min": 6
+    },
+    "specific": {
+      "#ruralroutes:candidate/biome/desert/dye_decor": {
+        "max": 20,
+        "min": 12
+      },
+      "#ruralroutes:candidate/theme/desert_dyeworks/finished_goods": {
+        "max": 16,
+        "min": 10
+      },
+      "desert_dyeworks/inputs": {
+        "max": 16,
+        "min": 10
+      },
+      "minecraft:bone_meal": {
+        "max": 20,
+        "min": 12
+      },
+      "minecraft:clay_ball": {
+        "max": 24,
+        "min": 14
+      },
+      "minecraft:cyan_dye": {
+        "max": 4,
+        "min": 2
+      },
+      "minecraft:terracotta": {
+        "max": 20,
+        "min": 12
+      }
+    }
+  },
   "theme_specialties": [
     "minecraft:cyan_dye"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 1,
+          "item": "minecraft:cactus"
+        },
+        {
+          "count": 1,
+          "item": "minecraft:bone_meal"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:cyan_dye"
+        }
+      ]
+    }
   ]
 }

@@ -40,38 +40,109 @@ public record ThemeTemplate(
 
     /**
      * 物品引用，支持标签或精确物品。
-     * 可使用纯字符串，也可使用对象格式声明候选抽样数量。
+     * 可使用纯字符串、单引用对象，或混合候选组对象。
      */
     public record ItemReference(
-        String id,               // 如 "#ruralroutes:pool/crop" 或 "minecraft:bread"
-        Optional<Integer> pick   // 展开候选后随机抽取的数量；缺省表示全部纳入
+        Optional<String> id,           // 单引用，如 "#ruralroutes:pool/crop" 或 "minecraft:bread"
+        Optional<List<String>> items,  // 混合候选组，可同时包含标签与精确物品
+        Optional<Integer> pick,        // 展开候选后随机抽取的数量；缺省表示全部纳入
+        Optional<String> key           // 可选来源键，供库存等后续逻辑稳定匹配
     ) {
+        public ItemReference {
+            id = id.map(String::strip).filter(str -> !str.isEmpty());
+            items = items.map(list -> List.copyOf(list.stream()
+                .map(String::strip)
+                .filter(str -> !str.isEmpty())
+                .toList()));
+            key = key.map(String::strip).filter(str -> !str.isEmpty());
+
+            boolean hasId = id.isPresent();
+            boolean hasItems = items.isPresent();
+            if (hasId == hasItems) {
+                throw new IllegalArgumentException("ItemReference must define exactly one of id or items");
+            }
+            if (items.isPresent() && items.get().isEmpty()) {
+                throw new IllegalArgumentException("ItemReference items cannot be empty");
+            }
+        }
+
         private static final Codec<ItemReference> OBJECT_CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-                Codec.STRING.fieldOf("id").forGetter(ItemReference::id),
-                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("pick").forGetter(ItemReference::pick)
+                Codec.STRING.optionalFieldOf("id").forGetter(ItemReference::id),
+                Codec.STRING.listOf().optionalFieldOf("items").forGetter(ItemReference::items),
+                Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("pick").forGetter(ItemReference::pick),
+                Codec.STRING.optionalFieldOf("key").forGetter(ItemReference::key)
             ).apply(instance, ItemReference::new)
         );
 
         public static final Codec<ItemReference> CODEC = Codec.either(Codec.STRING, OBJECT_CODEC)
             .xmap(
                 either -> either.map(
-                    id -> new ItemReference(id, Optional.empty()),
+                    ItemReference::single,
                     ref -> ref
                 ),
-                ref -> ref.pick().isPresent()
-                    ? Either.right(ref)
-                    : Either.left(ref.id())
+                ref -> ref.canUseStringShorthand()
+                    ? Either.left(ref.id().orElseThrow())
+                    : Either.right(ref)
             );
+
+        public static ItemReference single(String id) {
+            return new ItemReference(Optional.of(id), Optional.empty(), Optional.empty(), Optional.empty());
+        }
+
+        public static ItemReference single(String id, Integer pick) {
+            return new ItemReference(Optional.of(id), Optional.empty(), Optional.ofNullable(pick), Optional.empty());
+        }
+
+        public static ItemReference group(List<String> refs, Integer pick, String key) {
+            return new ItemReference(Optional.empty(), Optional.of(refs), Optional.ofNullable(pick), Optional.ofNullable(key));
+        }
+
+        /** 是否为单引用 */
+        public boolean isSingle() {
+            return id.isPresent();
+        }
+
+        /** 是否为候选组 */
+        public boolean isGroup() {
+            return items.isPresent();
+        }
+
+        /** 获取展开前的原始引用列表 */
+        public List<String> refs() {
+            return items.orElseGet(() -> List.of(id.orElseThrow()));
+        }
+
+        /** 获取运行时使用的稳定来源键 */
+        public String sourceKey() {
+            if (key.isPresent()) {
+                return key.get();
+            }
+            if (id.isPresent()) {
+                return id.get();
+            }
+            return "group:" + String.join("|", refs());
+        }
+
+        /** 获取用于日志的简短描述 */
+        public String debugLabel() {
+            return isSingle() ? id.orElse("<unknown>") : refs().toString();
+        }
+
+        /** 是否可序列化为字符串简写 */
+        public boolean canUseStringShorthand() {
+            return id.isPresent() && items.isEmpty() && pick.isEmpty() && key.isEmpty();
+        }
 
         /** 是否为标签引用 */
         public boolean isTag() {
-            return id.startsWith("#");
+            return id.map(ref -> ref.startsWith("#")).orElse(false);
         }
 
         /** 获取物品/标签 ID（不含 # 前缀） */
         public String itemId() {
-            return isTag() ? id.substring(1) : id;
+            String ref = id.orElseThrow(() -> new IllegalStateException("Grouped ItemReference has no single item id"));
+            return isTag() ? ref.substring(1) : ref;
         }
 
         /** 是否在展开候选后进行抽样 */
