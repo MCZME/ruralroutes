@@ -86,14 +86,10 @@ public class RuralRoutes {
     }
 
     private void onServerTick(ServerTickEvent.Post event) {
-        // 只处理主世界（CycleManager 存储在主世界）
         ServerLevel overworld = event.getServer().overworld();
         CycleManager cycleManager = CycleManager.get(overworld);
-        long gameTime = overworld.getGameTime();
 
-        // 检查周期是否推进
-        if (cycleManager.updateCurrentCycle(gameTime)) {
-            // 预先生成新周期的市场状态
+        if (cycleManager.updateCurrentCycle(overworld)) {
             cycleManager.getOrInitMarketState();
             LOGGER.info("Market state generated for new cycle {}", cycleManager.getCurrentCycle());
         }

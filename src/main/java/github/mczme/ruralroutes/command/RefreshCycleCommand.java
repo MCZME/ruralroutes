@@ -46,10 +46,8 @@ public class RefreshCycleCommand {
         ServerLevel level = source.getLevel();
 
         CycleManager cycleManager = CycleManager.get(level);
-        long currentGameTime = level.getGameTime();
-        long currentCycle = cycleManager.getCycleIndex(currentGameTime);
+        long currentCycle = cycleManager.getCycleIndex(level);
 
-        // 强制生成新的市场状态
         MarketState newState = MarketStateGenerator.generate(currentCycle + 1, new Random());
         cycleManager.setMarketState(newState);
         cycleManager.requestRefresh();
@@ -71,10 +69,8 @@ public class RefreshCycleCommand {
         ServerLevel level = source.getLevel();
 
         CycleManager cycleManager = CycleManager.get(level);
-        long currentGameTime = level.getGameTime();
-        long currentCycle = cycleManager.getCycleIndex(currentGameTime);
+        long currentCycle = cycleManager.getCycleIndex(level);
 
-        // 强制重新生成当前周期的市场状态
         MarketState newState = MarketStateGenerator.generate(currentCycle, new Random());
         cycleManager.setMarketState(newState);
         cycleManager.requestRefresh();
@@ -97,8 +93,7 @@ public class RefreshCycleCommand {
 
         CycleManager cycleManager = CycleManager.get(level);
         MarketState state = cycleManager.getMarketState();
-        long currentGameTime = level.getGameTime();
-        long currentCycle = cycleManager.getCycleIndex(currentGameTime);
+        long currentCycle = cycleManager.getCycleIndex(level);
 
         if (state == null) {
             source.sendSuccess(() -> Component.literal("当前无市场状态，周期索引: " + currentCycle), false);

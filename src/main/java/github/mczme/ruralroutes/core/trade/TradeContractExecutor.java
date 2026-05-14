@@ -127,7 +127,7 @@ public final class TradeContractExecutor {
         }
 
         CycleManager cycleManager = CycleManager.get(level);
-        long actualCycle = cycleManager.getCycleIndex(level.getGameTime());
+        long actualCycle = cycleManager.getCycleIndex(level);
         if (currentCycleIndex != actualCycle) {
             return TradeResult.fail(TradeResult.Reason.CYCLE_CHANGED, List.of());
         }

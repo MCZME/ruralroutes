@@ -228,7 +228,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
         // 初始化周期索引（服务端）
         if (player instanceof ServerPlayer serverPlayer) {
             CycleManager cycleManager = CycleManager.get(serverPlayer.serverLevel());
-            this.currentCycleIndex = cycleManager.getCycleIndex(serverPlayer.serverLevel().getGameTime());
+            this.currentCycleIndex = cycleManager.getCycleIndex(serverPlayer.serverLevel());
         }
     }
 
@@ -659,22 +659,21 @@ public class TradeStationMenu extends AbstractContainerMenu {
         } else if (result.reason() == TradeResult.Reason.CYCLE_CHANGED) {
             // 周期变化：刷新 GUI 并通知玩家
             CycleManager cycleManager = CycleManager.get(serverPlayer.serverLevel());
-            this.currentCycleIndex = cycleManager.getCycleIndex(serverPlayer.serverLevel().getGameTime());
+            this.currentCycleIndex = cycleManager.getCycleIndex(serverPlayer.serverLevel());
+
+            // 清空旧暂存区，避免继续持有上一周期的报价和清单引用
+            pendingSlots.clear();
+            isBuyTrade = true;
 
             // 刷新节点数据
             CommercialNodeData updatedData = CommercialNodeManager.getNodeData(player.level(), blockPos);
             if (updatedData != null) {
-                updateSlotsFromNodeData(updatedData);
-                // 重新计算价格
-                for (TradeSlot slot : sellSlots) {
-                    slot.setPrice(calculateSellPrice(slot.getItemId()));
-                }
-                for (TradeSlot slot : buySlots) {
-                    slot.setPrice(calculateBuyPrice(slot.getItemId()));
-                }
+                // 周期刷新后，清单和槽位数量都可能变化，因此直接按节点数据重建
+                initializeFromNodeData(updatedData);
             }
 
             syncSlotDataToClient(serverPlayer);
+            syncPendingTradeToClient();
             player.sendSystemMessage(Component.translatable("gui.ruralroutes.trade_station.error.cycle_changed"));
         } else {
             // 其他交易失败：发送失败原因

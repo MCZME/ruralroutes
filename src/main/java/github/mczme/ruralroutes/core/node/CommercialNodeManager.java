@@ -29,6 +29,15 @@ public class CommercialNodeManager {
     private CommercialNodeManager() {}
 
     /**
+     * 当前周期内实际入选的交易物品。
+     * sourceRefId 保留来源引用，便于 stock.specific 等规则继续按原引用匹配。
+     */
+    private record SelectedTradeItem(
+        String sourceRefId,
+        ResourceLocation itemId
+    ) {}
+
+    /**
      * 获取区块中的商业节点数据
      * @param level 世界
      * @param chunkPos 区块坐标
@@ -103,16 +112,20 @@ public class CommercialNodeManager {
         }
 
         UUID tradeNodeId = UUID.randomUUID();
-        List<ResourceLocation> sellItems = generateSellItems(template);
-        List<ResourceLocation> buyItems = generateBuyItems(template);
+        List<SelectedTradeItem> selectedSellItems = selectTradeItems(template.sellItems());
+        List<SelectedTradeItem> selectedBuyItems = selectTradeItems(template.buyItems());
+        List<ResourceLocation> sellItems = toItemIds(selectedSellItems);
+        List<ResourceLocation> buyItems = toItemIds(selectedBuyItems);
         List<ResourceLocation> specialties = generateSpecialties(template);
-        Map<ResourceLocation, StockEntry> stocks = initializeStocks(template);
+        Map<ResourceLocation, StockEntry> stocks = initializeStocks(template, selectedSellItems, selectedBuyItems);
 
         // 将特产加入出售列表和库存
         addSpecialtiesToSellItems(sellItems, specialties);
         addSpecialtiesToStocks(stocks, template, specialties);
 
-        long timestamp = level.getGameTime();
+        long timestamp = level instanceof ServerLevel serverLevel 
+            ? CycleManager.getEffectiveTime(serverLevel) 
+            : level.getGameTime();
 
         CommercialNodeData data = CommercialNodeData.create(tradeNodeId, themeName, sellItems, buyItems, specialties, stocks, timestamp);
 
@@ -206,44 +219,72 @@ public class CommercialNodeManager {
     }
 
     /**
-     * 从主题模板生成出售物品列表
-     * 将模板中的 ItemReference 转换为 ResourceLocation 列表
+     * 从主题模板候选中选出当前周期的实际交易物品。
+     * 规则：
+     * 1. 先展开引用为候选物品集合
+     * 2. 若引用声明了 pick，则从候选中随机抽取指定数量
+     * 3. 不同引用命中同一物品时，保留先出现的那条引用
      */
-    private static List<ResourceLocation> generateSellItems(ThemeTemplate template) {
-        List<ResourceLocation> sellItems = new ArrayList<>();
+    private static List<SelectedTradeItem> selectTradeItems(List<ThemeTemplate.ItemReference> itemRefs) {
+        Map<ResourceLocation, SelectedTradeItem> selected = new LinkedHashMap<>();
+        Random random = new Random();
 
-        for (ThemeTemplate.ItemReference itemRef : template.sellItems()) {
-            Set<Item> items = TagLookupCache.getItems(itemRef.id());
-            for (Item item : items) {
-                sellItems.add(BuiltInRegistries.ITEM.getKey(item));
+        for (ThemeTemplate.ItemReference itemRef : itemRefs) {
+            List<ResourceLocation> candidates = resolveItemCandidates(itemRef);
+            if (candidates.isEmpty()) {
+                continue;
+            }
+
+            List<ResourceLocation> chosen = chooseItems(itemRef, candidates, random);
+            for (ResourceLocation itemId : chosen) {
+                selected.putIfAbsent(itemId, new SelectedTradeItem(itemRef.id(), itemId));
             }
         }
 
-        return sellItems;
+        return List.copyOf(selected.values());
     }
 
-    /**
-     * 从主题模板生成收购物品列表
-     * 将模板中的 ItemReference 转换为 ResourceLocation 列表
-     */
-    private static List<ResourceLocation> generateBuyItems(ThemeTemplate template) {
-        List<ResourceLocation> buyItems = new ArrayList<>();
+    private static List<ResourceLocation> resolveItemCandidates(ThemeTemplate.ItemReference itemRef) {
+        List<ResourceLocation> candidates = TagLookupCache.getItems(itemRef.id()).stream()
+            .map(BuiltInRegistries.ITEM::getKey)
+            .filter(Objects::nonNull)
+            .sorted(Comparator.comparing(ResourceLocation::toString))
+            .toList();
 
-        for (ThemeTemplate.ItemReference itemRef : template.buyItems()) {
-            Set<Item> items = TagLookupCache.getItems(itemRef.id());
-            for (Item item : items) {
-                buyItems.add(BuiltInRegistries.ITEM.getKey(item));
-            }
+        if (candidates.isEmpty()) {
+            RuralRoutes.LOGGER.warn("Theme item reference resolved to empty set: {}", itemRef.id());
         }
 
-        return buyItems;
+        return candidates;
+    }
+
+    private static List<ResourceLocation> chooseItems(ThemeTemplate.ItemReference itemRef,
+            List<ResourceLocation> candidates, Random random) {
+
+        if (itemRef.pick().isEmpty() || itemRef.pick().get() >= candidates.size()) {
+            return candidates;
+        }
+
+        List<ResourceLocation> shuffled = new ArrayList<>(candidates);
+        Collections.shuffle(shuffled, random);
+
+        List<ResourceLocation> chosen = new ArrayList<>(shuffled.subList(0, itemRef.pick().get()));
+        chosen.sort(Comparator.comparing(ResourceLocation::toString));
+        return chosen;
+    }
+
+    private static List<ResourceLocation> toItemIds(List<SelectedTradeItem> selectedItems) {
+        return selectedItems.stream()
+            .map(SelectedTradeItem::itemId)
+            .toList();
     }
 
     /**
-     * 从主题模板初始化库存
-     * 处理标签展开：标签类型的物品引用会展开为具体物品列表
+     * 从主题模板初始化库存。
+     * 仅为当前周期实际入选的物品建立库存条目。
      */
-    private static Map<ResourceLocation, StockEntry> initializeStocks(ThemeTemplate template) {
+    private static Map<ResourceLocation, StockEntry> initializeStocks(ThemeTemplate template,
+            List<SelectedTradeItem> selectedSellItems, List<SelectedTradeItem> selectedBuyItems) {
         Map<ResourceLocation, StockEntry> stocks = new HashMap<>();
 
         // 默认库存范围
@@ -262,38 +303,16 @@ public class CommercialNodeManager {
         }
 
         // 添加出售物品（村庄卖给玩家）
-        for (ThemeTemplate.ItemReference itemRef : template.sellItems()) {
-            addItemsToStocks(stocks, template, itemRef, defaultMin, defaultMax, true);
+        for (SelectedTradeItem item : selectedSellItems) {
+            processStockEntry(stocks, template, item.sourceRefId(), item.itemId(), defaultMin, defaultMax, true);
         }
 
         // 添加收购物品（玩家卖给村庄）
-        for (ThemeTemplate.ItemReference itemRef : template.buyItems()) {
-            addItemsToStocks(stocks, template, itemRef, defaultMin, defaultMax, false);
+        for (SelectedTradeItem item : selectedBuyItems) {
+            processStockEntry(stocks, template, item.sourceRefId(), item.itemId(), defaultMin, defaultMax, false);
         }
 
         return stocks;
-    }
-
-    /**
-     * 将物品引用中的物品添加到库存映射
-     * 如果是标签类型，展开为具体物品列表
-     * @param isSellItem true=出售物品（初始满库存），false=收购物品（叠加库存上限）
-     *
-     * 叠加逻辑：
-     * - 出售物品：库存满（current = max）
-     * - 收购物品：
-     *   - 如果物品不存在：库存空（current = 0, max = 配置值）
-     *   - 如果物品已存在（同时在出售清单中）：current 不变，max 增加
-     */
-    private static void addItemsToStocks(Map<ResourceLocation, StockEntry> stocks,
-            ThemeTemplate template, ThemeTemplate.ItemReference itemRef,
-            int defaultMin, int defaultMax, boolean isSellItem) {
-
-        Set<Item> items = TagLookupCache.getItems(itemRef.id());
-        for (Item item : items) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
-            processStockEntry(stocks, template, itemRef.id(), itemId, defaultMin, defaultMax, isSellItem);
-        }
     }
 
     /**
@@ -416,12 +435,11 @@ public class CommercialNodeManager {
         CycleManager cycleManager = CycleManager.get(level);
 
         if (cycleManager.needsRefresh(nodeData.refreshTimestamp())) {
-            // 确保市场状态与当前周期同步
             cycleManager.getOrInitMarketState();
             cycleManager.markRefreshed();
             RuralRoutes.LOGGER.debug("Refreshing commercial node {} at cycle {}",
                 nodeData.tradeNodeId(), cycleManager.getCurrentCycle());
-            return refreshNodeData(level, pos, nodeData, level.getGameTime());
+            return refreshNodeData(level, pos, nodeData, CycleManager.getEffectiveTime(level));
         }
 
         return nodeData;
@@ -432,7 +450,7 @@ public class CommercialNodeManager {
      * 恢复库存到基准值，重新生成特产，更新刷新时间戳
      */
     private static CommercialNodeData refreshNodeData(ServerLevel level, BlockPos pos,
-            CommercialNodeData oldData, long currentGameTime) {
+            CommercialNodeData oldData, long currentTimestamp) {
 
         ThemeTemplate template = ThemeManager.INSTANCE.getTheme(oldData.themeName());
         if (template == null) {
@@ -440,14 +458,18 @@ public class CommercialNodeManager {
             return oldData;
         }
 
+        List<SelectedTradeItem> selectedSellItems = selectTradeItems(template.sellItems());
+        List<SelectedTradeItem> selectedBuyItems = selectTradeItems(template.buyItems());
+        List<ResourceLocation> newSellItems = toItemIds(selectedSellItems);
+        List<ResourceLocation> newBuyItems = toItemIds(selectedBuyItems);
+
         // 重新初始化库存（全量恢复）
-        Map<ResourceLocation, StockEntry> newStocks = initializeStocks(template);
+        Map<ResourceLocation, StockEntry> newStocks = initializeStocks(template, selectedSellItems, selectedBuyItems);
 
         // 重新生成特产
         List<ResourceLocation> newSpecialties = generateSpecialties(template);
 
         // 重新生成出售列表（包含新特产）
-        List<ResourceLocation> newSellItems = generateSellItems(template);
         addSpecialtiesToSellItems(newSellItems, newSpecialties);
         addSpecialtiesToStocks(newStocks, template, newSpecialties);
 
@@ -456,10 +478,10 @@ public class CommercialNodeManager {
             oldData.tradeNodeId(),
             oldData.themeName(),
             newSellItems,
-            oldData.buyItems(),
+            newBuyItems,
             newSpecialties,
             newStocks,
-            currentGameTime
+            currentTimestamp
         );
 
         // 存储到区块

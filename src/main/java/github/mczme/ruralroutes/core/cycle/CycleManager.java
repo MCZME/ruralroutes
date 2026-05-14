@@ -7,6 +7,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 
 /**
@@ -27,6 +28,17 @@ public class CycleManager extends SavedData {
 
     /** 当前周期的市场状态 */
     private MarketState marketState;
+
+    /**
+     * 获取有效时间
+     * 根据配置的时间模式返回对应的时间值
+     */
+    public static long getEffectiveTime(Level level) {
+        return switch (Config.CYCLE_TIME_MODE.get()) {
+            case SERVER_TIME -> level.getGameTime();
+            case GAME_TIME   -> level.getDayTime();
+        };
+    }
 
     /**
      * 获取或创建 CycleManager
@@ -87,12 +99,22 @@ public class CycleManager extends SavedData {
     }
 
     /**
-     * 计算指定 tick 所在的周期索引
-     * @param gameTime 游戏时间（tick）
+     * 计算指定世界的周期索引
+     * @param level 世界
      * @return 周期索引
      */
-    public long getCycleIndex(long gameTime) {
-        return gameTime / Config.getCycleLengthInTicks();
+    public long getCycleIndex(ServerLevel level) {
+        return getEffectiveTime(level) / Config.getCycleLengthInTicks();
+    }
+
+    /**
+     * 计算指定时间戳对应的周期索引
+     * 用于计算节点时间戳对应的周期
+     * @param timestamp 时间戳
+     * @return 周期索引
+     */
+    public long getCycleIndex(long timestamp) {
+        return timestamp / Config.getCycleLengthInTicks();
     }
 
     /**
@@ -106,12 +128,12 @@ public class CycleManager extends SavedData {
     }
 
     /**
-     * 获取当前周期起始 tick
-     * @param gameTime 当前游戏时间
-     * @return 当前周期开始的 tick
+     * 获取当前周期起始时间
+     * @param level 世界
+     * @return 当前周期开始的时间
      */
-    public long getCurrentCycleStartTick(long gameTime) {
-        long cycleIndex = getCycleIndex(gameTime);
+    public long getCurrentCycleStartTick(ServerLevel level) {
+        long cycleIndex = getCycleIndex(level);
         return cycleIndex * Config.getCycleLengthInTicks();
     }
 
@@ -165,11 +187,11 @@ public class CycleManager extends SavedData {
 
     /**
      * 更新缓存的周期索引
-     * @param gameTime 当前游戏时间
+     * @param level 世界
      * @return true 表示周期已推进
      */
-    public boolean updateCurrentCycle(long gameTime) {
-        long newCycle = getCycleIndex(gameTime);
+    public boolean updateCurrentCycle(ServerLevel level) {
+        long newCycle = getCycleIndex(level);
         if (newCycle != currentCycle) {
             currentCycle = newCycle;
             return true;

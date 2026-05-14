@@ -18,6 +18,21 @@ public class Config {
     // ===== 贸易周期配置 =====
 
     /**
+     * 周期时间模式
+     */
+    public enum CycleTimeMode {
+        SERVER_TIME,
+        GAME_TIME
+    }
+
+    /**
+     * 周期时间模式配置
+     */
+    public static final ModConfigSpec.EnumValue<CycleTimeMode> CYCLE_TIME_MODE = BUILDER
+            .comment("周期时间模式", "server_time: 基于服务器运行时间（实时）", "game_time: 基于游戏内昼夜循环")
+            .defineEnum("cycle.time_mode", CycleTimeMode.SERVER_TIME);
+
+    /**
      * 贸易周期长度（游戏日）
      */
     public static final ModConfigSpec.IntValue CYCLE_DAYS = BUILDER

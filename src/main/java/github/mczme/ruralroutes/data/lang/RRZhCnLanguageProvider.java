@@ -31,10 +31,23 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("ruralroutes.configuration.cycle", "贸易周期");
         add("ruralroutes.configuration.cycle.button", "贸易周期");
         add("ruralroutes.configuration.cycle.tooltip", "贸易周期刷新设置");
+        add("ruralroutes.configuration.time_mode", "时间模式");
+        add("ruralroutes.configuration.time_mode.tooltip", "server_time: 基于服务器运行时间; game_time: 基于游戏内昼夜循环");
         add("ruralroutes.configuration.days", "周期长度（日）");
         add("ruralroutes.configuration.days.tooltip", "贸易周期长度，单位为游戏日（1-30）");
         add("ruralroutes.configuration.refresh_time", "刷新时刻");
         add("ruralroutes.configuration.refresh_time.tooltip", "贸易周期刷新的时刻");
+
+        // 市场系统配置
+        add("ruralroutes.configuration.market", "市场");
+        add("ruralroutes.configuration.market.button", "市场");
+        add("ruralroutes.configuration.market.tooltip", "市场系统设置");
+        add("ruralroutes.configuration.enabled", "启用市场");
+        add("ruralroutes.configuration.enabled.tooltip", "启用后每个贸易周期会生成市场事件影响物品价格");
+        add("ruralroutes.configuration.rule_pick_count", "规则选择数量");
+        add("ruralroutes.configuration.rule_pick_count.tooltip", "每个贸易周期随机选择的市场事件规则数量（1-20）");
+        add("ruralroutes.configuration.max_delta", "最大价格调整幅度");
+        add("ruralroutes.configuration.max_delta.tooltip", "市场事件叠加后的最大价格调整百分比（0.1-1.0）");
 
         // 方块翻译
         addBlock(RRBlocks.TRADE_STATION, "贸易站");
