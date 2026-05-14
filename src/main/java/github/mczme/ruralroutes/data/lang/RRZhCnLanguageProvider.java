@@ -43,7 +43,7 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
 
         // 物品翻译
         addItem(RRItems.CONFIG_TOOL, "配置工具");
-        add("item.ruralroutes.config_tool.tooltip", "开发者工具，用于设置贸易站主题");
+        add("item.ruralroutes.config_tool.tooltip", "开发者工具，用于设置贸易站主题和方块外观");
 
         // 货币
         addItem(RRItems.COPPER_COIN, "铜板");
@@ -53,13 +53,16 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("item.ruralroutes.config_tool.current_theme", "当前主题: %s");
 
         // GUI 翻译
-        add("gui.ruralroutes.config_tool.title", "主题配置");
+        add("gui.ruralroutes.config_tool.title", "主题与外观配置");
         add("gui.ruralroutes.config_tool.apply", "应用");
         add("gui.ruralroutes.config_tool.cancel", "取消");
         add("gui.ruralroutes.config_tool.close", "关闭");
         add("gui.ruralroutes.config_tool.selected", "已选择: %s");
+        add("gui.ruralroutes.config_tool.selected_style", "已选择外观: %s");
         add("gui.ruralroutes.config_tool.current_theme", "当前: %s");
         add("gui.ruralroutes.config_tool.no_current_theme", "未设置主题");
+        add("gui.ruralroutes.config_tool.current_style", "当前外观: %s");
+        add("gui.ruralroutes.config_tool.no_current_style", "当前外观: 未设置");
         add("gui.ruralroutes.config_tool.node_id", "节点ID: %s");
         add("gui.ruralroutes.config_tool.no_node_id", "节点ID: 未激活");
         add("gui.ruralroutes.config_tool.type.trade_station", "类型: 贸易站");
@@ -75,8 +78,10 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.section.current_config", "当前配置");
         add("gui.ruralroutes.config_tool.section.clipboard", "剪贴板");
         add("gui.ruralroutes.config_tool.section.available_themes", "可用主题");
+        add("gui.ruralroutes.config_tool.section.available_styles", "可用外观");
         add("gui.ruralroutes.config_tool.section.link_target", "关联说明");
         add("gui.ruralroutes.config_tool.no_selection", "点击右侧主题列表选择后再应用");
+        add("gui.ruralroutes.config_tool.no_style_selection", "点击右侧外观列表选择后再应用");
         add("gui.ruralroutes.config_tool.clipboard_empty", "剪贴板中还没有节点信息");
         add("gui.ruralroutes.config_tool.clipboard_source", "来源贸易站: %s");
         add("gui.ruralroutes.config_tool.paste_ready", "可将剪贴板中的节点绑定到当前方块");
@@ -84,6 +89,11 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.theme_biome", "群系: %s");
         add("gui.ruralroutes.config_tool.theme_list_empty", "没有加载到主题");
         add("gui.ruralroutes.config_tool.unknown_block", "未知方块");
+        add("gui.ruralroutes.config_tool.style.plains", "平原风格");
+        add("gui.ruralroutes.config_tool.style.desert", "沙漠风格");
+        add("gui.ruralroutes.config_tool.style.savanna", "热带草原风格");
+        add("gui.ruralroutes.config_tool.style.taiga", "针叶林风格");
+        add("gui.ruralroutes.config_tool.style.snowy", "雪地风格");
 
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "主题: %s");

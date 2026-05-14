@@ -1,0 +1,7 @@
+{
+  "parent": "ruralroutes:block/trade_station",
+  "textures": {
+    "0": "ruralroutes:block/trade_station_taiga",
+    "particle": "ruralroutes:block/trade_station_taiga"
+  }
+}

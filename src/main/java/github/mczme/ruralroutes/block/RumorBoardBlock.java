@@ -3,6 +3,7 @@ package github.mczme.ruralroutes.block;
 import github.mczme.ruralroutes.blockentity.RumorBoardBlockEntity;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
+import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.menu.RumorBoardMenu;
 import github.mczme.ruralroutes.register.RRBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -27,6 +28,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
@@ -45,6 +47,7 @@ public class RumorBoardBlock extends BaseEntityBlock {
         simpleCodec(RumorBoardBlock::new);
 
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<VillageStyle> STYLE = EnumProperty.create("style", VillageStyle.class);
 
     private static final VoxelShape NORTH_SHAPE = Block.box(0, 0, 14, 16, 12, 16);
     private static final VoxelShape SOUTH_SHAPE = Block.box(0, 0, 0, 16, 12, 2);
@@ -60,7 +63,9 @@ public class RumorBoardBlock extends BaseEntityBlock {
         super(properties.mapColor(MapColor.WOOD)
             .strength(2.0f)
             .noOcclusion());
-        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+        this.registerDefaultState(this.stateDefinition.any()
+            .setValue(FACING, Direction.NORTH)
+            .setValue(STYLE, VillageStyle.PLAINS));
     }
 
     @Override
@@ -154,7 +159,7 @@ public class RumorBoardBlock extends BaseEntityBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, STYLE);
     }
 
     @Override

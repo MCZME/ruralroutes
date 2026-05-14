@@ -1,8 +1,24 @@
 {
   "variants": {
-    "facing=north": { "model": "ruralroutes:block/trade_station" },
-    "facing=south": { "model": "ruralroutes:block/trade_station", "y": 180 },
-    "facing=west": { "model": "ruralroutes:block/trade_station", "y": 270 },
-    "facing=east": { "model": "ruralroutes:block/trade_station", "y": 90 }
+    "facing=north,style=plains": { "model": "ruralroutes:block/trade_station" },
+    "facing=south,style=plains": { "model": "ruralroutes:block/trade_station", "y": 180 },
+    "facing=west,style=plains": { "model": "ruralroutes:block/trade_station", "y": 270 },
+    "facing=east,style=plains": { "model": "ruralroutes:block/trade_station", "y": 90 },
+    "facing=north,style=desert": { "model": "ruralroutes:block/trade_station_desert" },
+    "facing=south,style=desert": { "model": "ruralroutes:block/trade_station_desert", "y": 180 },
+    "facing=west,style=desert": { "model": "ruralroutes:block/trade_station_desert", "y": 270 },
+    "facing=east,style=desert": { "model": "ruralroutes:block/trade_station_desert", "y": 90 },
+    "facing=north,style=savanna": { "model": "ruralroutes:block/trade_station_savanna" },
+    "facing=south,style=savanna": { "model": "ruralroutes:block/trade_station_savanna", "y": 180 },
+    "facing=west,style=savanna": { "model": "ruralroutes:block/trade_station_savanna", "y": 270 },
+    "facing=east,style=savanna": { "model": "ruralroutes:block/trade_station_savanna", "y": 90 },
+    "facing=north,style=taiga": { "model": "ruralroutes:block/trade_station_taiga" },
+    "facing=south,style=taiga": { "model": "ruralroutes:block/trade_station_taiga", "y": 180 },
+    "facing=west,style=taiga": { "model": "ruralroutes:block/trade_station_taiga", "y": 270 },
+    "facing=east,style=taiga": { "model": "ruralroutes:block/trade_station_taiga", "y": 90 },
+    "facing=north,style=snowy": { "model": "ruralroutes:block/trade_station_snowy" },
+    "facing=south,style=snowy": { "model": "ruralroutes:block/trade_station_snowy", "y": 180 },
+    "facing=west,style=snowy": { "model": "ruralroutes:block/trade_station_snowy", "y": 270 },
+    "facing=east,style=snowy": { "model": "ruralroutes:block/trade_station_snowy", "y": 90 }
   }
 }

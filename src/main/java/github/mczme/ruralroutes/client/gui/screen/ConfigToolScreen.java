@@ -2,6 +2,7 @@ package github.mczme.ruralroutes.client.gui.screen;
 
 import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.item.ConfigToolItem;
 import github.mczme.ruralroutes.menu.ConfigToolMenu;
 import github.mczme.ruralroutes.network.ConfigToolApplyPayload;
@@ -23,7 +24,7 @@ import java.util.UUID;
 /**
  * 配置工具 GUI 屏幕
  * 贸易站：可编辑主题、复制节点信息
- * 展示柜/传闻板：可粘贴节点信息
+ * 展示柜/传闻板：可编辑外观、粘贴节点信息
  */
 public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
 
@@ -75,7 +76,7 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
         if (menu.canEditTheme()) {
             buildTradeStationButtons();
         } else {
-            buildLinkButtons();
+            buildAuxBlockButtons();
         }
     }
 
@@ -106,10 +107,10 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
         addRenderableWidget(applyButton);
     }
 
-    private void buildLinkButtons() {
+    private void buildAuxBlockButtons() {
         int gap = 6;
         int totalWidth = GUI_WIDTH - PANEL_PADDING * 2;
-        int buttonWidth = (totalWidth - gap) / 2;
+        int buttonWidth = (totalWidth - gap * 2) / 3;
         int buttonY = topPos + GUI_HEIGHT - FOOTER_HEIGHT + 7;
         int startX = leftPos + PANEL_PADDING;
 
@@ -124,6 +125,13 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
         ).bounds(startX + buttonWidth + gap, buttonY, buttonWidth, 20).build();
         pasteButton.active = menu.hasCopiedNodeInfo();
         addRenderableWidget(pasteButton);
+
+        Button applyStyleButton = Button.builder(
+            Component.translatable("gui.ruralroutes.config_tool.apply"),
+            b -> applySelectedStyle()
+        ).bounds(startX + (buttonWidth + gap) * 2, buttonY, buttonWidth, 20).build();
+        applyStyleButton.active = canApplyStyle();
+        addRenderableWidget(applyStyleButton);
     }
 
     private void applySelectedTheme() {
@@ -132,6 +140,15 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
             return;
         }
         PacketDistributor.sendToServer(ConfigToolApplyPayload.setTheme(menu.getBlockPos(), selected));
+        this.onClose();
+    }
+
+    private void applySelectedStyle() {
+        VillageStyle selected = menu.getSelectedStyle();
+        if (selected == null) {
+            return;
+        }
+        PacketDistributor.sendToServer(ConfigToolApplyPayload.setStyle(menu.getBlockPos(), selected));
         this.onClose();
     }
 
@@ -172,12 +189,23 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
         return selected != null && !selected.equals(current);
     }
 
+    private boolean canApplyStyle() {
+        VillageStyle selected = menu.getSelectedStyle();
+        VillageStyle current = menu.getCurrentStyle();
+        return selected != null && selected != current;
+    }
+
     private boolean hasCurrentNodeInfo() {
         return menu.getCurrentTradeNodeId() != null && menu.getCurrentStationPos() != null;
     }
 
     private void selectTheme(ResourceLocation theme) {
         menu.selectTheme(theme);
+        this.rebuildWidgets();
+    }
+
+    private void selectStyle(VillageStyle style) {
+        menu.selectStyle(style);
         this.rebuildWidgets();
     }
 
@@ -188,6 +216,8 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
 
         if (menu.canEditTheme()) {
             renderThemeTooltip(guiGraphics, mouseX, mouseY);
+        } else if (menu.canEditStyle()) {
+            renderStyleTooltip(guiGraphics, mouseX, mouseY);
         }
     }
 
@@ -197,6 +227,8 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
         renderInfoPanel(guiGraphics);
         if (menu.canEditTheme()) {
             renderThemePanel(guiGraphics, mouseX, mouseY);
+        } else if (menu.canEditStyle()) {
+            renderStylePanel(guiGraphics, mouseX, mouseY);
         }
     }
 
@@ -219,7 +251,9 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
     private void renderInfoPanel(GuiGraphics guiGraphics) {
         int panelX = leftPos + PANEL_PADDING;
         int panelY = topPos + HEADER_HEIGHT + PANEL_PADDING;
-        int panelWidth = menu.canEditTheme() ? INFO_PANEL_WIDTH : GUI_WIDTH - PANEL_PADDING * 2;
+        int panelWidth = (menu.canEditTheme() || menu.canEditStyle())
+            ? INFO_PANEL_WIDTH
+            : GUI_WIDTH - PANEL_PADDING * 2;
         int panelHeight = getContentHeight();
 
         renderPanel(guiGraphics, panelX, panelY, panelWidth, panelHeight,
@@ -234,22 +268,43 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
         lineY = drawWrappedText(guiGraphics, getNodeLine(), contentX, lineY, contentWidth,
             menu.getCurrentTradeNodeId() != null ? TEXT_GOOD : TEXT_WARN);
 
-        if (menu.canEditTheme()) {
+        if (menu.canEditTheme() || menu.canEditStyle()) {
             lineY += 8;
             lineY = drawSectionTitle(guiGraphics,
                 Component.translatable("gui.ruralroutes.config_tool.section.current_config"),
                 contentX, lineY, contentWidth);
-            lineY = drawWrappedText(guiGraphics, getCurrentThemeLine(), contentX, lineY, contentWidth, TEXT_MUTED);
+
+            if (menu.canEditTheme()) {
+                lineY = drawWrappedText(guiGraphics, getCurrentThemeLine(), contentX, lineY, contentWidth, TEXT_MUTED);
+                lineY += 2;
+
+                ResourceLocation selectedTheme = menu.getSelectedTheme();
+                if (selectedTheme != null) {
+                    lineY = drawWrappedText(guiGraphics,
+                        Component.translatable("gui.ruralroutes.config_tool.selected", selectedTheme.toString()),
+                        contentX, lineY, contentWidth, TEXT_ACCENT);
+                } else {
+                    lineY = drawWrappedText(guiGraphics,
+                        Component.translatable("gui.ruralroutes.config_tool.no_selection"),
+                        contentX, lineY, contentWidth, TEXT_MUTED);
+                }
+                lineY += 2;
+            }
+
+            lineY = drawWrappedText(guiGraphics, getCurrentStyleLine(), contentX, lineY, contentWidth, TEXT_MUTED);
             lineY += 2;
-            ResourceLocation selected = menu.getSelectedTheme();
-            if (selected != null) {
-                lineY = drawWrappedText(guiGraphics,
-                    Component.translatable("gui.ruralroutes.config_tool.selected", selected.toString()),
-                    contentX, lineY, contentWidth, TEXT_ACCENT);
-            } else {
-                lineY = drawWrappedText(guiGraphics,
-                    Component.translatable("gui.ruralroutes.config_tool.no_selection"),
-                    contentX, lineY, contentWidth, TEXT_MUTED);
+
+            if (menu.canEditStyle()) {
+                VillageStyle selectedStyle = menu.getSelectedStyle();
+                if (selectedStyle != null) {
+                    lineY = drawWrappedText(guiGraphics,
+                        Component.translatable("gui.ruralroutes.config_tool.selected_style", getStyleName(selectedStyle)),
+                        contentX, lineY, contentWidth, TEXT_ACCENT);
+                } else {
+                    lineY = drawWrappedText(guiGraphics,
+                        Component.translatable("gui.ruralroutes.config_tool.no_style_selection"),
+                        contentX, lineY, contentWidth, TEXT_MUTED);
+                }
             }
         }
 
@@ -274,7 +329,7 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
                 contentX, lineY, contentWidth, TEXT_MUTED);
         }
 
-        if (!menu.canEditTheme()) {
+        if (menu.canEditStyle()) {
             lineY += 8;
             lineY = drawSectionTitle(guiGraphics,
                 Component.translatable("gui.ruralroutes.config_tool.section.link_target"),
@@ -321,6 +376,28 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
             MAX_VISIBLE * THEME_ENTRY_HEIGHT + (MAX_VISIBLE - 1) * THEME_ENTRY_SPACING, themes.size());
     }
 
+    private void renderStylePanel(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        int panelX = getThemePanelX();
+        int panelY = topPos + HEADER_HEIGHT + PANEL_PADDING;
+        int panelWidth = getThemePanelWidth();
+        int panelHeight = getContentHeight();
+        renderPanel(guiGraphics, panelX, panelY, panelWidth, panelHeight,
+            Component.translatable("gui.ruralroutes.config_tool.section.available_styles"));
+
+        List<VillageStyle> styles = menu.getAvailableStyles();
+        int rowX = panelX + 6;
+        int rowY = panelY + PANEL_HEADER_HEIGHT + 6;
+        int rowWidth = getThemeRowWidth();
+
+        VillageStyle currentStyle = menu.getCurrentStyle();
+        VillageStyle selectedStyle = menu.getSelectedStyle();
+        for (int i = 0; i < styles.size(); i++) {
+            int entryY = rowY + i * (THEME_ENTRY_HEIGHT + THEME_ENTRY_SPACING);
+            renderStyleEntry(guiGraphics, styles.get(i), rowX, entryY, rowWidth,
+                mouseX, mouseY, styles.get(i) == currentStyle, styles.get(i) == selectedStyle);
+        }
+    }
+
     private void renderThemeEntry(GuiGraphics guiGraphics, ResourceLocation theme, int x, int y, int width,
                                   int mouseX, int mouseY, boolean isCurrent, boolean isSelected) {
         boolean hovered = isMouseOverEntry(mouseX, mouseY, x, y, width, THEME_ENTRY_HEIGHT);
@@ -334,6 +411,31 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
 
         String primary = ellipsize(formatThemeTitle(theme), width - 18);
         String secondary = ellipsize(theme.toString(), width - 18);
+        guiGraphics.drawString(font, primary, x + 8, y + 4, TEXT_PRIMARY);
+        guiGraphics.drawString(font, secondary, x + 8, y + 14, isCurrent ? TEXT_GOOD : TEXT_MUTED);
+
+        if (isCurrent) {
+            guiGraphics.fill(x + width - 7, y + 4, x + width - 3, y + 8, THEME_CURRENT_MARK);
+        }
+        if (isSelected) {
+            guiGraphics.fill(x + width - 7, y + THEME_ENTRY_HEIGHT - 8,
+                x + width - 3, y + THEME_ENTRY_HEIGHT - 4, THEME_SELECTED_MARK);
+        }
+    }
+
+    private void renderStyleEntry(GuiGraphics guiGraphics, VillageStyle style, int x, int y, int width,
+                                  int mouseX, int mouseY, boolean isCurrent, boolean isSelected) {
+        boolean hovered = isMouseOverEntry(mouseX, mouseY, x, y, width, THEME_ENTRY_HEIGHT);
+        int bgColor = isSelected ? THEME_SELECTED_BG : hovered ? THEME_HOVER_BG : THEME_BG;
+
+        guiGraphics.fill(x, y, x + width, y + THEME_ENTRY_HEIGHT, bgColor);
+        guiGraphics.renderOutline(x, y, width, THEME_ENTRY_HEIGHT, THEME_BORDER);
+
+        int stripeColor = isSelected ? THEME_SELECTED_MARK : isCurrent ? THEME_CURRENT_MARK : THEME_BORDER;
+        guiGraphics.fill(x, y, x + 3, y + THEME_ENTRY_HEIGHT, stripeColor);
+
+        String primary = ellipsize(getStyleName(style), width - 18);
+        String secondary = ellipsize(style.biomeId().toString(), width - 18);
         guiGraphics.drawString(font, primary, x + 8, y + 4, TEXT_PRIMARY);
         guiGraphics.drawString(font, secondary, x + 8, y + 14, isCurrent ? TEXT_GOOD : TEXT_MUTED);
 
@@ -372,6 +474,21 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
         if (template != null) {
             tooltip.add(Component.translatable("gui.ruralroutes.config_tool.theme_biome", template.biome().toString()));
         }
+
+        guiGraphics.renderTooltip(font,
+            tooltip.stream().map(Component::getVisualOrderText).toList(), mouseX, mouseY);
+    }
+
+    private void renderStyleTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        VillageStyle hoveredStyle = getHoveredStyle(mouseX, mouseY);
+        if (hoveredStyle == null) {
+            return;
+        }
+
+        List<Component> tooltip = List.of(
+            Component.translatable(hoveredStyle.translationKey()),
+            Component.translatable("gui.ruralroutes.config_tool.theme_biome", hoveredStyle.biomeId().toString())
+        );
 
         guiGraphics.renderTooltip(font,
             tooltip.stream().map(Component::getVisualOrderText).toList(), mouseX, mouseY);
@@ -425,6 +542,14 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
         return Component.translatable("gui.ruralroutes.config_tool.current_theme", current.toString());
     }
 
+    private Component getCurrentStyleLine() {
+        VillageStyle current = menu.getCurrentStyle();
+        if (current == null) {
+            return Component.translatable("gui.ruralroutes.config_tool.no_current_style");
+        }
+        return Component.translatable("gui.ruralroutes.config_tool.current_style", getStyleName(current));
+    }
+
     private int getContentHeight() {
         return GUI_HEIGHT - HEADER_HEIGHT - FOOTER_HEIGHT - PANEL_PADDING * 2;
     }
@@ -464,6 +589,25 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
         return null;
     }
 
+    private VillageStyle getHoveredStyle(double mouseX, double mouseY) {
+        if (!menu.canEditStyle()) {
+            return null;
+        }
+
+        List<VillageStyle> styles = menu.getAvailableStyles();
+        int rowX = getThemePanelX() + 6;
+        int rowY = topPos + HEADER_HEIGHT + PANEL_PADDING + PANEL_HEADER_HEIGHT + 6;
+        int rowWidth = getThemeRowWidth();
+
+        for (int i = 0; i < styles.size(); i++) {
+            int entryY = rowY + i * (THEME_ENTRY_HEIGHT + THEME_ENTRY_SPACING);
+            if (isMouseOverEntry(mouseX, mouseY, rowX, entryY, rowWidth, THEME_ENTRY_HEIGHT)) {
+                return styles.get(i);
+            }
+        }
+        return null;
+    }
+
     private boolean isMouseOverEntry(double mouseX, double mouseY, int x, int y, int width, int height) {
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
     }
@@ -476,13 +620,19 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
                 selectTheme(hoveredTheme);
                 return true;
             }
+
+            VillageStyle hoveredStyle = getHoveredStyle(mouseX, mouseY);
+            if (hoveredStyle != null) {
+                selectStyle(hoveredStyle);
+                return true;
+            }
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (menu.canEditTheme() && isMouseOverThemePanel(mouseX, mouseY)) {
+        if (menu.canEditTheme() && isMouseOverOptionPanel(mouseX, mouseY)) {
             List<ResourceLocation> themes = menu.getAvailableThemes();
             int maxScroll = Math.max(0, themes.size() - MAX_VISIBLE);
             int direction = scrollY > 0 ? -1 : 1;
@@ -492,8 +642,8 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
-    private boolean isMouseOverThemePanel(double mouseX, double mouseY) {
-        if (!menu.canEditTheme()) {
+    private boolean isMouseOverOptionPanel(double mouseX, double mouseY) {
+        if (!menu.canEditTheme() && !menu.canEditStyle()) {
             return false;
         }
         int x = getThemePanelX();
@@ -523,6 +673,10 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
             }
         }
         return builder.toString();
+    }
+
+    private String getStyleName(VillageStyle style) {
+        return Component.translatable(style.translationKey()).getString();
     }
 
     private String ellipsize(String text, int maxWidth) {

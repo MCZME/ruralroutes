@@ -1,8 +1,12 @@
 package github.mczme.ruralroutes.network;
 
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.block.BlockStyleHelper;
 import github.mczme.ruralroutes.blockentity.TradeNodeBlockEntity;
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
+import github.mczme.ruralroutes.core.theme.ThemeManager;
+import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.item.ConfigToolItem;
 import github.mczme.ruralroutes.register.RRDataComponents;
 import io.netty.buffer.ByteBuf;
@@ -14,7 +18,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
@@ -31,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 public record ConfigToolApplyPayload(
     BlockPos blockPos,
     @Nullable ResourceLocation themeName,
+    @Nullable VillageStyle style,
     @Nullable UUID nodeId,
     @Nullable BlockPos stationPos,
     Operation operation
@@ -38,6 +45,7 @@ public record ConfigToolApplyPayload(
 
     public enum Operation {
         SET_THEME,      // 设置主题
+        SET_STYLE,      // 设置外观风格
         COPY_NODE_INFO, // 复制节点信息
         PASTE_NODE_INFO // 粘贴节点信息
     }
@@ -54,12 +62,16 @@ public record ConfigToolApplyPayload(
                 Operation op = Operation.values()[opOrdinal];
 
                 ResourceLocation theme = null;
+                VillageStyle style = null;
                 UUID nodeId = null;
                 BlockPos stationPos = null;
 
                 switch (op) {
                     case SET_THEME -> {
                         theme = ResourceLocation.STREAM_CODEC.decode(buf);
+                    }
+                    case SET_STYLE -> {
+                        style = VillageStyle.values()[buf.readInt()];
                     }
                     case COPY_NODE_INFO -> {
                         nodeId = UUIDUtil.STREAM_CODEC.decode(buf);
@@ -71,7 +83,7 @@ public record ConfigToolApplyPayload(
                     }
                 }
 
-                return new ConfigToolApplyPayload(pos, theme, nodeId, stationPos, op);
+                return new ConfigToolApplyPayload(pos, theme, style, nodeId, stationPos, op);
             }
 
             @Override
@@ -82,6 +94,9 @@ public record ConfigToolApplyPayload(
                 switch (payload.operation()) {
                     case SET_THEME -> {
                         ResourceLocation.STREAM_CODEC.encode(buf, payload.themeName());
+                    }
+                    case SET_STYLE -> {
+                        buf.writeInt(payload.style().ordinal());
                     }
                     case COPY_NODE_INFO -> {
                         UUIDUtil.STREAM_CODEC.encode(buf, payload.nodeId());
@@ -104,21 +119,28 @@ public record ConfigToolApplyPayload(
      * 创建设置主题的 Payload
      */
     public static ConfigToolApplyPayload setTheme(BlockPos pos, ResourceLocation theme) {
-        return new ConfigToolApplyPayload(pos, theme, null, null, Operation.SET_THEME);
+        return new ConfigToolApplyPayload(pos, theme, null, null, null, Operation.SET_THEME);
+    }
+
+    /**
+     * 创建设置外观风格的 Payload
+     */
+    public static ConfigToolApplyPayload setStyle(BlockPos pos, VillageStyle style) {
+        return new ConfigToolApplyPayload(pos, null, style, null, null, Operation.SET_STYLE);
     }
 
     /**
      * 创建复制节点信息的 Payload
      */
     public static ConfigToolApplyPayload copyNodeInfo(BlockPos pos, UUID nodeId, BlockPos stationPos) {
-        return new ConfigToolApplyPayload(pos, null, nodeId, stationPos, Operation.COPY_NODE_INFO);
+        return new ConfigToolApplyPayload(pos, null, null, nodeId, stationPos, Operation.COPY_NODE_INFO);
     }
 
     /**
      * 创建粘贴节点信息的 Payload
      */
     public static ConfigToolApplyPayload pasteNodeInfo(BlockPos pos, UUID nodeId, BlockPos stationPos) {
-        return new ConfigToolApplyPayload(pos, null, nodeId, stationPos, Operation.PASTE_NODE_INFO);
+        return new ConfigToolApplyPayload(pos, null, null, nodeId, stationPos, Operation.PASTE_NODE_INFO);
     }
 
     /**
@@ -134,6 +156,17 @@ public record ConfigToolApplyPayload(
             case SET_THEME -> {
                 if (payload.themeName() != null && be instanceof TradeStationBlockEntity station) {
                     station.setVillageTheme(payload.themeName());
+
+                    ThemeTemplate template = ThemeManager.INSTANCE.getTheme(payload.themeName());
+                    VillageStyle resolvedStyle = template != null
+                        ? VillageStyle.fromBiome(template.biome())
+                        : VillageStyle.PLAINS;
+                    applyStyle(level, payload.blockPos(), resolvedStyle);
+                }
+            }
+            case SET_STYLE -> {
+                if (payload.style() != null) {
+                    applyStyle(level, payload.blockPos(), payload.style());
                 }
             }
             case COPY_NODE_INFO -> {
@@ -152,6 +185,18 @@ public record ConfigToolApplyPayload(
                     nodeEntity.setTradeNodeInfo(payload.nodeId(), payload.stationPos());
                 }
             }
+        }
+    }
+
+    private static void applyStyle(Level level, BlockPos blockPos, VillageStyle style) {
+        BlockState state = level.getBlockState(blockPos);
+        if (!BlockStyleHelper.hasStyle(state)) {
+            return;
+        }
+
+        BlockState updated = BlockStyleHelper.withStyle(state, style);
+        if (updated != state) {
+            level.setBlock(blockPos, updated, Block.UPDATE_CLIENTS);
         }
     }
 }

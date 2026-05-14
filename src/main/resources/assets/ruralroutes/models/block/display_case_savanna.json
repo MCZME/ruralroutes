@@ -1,0 +1,7 @@
+{
+  "parent": "ruralroutes:block/display_case",
+  "textures": {
+    "1": "ruralroutes:block/display_case_savanna",
+    "particle": "ruralroutes:block/display_case_savanna"
+  }
+}

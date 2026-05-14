@@ -4,6 +4,7 @@ import github.mczme.ruralroutes.blockentity.DisplayCaseBlockEntity;
 import github.mczme.ruralroutes.client.gui.screen.DisplayCaseScreen;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
+import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.register.RRBlockEntities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
@@ -42,6 +44,7 @@ public class DisplayCaseBlock extends BaseEntityBlock {
         simpleCodec(DisplayCaseBlock::new);
 
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<VillageStyle> STYLE = EnumProperty.create("style", VillageStyle.class);
 
     private static final VoxelShape SHAPE = Block.box(
         2, 0, 2, 14, 13, 14
@@ -57,12 +60,14 @@ public class DisplayCaseBlock extends BaseEntityBlock {
             .strength(1.5f)
             .noOcclusion()
             .isViewBlocking((state, level, pos) -> false));
-        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+        this.registerDefaultState(this.stateDefinition.any()
+            .setValue(FACING, Direction.NORTH)
+            .setValue(STYLE, VillageStyle.PLAINS));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, STYLE);
     }
 
     @Override

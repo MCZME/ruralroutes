@@ -1,0 +1,7 @@
+{
+  "parent": "ruralroutes:block/rumor_board",
+  "textures": {
+    "0": "ruralroutes:block/rumor_board_desert",
+    "particle": "ruralroutes:block/rumor_board_desert"
+  }
+}

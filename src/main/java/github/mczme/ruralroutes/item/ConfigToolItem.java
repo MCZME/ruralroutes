@@ -25,7 +25,7 @@ import java.util.UUID;
 /**
  * 配置工具 - 用于查看和配置核心方块
  * 贸易站：可编辑主题、复制节点信息
- * 展示柜/传闻板：可粘贴节点信息
+ * 展示柜/传闻板：可编辑外观、粘贴节点信息
  */
 public class ConfigToolItem extends Item {
 

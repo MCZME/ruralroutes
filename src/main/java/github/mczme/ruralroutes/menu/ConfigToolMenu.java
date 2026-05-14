@@ -1,10 +1,12 @@
 package github.mczme.ruralroutes.menu;
 
+import github.mczme.ruralroutes.block.BlockStyleHelper;
 import github.mczme.ruralroutes.blockentity.DisplayCaseBlockEntity;
 import github.mczme.ruralroutes.blockentity.RumorBoardBlockEntity;
 import github.mczme.ruralroutes.blockentity.TradeNodeBlockEntity;
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
+import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.item.ConfigToolItem;
 import github.mczme.ruralroutes.register.RRMenuTypes;
 import net.minecraft.client.Minecraft;
@@ -17,6 +19,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,7 +29,7 @@ import java.util.UUID;
 /**
  * 配置工具 GUI 菜单
  * 贸易站：可编辑主题、复制节点信息
- * 展示柜/传闻板：可粘贴节点信息
+ * 展示柜/传闻板：可编辑外观、粘贴节点信息
  */
 public class ConfigToolMenu extends AbstractContainerMenu {
 
@@ -39,7 +42,9 @@ public class ConfigToolMenu extends AbstractContainerMenu {
 
     private final BlockPos blockPos;
     private final List<ResourceLocation> availableThemes;
+    private final List<VillageStyle> availableStyles;
     private ResourceLocation selectedTheme;
+    private VillageStyle selectedStyle;
     private final UUID copiedNodeId;
     private final BlockPos copiedStationPos;
 
@@ -52,7 +57,9 @@ public class ConfigToolMenu extends AbstractContainerMenu {
         this.blockPos = blockPos;
         this.availableThemes = new ArrayList<>(ThemeManager.INSTANCE.getAllThemes().keySet());
         this.availableThemes.sort(Comparator.comparing(ResourceLocation::toString));
+        this.availableStyles = List.of(VillageStyle.values());
         this.selectedTheme = null;
+        this.selectedStyle = null;
 
         // 从玩家手持物品读取复制的节点信息
         Player player = playerInventory.player;
@@ -89,8 +96,16 @@ public class ConfigToolMenu extends AbstractContainerMenu {
         return availableThemes;
     }
 
+    public List<VillageStyle> getAvailableStyles() {
+        return availableStyles;
+    }
+
     public ResourceLocation getSelectedTheme() {
         return selectedTheme;
+    }
+
+    public VillageStyle getSelectedStyle() {
+        return selectedStyle;
     }
 
     /**
@@ -119,6 +134,14 @@ public class ConfigToolMenu extends AbstractContainerMenu {
     }
 
     /**
+     * 是否可手动编辑外观（展示柜/传闻板）
+     */
+    public boolean canEditStyle() {
+        BlockType blockType = getBlockType();
+        return blockType == BlockType.DISPLAY_CASE || blockType == BlockType.RUMOR_BOARD;
+    }
+
+    /**
      * 获取当前主题 - 仅贸易站有效
      */
     public ResourceLocation getCurrentTheme() {
@@ -130,6 +153,23 @@ public class ConfigToolMenu extends AbstractContainerMenu {
             }
         }
         return null;
+    }
+
+    /**
+     * 获取当前外观风格
+     */
+    public VillageStyle getCurrentStyle() {
+        Level level = Minecraft.getInstance().level;
+        if (level == null) {
+            return null;
+        }
+
+        BlockState state = level.getBlockState(blockPos);
+        if (!BlockStyleHelper.hasStyle(state)) {
+            return null;
+        }
+
+        return BlockStyleHelper.getStyle(state);
     }
 
     /**
@@ -164,6 +204,10 @@ public class ConfigToolMenu extends AbstractContainerMenu {
 
     public void selectTheme(ResourceLocation theme) {
         this.selectedTheme = theme;
+    }
+
+    public void selectStyle(VillageStyle style) {
+        this.selectedStyle = style;
     }
 
     /**

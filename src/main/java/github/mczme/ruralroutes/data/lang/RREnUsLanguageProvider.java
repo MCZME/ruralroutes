@@ -43,7 +43,7 @@ public class RREnUsLanguageProvider extends LanguageProvider {
 
         // 物品翻译
         addItem(RRItems.CONFIG_TOOL, "Config Tool");
-        add("item.ruralroutes.config_tool.tooltip", "Developer tool for setting trade station theme");
+        add("item.ruralroutes.config_tool.tooltip", "Developer tool for setting trade station themes and block styles");
 
         // 货币
         addItem(RRItems.COPPER_COIN, "Copper Coin");
@@ -53,13 +53,16 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("item.ruralroutes.config_tool.current_theme", "Current theme: %s");
 
         // GUI 翻译
-        add("gui.ruralroutes.config_tool.title", "Theme Configuration");
+        add("gui.ruralroutes.config_tool.title", "Theme & Style Configuration");
         add("gui.ruralroutes.config_tool.apply", "Apply");
         add("gui.ruralroutes.config_tool.cancel", "Cancel");
         add("gui.ruralroutes.config_tool.close", "Close");
         add("gui.ruralroutes.config_tool.selected", "Selected: %s");
+        add("gui.ruralroutes.config_tool.selected_style", "Selected Style: %s");
         add("gui.ruralroutes.config_tool.current_theme", "Current: %s");
         add("gui.ruralroutes.config_tool.no_current_theme", "No theme set");
+        add("gui.ruralroutes.config_tool.current_style", "Current Style: %s");
+        add("gui.ruralroutes.config_tool.no_current_style", "Current Style: Not set");
         add("gui.ruralroutes.config_tool.node_id", "Node ID: %s");
         add("gui.ruralroutes.config_tool.no_node_id", "Node ID: Not activated");
         add("gui.ruralroutes.config_tool.type.trade_station", "Type: Trade Station");
@@ -75,8 +78,10 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.section.current_config", "Current Setup");
         add("gui.ruralroutes.config_tool.section.clipboard", "Clipboard");
         add("gui.ruralroutes.config_tool.section.available_themes", "Themes");
+        add("gui.ruralroutes.config_tool.section.available_styles", "Styles");
         add("gui.ruralroutes.config_tool.section.link_target", "Linking");
         add("gui.ruralroutes.config_tool.no_selection", "Choose a theme from the list before applying");
+        add("gui.ruralroutes.config_tool.no_style_selection", "Choose a style from the list before applying");
         add("gui.ruralroutes.config_tool.clipboard_empty", "No node info is stored in the clipboard yet");
         add("gui.ruralroutes.config_tool.clipboard_source", "Source station: %s");
         add("gui.ruralroutes.config_tool.paste_ready", "The clipboard node can be linked to this block");
@@ -84,6 +89,11 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.theme_biome", "Biome: %s");
         add("gui.ruralroutes.config_tool.theme_list_empty", "No themes loaded");
         add("gui.ruralroutes.config_tool.unknown_block", "Unknown Block");
+        add("gui.ruralroutes.config_tool.style.plains", "Plains Style");
+        add("gui.ruralroutes.config_tool.style.desert", "Desert Style");
+        add("gui.ruralroutes.config_tool.style.savanna", "Savanna Style");
+        add("gui.ruralroutes.config_tool.style.taiga", "Taiga Style");
+        add("gui.ruralroutes.config_tool.style.snowy", "Snowy Style");
 
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "Theme: %s");
