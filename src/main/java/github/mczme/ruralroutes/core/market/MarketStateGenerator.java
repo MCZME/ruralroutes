@@ -117,7 +117,9 @@ public final class MarketStateGenerator {
                         scopeRule.type() == MarketScopeType.GLOBAL
                                 ? java.util.Optional.empty()
                                 : java.util.Optional.of(scopeTarget),
-                        rule.delta()
+                        rule.delta(),
+                        rule.rumorFamily(),
+                        rule.rumorTargetKey()
                 );
                 events.add(event);
             }

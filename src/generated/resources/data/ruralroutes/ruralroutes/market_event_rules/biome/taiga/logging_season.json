@@ -2,6 +2,8 @@
   "delta": -0.15,
   "id": "ruralroutes:biome/taiga/logging_season",
   "name_key": "market.ruralroutes.biome.taiga.logging_season",
+  "rumor_family": "release",
+  "rumor_target_key": "rumor.target.wood",
   "scopes": [
     {
       "type": "biome",

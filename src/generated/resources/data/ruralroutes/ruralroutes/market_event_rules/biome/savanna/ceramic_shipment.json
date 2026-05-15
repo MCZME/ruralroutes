@@ -2,6 +2,8 @@
   "delta": -0.12,
   "id": "ruralroutes:biome/savanna/ceramic_shipment",
   "name_key": "market.ruralroutes.biome.savanna.ceramic_shipment",
+  "rumor_family": "release",
+  "rumor_target_key": "rumor.target.terracotta",
   "scopes": [
     {
       "type": "biome",

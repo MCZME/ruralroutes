@@ -52,16 +52,22 @@ public final class RumorGenerator {
         // 2. 作用域目标名称
         String scopeTargetName = resolveScopeTargetName(event);
 
-        // 3. 涨跌方向
-        String directionKey = event.getDirectionKey();
-
-        return new RumorEntry(targetNameKey, event.scopeType(), scopeTargetName, directionKey);
+        return new RumorEntry(
+                targetNameKey,
+                event.scopeType(),
+                scopeTargetName,
+                event.rumorFamily()
+        );
     }
 
     /**
      * 解析目标名称翻译键
      */
     private static String resolveTargetNameKey(MarketEvent event) {
+        if (event.rumorTargetKey().isPresent()) {
+            return event.rumorTargetKey().get();
+        }
+
         if (event.isTargetTag()) {
             // 标签: ruralroutes.tag.{namespace}.{path}
             ResourceLocation tagId = ResourceLocation.parse(event.getTargetId());

@@ -16,16 +16,8 @@ public record RumorEntry(
         String targetNameKey,
         MarketScopeType scopeType,
         String scopeTargetName,
-        String directionKey
+        RumorFamily family
 ) {
-
-    private static final String[] TEMPLATE_KEYS = {
-            "rumor.template.1",
-            "rumor.template.2",
-            "rumor.template.3",
-            "rumor.template.4",
-            "rumor.template.5"
-    };
 
     private static final String SEPARATOR = "|";
 
@@ -36,7 +28,7 @@ public record RumorEntry(
         return targetNameKey + SEPARATOR
                 + scopeType.name() + SEPARATOR
                 + scopeTargetName + SEPARATOR
-                + directionKey;
+                + family.name();
     }
 
     /**
@@ -47,7 +39,8 @@ public record RumorEntry(
         if (parts.length != 4) return Optional.empty();
         try {
             MarketScopeType scopeType = MarketScopeType.valueOf(parts[1]);
-            return Optional.of(new RumorEntry(parts[0], scopeType, parts[2], parts[3]));
+            RumorFamily family = RumorFamily.valueOf(parts[3]);
+            return Optional.of(new RumorEntry(parts[0], scopeType, parts[2], family));
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
@@ -63,26 +56,12 @@ public record RumorEntry(
             return Component.translatable(targetNameKey);
         }
 
-        // 随机选择模板
-        String templateKey = TEMPLATE_KEYS[random.nextInt(TEMPLATE_KEYS.length)];
-
-        // 物品/标签名称
+        String templateKey = pickTemplateKey(random);
         Component target = Component.translatable(targetNameKey);
-
-        // 作用域范围
-        Component scope;
-        if (scopeType == MarketScopeType.GLOBAL) {
-            scope = Component.translatable("rumor.scope.global");
-        } else if (scopeType == MarketScopeType.BIOME) {
-            scope = Component.translatable("rumor.scope.biome", getScopeTargetComponent());
-        } else {
-            scope = Component.translatable("rumor.scope.theme", getScopeTargetComponent());
-        }
-
-        // 涨跌
-        Component direction = Component.translatable("rumor.direction." + directionKey);
-
-        return Component.translatable(templateKey, target, scope, direction);
+        return switch (scopeType) {
+            case GLOBAL -> Component.translatable(templateKey, target);
+            case BIOME, THEME -> Component.translatable(templateKey, getScopeTargetComponent(), target);
+        };
     }
 
     private boolean isGossip() {
@@ -96,10 +75,73 @@ public record RumorEntry(
         return Component.translatable(scopeTargetName);
     }
 
+    private String pickTemplateKey(Random random) {
+        String[] templateKeys = switch (family) {
+            case SHORTAGE -> switch (scopeType) {
+                case GLOBAL -> new String[] {
+                        "rumor.shortage.global.1",
+                        "rumor.shortage.global.2"
+                };
+                case BIOME -> new String[] {
+                        "rumor.shortage.biome.1",
+                        "rumor.shortage.biome.2"
+                };
+                case THEME -> new String[] {
+                        "rumor.shortage.theme.1",
+                        "rumor.shortage.theme.2"
+                };
+            };
+            case SURPLUS -> switch (scopeType) {
+                case GLOBAL -> new String[] {
+                        "rumor.surplus.global.1",
+                        "rumor.surplus.global.2"
+                };
+                case BIOME -> new String[] {
+                        "rumor.surplus.biome.1",
+                        "rumor.surplus.biome.2"
+                };
+                case THEME -> new String[] {
+                        "rumor.surplus.theme.1",
+                        "rumor.surplus.theme.2"
+                };
+            };
+            case DEMAND -> switch (scopeType) {
+                case GLOBAL -> new String[] {
+                        "rumor.demand.global.1",
+                        "rumor.demand.global.2"
+                };
+                case BIOME -> new String[] {
+                        "rumor.demand.biome.1",
+                        "rumor.demand.biome.2"
+                };
+                case THEME -> new String[] {
+                        "rumor.demand.theme.1",
+                        "rumor.demand.theme.2"
+                };
+            };
+            case RELEASE -> switch (scopeType) {
+                case GLOBAL -> new String[] {
+                        "rumor.release.global.1",
+                        "rumor.release.global.2"
+                };
+                case BIOME -> new String[] {
+                        "rumor.release.biome.1",
+                        "rumor.release.biome.2"
+                };
+                case THEME -> new String[] {
+                        "rumor.release.theme.1",
+                        "rumor.release.theme.2"
+                };
+            };
+        };
+
+        return templateKeys[random.nextInt(templateKeys.length)];
+    }
+
     /**
      * 创建闲谈情报（无市场事件时使用）
      */
     public static RumorEntry gossip(String gossipKey) {
-        return new RumorEntry(gossipKey, MarketScopeType.GLOBAL, "", "stable");
+        return new RumorEntry(gossipKey, MarketScopeType.GLOBAL, "", RumorFamily.RELEASE);
     }
 }

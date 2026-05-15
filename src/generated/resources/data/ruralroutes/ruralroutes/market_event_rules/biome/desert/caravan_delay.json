@@ -2,6 +2,8 @@
   "delta": 0.16,
   "id": "ruralroutes:biome/desert/caravan_delay",
   "name_key": "market.ruralroutes.biome.desert.caravan_delay",
+  "rumor_family": "shortage",
+  "rumor_target_key": "rumor.target.food",
   "scopes": [
     {
       "type": "biome",

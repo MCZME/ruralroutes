@@ -2,6 +2,7 @@ package github.mczme.ruralroutes.core.market;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import github.mczme.ruralroutes.core.rumor.RumorFamily;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -19,7 +20,9 @@ public record MarketEventRule(
         String targetRef,
         List<MarketEventScopeRule> scopes,
         float delta,
-        Optional<Integer> weight
+        Optional<Integer> weight,
+        RumorFamily rumorFamily,
+        Optional<String> rumorTargetKey
 ) {
     public static final Codec<MarketEventRule> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
@@ -28,7 +31,9 @@ public record MarketEventRule(
                     Codec.STRING.fieldOf("target_ref").forGetter(MarketEventRule::targetRef),
                     MarketEventScopeRule.CODEC.listOf().fieldOf("scopes").forGetter(MarketEventRule::scopes),
                     Codec.FLOAT.fieldOf("delta").forGetter(MarketEventRule::delta),
-                    Codec.INT.optionalFieldOf("weight").forGetter(MarketEventRule::weight)
+                    Codec.INT.optionalFieldOf("weight").forGetter(MarketEventRule::weight),
+                    RumorFamily.CODEC.fieldOf("rumor_family").forGetter(MarketEventRule::rumorFamily),
+                    Codec.STRING.optionalFieldOf("rumor_target_key").forGetter(MarketEventRule::rumorTargetKey)
             ).apply(instance, MarketEventRule::new)
     );
 
@@ -54,22 +59,16 @@ public record MarketEventRule(
     }
 
     /**
-     * 获取涨跌方向描述
-     */
-    public String getDirectionKey() {
-        if (delta > 0.001f) return "up";
-        if (delta < -0.001f) return "down";
-        return "stable";
-    }
-
-    /**
      * 创建简单规则（单一全局作用域）
      */
-    public static MarketEventRule simple(ResourceLocation id, String nameKey, String targetRef, float delta) {
+    public static MarketEventRule simple(ResourceLocation id, String nameKey, String targetRef,
+                                         float delta, RumorFamily rumorFamily) {
         return new MarketEventRule(
                 id, nameKey, targetRef,
                 List.of(MarketEventScopeRule.global()),
                 delta,
+                Optional.empty(),
+                rumorFamily,
                 Optional.empty()
         );
     }
@@ -78,12 +77,15 @@ public record MarketEventRule(
      * 创建带权重的规则
      */
     public static MarketEventRule weighted(ResourceLocation id, String nameKey, String targetRef,
-                                           float delta, int weight, List<MarketEventScopeRule> scopes) {
+                                           float delta, int weight, List<MarketEventScopeRule> scopes,
+                                           RumorFamily rumorFamily) {
         return new MarketEventRule(
                 id, nameKey, targetRef,
                 scopes,
                 delta,
-                Optional.of(weight)
+                Optional.of(weight),
+                rumorFamily,
+                Optional.empty()
         );
     }
 }

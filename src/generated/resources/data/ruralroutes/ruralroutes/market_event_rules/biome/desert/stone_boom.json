@@ -2,6 +2,8 @@
   "delta": 0.14,
   "id": "ruralroutes:biome/desert/stone_boom",
   "name_key": "market.ruralroutes.biome.desert.stone_boom",
+  "rumor_family": "demand",
+  "rumor_target_key": "rumor.target.stone",
   "scopes": [
     {
       "type": "biome",

@@ -2,6 +2,8 @@
   "delta": 0.22,
   "id": "ruralroutes:theme/desert_dyeworks/dye_boom",
   "name_key": "market.ruralroutes.theme.desert_dyeworks.dye_boom",
+  "rumor_family": "demand",
+  "rumor_target_key": "rumor.target.dye",
   "scopes": [
     {
       "type": "theme",

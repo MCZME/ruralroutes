@@ -2,6 +2,8 @@
   "delta": 0.15,
   "id": "ruralroutes:common/food_shortage",
   "name_key": "market.ruralroutes.common.food_shortage",
+  "rumor_family": "shortage",
+  "rumor_target_key": "rumor.target.food",
   "scopes": [
     {
       "type": "global",

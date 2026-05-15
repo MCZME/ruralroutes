@@ -2,6 +2,8 @@
   "delta": -0.22,
   "id": "ruralroutes:theme/desert_oasis/green_harvest",
   "name_key": "market.ruralroutes.theme.desert_oasis.green_harvest",
+  "rumor_family": "surplus",
+  "rumor_target_key": "rumor.target.crop",
   "scopes": [
     {
       "type": "theme",

@@ -164,17 +164,37 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
 
         // ===== 情报系统 =====
 
-        // 情报模板
-        add("rumor.template.1", "%s在%s价格%s");
-        add("rumor.template.2", "%s的%s价格%s");
-        add("rumor.template.3", "听说%s的%s价格%s");
-        add("rumor.template.4", "%s价格%s，%s受影响");
-        add("rumor.template.5", "商路传闻：%s的%s价格%s");
+        // 传闻模板：shortage
+        add("rumor.shortage.global.1", "最近各地都在抢%s。");
+        add("rumor.shortage.global.2", "这阵子%s紧俏得很。");
+        add("rumor.shortage.biome.1", "听说%s一带缺%s。");
+        add("rumor.shortage.biome.2", "最近%s那边在抢%s。");
+        add("rumor.shortage.theme.1", "%s最近缺%s。");
+        add("rumor.shortage.theme.2", "听说%s正缺%s。");
 
-        // 涨跌
-        add("rumor.direction.up", "上涨");
-        add("rumor.direction.down", "下跌");
-        add("rumor.direction.stable", "平稳");
+        // 传闻模板：surplus
+        add("rumor.surplus.global.1", "最近各地%s出得多。");
+        add("rumor.surplus.global.2", "这阵子%s行情松了点。");
+        add("rumor.surplus.biome.1", "%s一带%s出得多。");
+        add("rumor.surplus.biome.2", "听说%s那边%s堆了不少。");
+        add("rumor.surplus.theme.1", "%s最近%s出得多。");
+        add("rumor.surplus.theme.2", "%s这阵子在放%s。");
+
+        // 传闻模板：demand
+        add("rumor.demand.global.1", "最近%s在各地都走俏。");
+        add("rumor.demand.global.2", "这阵子%s卖得挺快。");
+        add("rumor.demand.biome.1", "听说%s一带在抢%s。");
+        add("rumor.demand.biome.2", "最近%s那边收%s收得勤。");
+        add("rumor.demand.theme.1", "%s最近在高价收%s。");
+        add("rumor.demand.theme.2", "听说%s看上%s了。");
+
+        // 传闻模板：release
+        add("rumor.release.global.1", "最近各地放出了一批%s。");
+        add("rumor.release.global.2", "这阵子%s到货挺多。");
+        add("rumor.release.biome.1", "%s一带最近到了一批%s。");
+        add("rumor.release.biome.2", "听说%s那边刚放出了些%s。");
+        add("rumor.release.theme.1", "%s最近放出了一批%s。");
+        add("rumor.release.theme.2", "听说%s新放出了些%s。");
 
         // 作用域
         add("rumor.scope.global", "世界各地");
@@ -190,19 +210,21 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("ruralroutes.tag.minecraft.planks", "木板类物品");
         add("ruralroutes.tag.minecraft.crops", "农作物类");
 
-        // 系统池标签翻译
-        add("ruralroutes.tag.ruralroutes.pool/food", "食品货");
-        add("ruralroutes.tag.ruralroutes.pool/crop", "农货");
-        add("ruralroutes.tag.ruralroutes.pool/wood", "木料");
-        add("ruralroutes.tag.ruralroutes.pool/stone", "石料");
-        add("ruralroutes.tag.ruralroutes.pool/mineral", "矿料");
-        add("ruralroutes.tag.ruralroutes.pool/dye_decor", "染装货");
-        add("ruralroutes.tag.ruralroutes.pool/leather_fiber", "皮革纤维货");
-        add("ruralroutes.tag.ruralroutes.pool/ice_snow", "冰雪货");
-        add("ruralroutes.tag.ruralroutes.pool/nether_goods", "下界货");
-        add("ruralroutes.tag.ruralroutes.pool/ocean_goods", "海货");
-        add("ruralroutes.tag.ruralroutes.pool/end_goods", "末地货");
-        add("ruralroutes.tag.ruralroutes.pool/precious", "珍材");
+        // 传闻目标别名
+        add("rumor.target.food", "吃食");
+        add("rumor.target.crop", "庄稼");
+        add("rumor.target.wood", "木料");
+        add("rumor.target.stone", "石料");
+        add("rumor.target.mineral", "矿料");
+        add("rumor.target.dye", "染料");
+        add("rumor.target.decor", "染色商品");
+        add("rumor.target.terracotta", "彩陶");
+        add("rumor.target.leather_fiber", "皮货");
+        add("rumor.target.ice_snow", "冰货");
+        add("rumor.target.nether_goods", "下界货");
+        add("rumor.target.ocean_goods", "海货");
+        add("rumor.target.end_goods", "末地货");
+        add("rumor.target.precious", "稀罕货");
 
         // 主题翻译
         add("ruralroutes.theme.plains_granary", "平原粮仓");

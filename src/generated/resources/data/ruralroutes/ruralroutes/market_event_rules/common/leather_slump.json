@@ -2,6 +2,8 @@
   "delta": -0.1,
   "id": "ruralroutes:common/leather_slump",
   "name_key": "market.ruralroutes.common.leather_slump",
+  "rumor_family": "surplus",
+  "rumor_target_key": "rumor.target.leather_fiber",
   "scopes": [
     {
       "type": "global",

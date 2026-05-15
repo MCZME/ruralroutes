@@ -3,10 +3,12 @@ package github.mczme.ruralroutes.data.builder;
 import github.mczme.ruralroutes.RuralRoutes;
 import github.mczme.ruralroutes.core.market.MarketEventRule;
 import github.mczme.ruralroutes.core.market.MarketEventScopeRule;
+import github.mczme.ruralroutes.core.rumor.RumorFamily;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -23,6 +25,8 @@ public class MarketRuleBuilder {
     private final List<MarketEventScopeRule> scopes = new ArrayList<>();
     private float delta;
     private Integer weight;
+    private RumorFamily rumorFamily;
+    private String rumorTargetKey;
 
     private MarketRuleBuilder(String id, BiConsumer<ResourceLocation, MarketEventRule> registrar) {
         this.id = id;
@@ -80,6 +84,22 @@ public class MarketRuleBuilder {
     }
 
     /**
+     * 设置传闻语义族
+     */
+    public MarketRuleBuilder rumorFamily(RumorFamily family) {
+        this.rumorFamily = Objects.requireNonNull(family, "family");
+        return this;
+    }
+
+    /**
+     * 设置传闻目标翻译 key
+     */
+    public MarketRuleBuilder rumorTargetKey(String key) {
+        this.rumorTargetKey = key;
+        return this;
+    }
+
+    /**
      * 构建并注册规则
      */
     public void register() {
@@ -90,7 +110,9 @@ public class MarketRuleBuilder {
                 targetRef,
                 List.copyOf(scopes),
                 delta,
-                Optional.ofNullable(weight)
+                Optional.ofNullable(weight),
+                Objects.requireNonNull(rumorFamily, "rumorFamily"),
+                Optional.ofNullable(rumorTargetKey)
         );
         registrar.accept(location, rule);
     }

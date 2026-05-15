@@ -2,6 +2,8 @@
   "delta": 0.18,
   "id": "ruralroutes:biome/snowy/cold_supply",
   "name_key": "market.ruralroutes.biome.snowy.cold_supply",
+  "rumor_family": "shortage",
+  "rumor_target_key": "rumor.target.food",
   "scopes": [
     {
       "type": "biome",

@@ -2,6 +2,8 @@
   "delta": 0.22,
   "id": "ruralroutes:theme/taiga_fur/winter_fur",
   "name_key": "market.ruralroutes.theme.taiga_fur.winter_fur",
+  "rumor_family": "demand",
+  "rumor_target_key": "rumor.target.leather_fiber",
   "scopes": [
     {
       "type": "theme",

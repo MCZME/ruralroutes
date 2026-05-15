@@ -2,6 +2,8 @@
   "delta": 0.14,
   "id": "ruralroutes:biome/taiga/fur_demand",
   "name_key": "market.ruralroutes.biome.taiga.fur_demand",
+  "rumor_family": "demand",
+  "rumor_target_key": "rumor.target.leather_fiber",
   "scopes": [
     {
       "type": "biome",

@@ -2,6 +2,8 @@
   "delta": 0.22,
   "id": "ruralroutes:theme/plains_workshop/ore_shortage",
   "name_key": "market.ruralroutes.theme.plains_workshop.ore_shortage",
+  "rumor_family": "shortage",
+  "rumor_target_key": "rumor.target.mineral",
   "scopes": [
     {
       "type": "theme",

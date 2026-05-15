@@ -164,17 +164,37 @@ public class RREnUsLanguageProvider extends LanguageProvider {
 
         // ===== Rumor System =====
 
-        // Rumor templates
-        add("rumor.template.1", "%s prices %s in %s");
-        add("rumor.template.2", "%s prices %s around %s");
-        add("rumor.template.3", "Heard that %s prices %s in %s");
-        add("rumor.template.4", "%s prices %s, %s affected");
-        add("rumor.template.5", "Trade route rumor: %s prices %s in %s");
+        // Rumor templates: shortage
+        add("rumor.shortage.global.1", "Folks everywhere are scrambling for %s lately.");
+        add("rumor.shortage.global.2", "%s has been tight all over lately.");
+        add("rumor.shortage.biome.1", "Word is folks around %s have been short on %s.");
+        add("rumor.shortage.biome.2", "People around %s have been snapping up %s.");
+        add("rumor.shortage.theme.1", "%s has been short on %s lately.");
+        add("rumor.shortage.theme.2", "Heard %s is looking for %s.");
 
-        // Direction
-        add("rumor.direction.up", "risen");
-        add("rumor.direction.down", "fallen");
-        add("rumor.direction.stable", "stable");
+        // Rumor templates: surplus
+        add("rumor.surplus.global.1", "%s has been plentiful everywhere lately.");
+        add("rumor.surplus.global.2", "There's plenty of %s on the roads right now.");
+        add("rumor.surplus.biome.1", "%s has had plenty of %s moving lately.");
+        add("rumor.surplus.biome.2", "Word is %s has %s piled up.");
+        add("rumor.surplus.theme.1", "%s has had plenty of %s lately.");
+        add("rumor.surplus.theme.2", "%s has been letting %s go.");
+
+        // Rumor templates: demand
+        add("rumor.demand.global.1", "%s has been selling fast everywhere lately.");
+        add("rumor.demand.global.2", "%s is in demand across the routes right now.");
+        add("rumor.demand.biome.1", "Heard folks around %s are chasing %s.");
+        add("rumor.demand.biome.2", "%s has been hungry for %s lately.");
+        add("rumor.demand.theme.1", "%s has been paying well for %s lately.");
+        add("rumor.demand.theme.2", "Heard %s has its eye on %s.");
+
+        // Rumor templates: release
+        add("rumor.release.global.1", "Fresh batches of %s have been showing up everywhere.");
+        add("rumor.release.global.2", "There's been a lot of %s arriving lately.");
+        add("rumor.release.biome.1", "Around %s, fresh %s has been turning up lately.");
+        add("rumor.release.biome.2", "Heard %s just let out more %s.");
+        add("rumor.release.theme.1", "%s has just released a fresh batch of %s.");
+        add("rumor.release.theme.2", "Heard %s has new %s on hand.");
 
         // Scope
         add("rumor.scope.global", "everywhere");
@@ -190,19 +210,21 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("ruralroutes.tag.minecraft.planks", "Plank items");
         add("ruralroutes.tag.minecraft.crops", "Crop items");
 
-        // System pool tag translations
-        add("ruralroutes.tag.ruralroutes.pool/food", "Food goods");
-        add("ruralroutes.tag.ruralroutes.pool/crop", "Crop goods");
-        add("ruralroutes.tag.ruralroutes.pool/wood", "Timber goods");
-        add("ruralroutes.tag.ruralroutes.pool/stone", "Stone goods");
-        add("ruralroutes.tag.ruralroutes.pool/mineral", "Mineral goods");
-        add("ruralroutes.tag.ruralroutes.pool/dye_decor", "Dyed and decorative goods");
-        add("ruralroutes.tag.ruralroutes.pool/leather_fiber", "Leather and fiber goods");
-        add("ruralroutes.tag.ruralroutes.pool/ice_snow", "Ice and snow goods");
-        add("ruralroutes.tag.ruralroutes.pool/nether_goods", "Nether goods");
-        add("ruralroutes.tag.ruralroutes.pool/ocean_goods", "Ocean goods");
-        add("ruralroutes.tag.ruralroutes.pool/end_goods", "End goods");
-        add("ruralroutes.tag.ruralroutes.pool/precious", "Precious goods");
+        // Rumor target aliases
+        add("rumor.target.food", "provisions");
+        add("rumor.target.crop", "farm produce");
+        add("rumor.target.wood", "timber");
+        add("rumor.target.stone", "stone goods");
+        add("rumor.target.mineral", "ore");
+        add("rumor.target.dye", "dyes");
+        add("rumor.target.decor", "decor goods");
+        add("rumor.target.terracotta", "terracotta wares");
+        add("rumor.target.leather_fiber", "hides");
+        add("rumor.target.ice_snow", "ice goods");
+        add("rumor.target.nether_goods", "Nether goods");
+        add("rumor.target.ocean_goods", "sea goods");
+        add("rumor.target.end_goods", "End goods");
+        add("rumor.target.precious", "valuables");
 
         // Theme translations
         add("ruralroutes.theme.plains_granary", "Plains Granary");

@@ -2,6 +2,8 @@
   "delta": -0.2,
   "id": "ruralroutes:theme/snowy_hunter/good_hunt",
   "name_key": "market.ruralroutes.theme.snowy_hunter.good_hunt",
+  "rumor_family": "release",
+  "rumor_target_key": "rumor.target.leather_fiber",
   "scopes": [
     {
       "type": "theme",

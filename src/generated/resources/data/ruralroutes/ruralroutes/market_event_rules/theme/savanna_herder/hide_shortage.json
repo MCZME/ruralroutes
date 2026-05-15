@@ -2,6 +2,8 @@
   "delta": 0.22,
   "id": "ruralroutes:theme/savanna_herder/hide_shortage",
   "name_key": "market.ruralroutes.theme.savanna_herder.hide_shortage",
+  "rumor_family": "shortage",
+  "rumor_target_key": "rumor.target.leather_fiber",
   "scopes": [
     {
       "type": "theme",

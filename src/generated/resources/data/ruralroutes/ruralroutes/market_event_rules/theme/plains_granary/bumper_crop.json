@@ -2,6 +2,8 @@
   "delta": -0.22,
   "id": "ruralroutes:theme/plains_granary/bumper_crop",
   "name_key": "market.ruralroutes.theme.plains_granary.bumper_crop",
+  "rumor_family": "surplus",
+  "rumor_target_key": "rumor.target.crop",
   "scopes": [
     {
       "type": "theme",

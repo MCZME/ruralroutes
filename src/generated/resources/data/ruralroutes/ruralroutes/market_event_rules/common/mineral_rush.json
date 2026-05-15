@@ -2,6 +2,8 @@
   "delta": 0.15,
   "id": "ruralroutes:common/mineral_rush",
   "name_key": "market.ruralroutes.common.mineral_rush",
+  "rumor_family": "demand",
+  "rumor_target_key": "rumor.target.mineral",
   "scopes": [
     {
       "type": "global",

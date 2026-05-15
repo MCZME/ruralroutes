@@ -2,6 +2,8 @@
   "delta": -0.22,
   "id": "ruralroutes:theme/snowy_iceworks/cold_storage",
   "name_key": "market.ruralroutes.theme.snowy_iceworks.cold_storage",
+  "rumor_family": "release",
+  "rumor_target_key": "rumor.target.ice_snow",
   "scopes": [
     {
       "type": "theme",

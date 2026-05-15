@@ -2,6 +2,8 @@
   "delta": 0.15,
   "id": "ruralroutes:biome/savanna/kiln_season",
   "name_key": "market.ruralroutes.biome.savanna.kiln_season",
+  "rumor_family": "demand",
+  "rumor_target_key": "rumor.target.wood",
   "scopes": [
     {
       "type": "biome",

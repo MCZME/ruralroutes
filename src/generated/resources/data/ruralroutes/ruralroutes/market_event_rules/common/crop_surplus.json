@@ -2,6 +2,8 @@
   "delta": -0.12,
   "id": "ruralroutes:common/crop_surplus",
   "name_key": "market.ruralroutes.common.crop_surplus",
+  "rumor_family": "surplus",
+  "rumor_target_key": "rumor.target.crop",
   "scopes": [
     {
       "type": "global",

@@ -2,6 +2,8 @@
   "delta": 0.14,
   "id": "ruralroutes:biome/plains/tool_demand",
   "name_key": "market.ruralroutes.biome.plains.tool_demand",
+  "rumor_family": "demand",
+  "rumor_target_key": "rumor.target.mineral",
   "scopes": [
     {
       "type": "biome",

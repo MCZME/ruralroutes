@@ -2,6 +2,8 @@
   "delta": -0.2,
   "id": "ruralroutes:theme/savanna_woodworks/timber_release",
   "name_key": "market.ruralroutes.theme.savanna_woodworks.timber_release",
+  "rumor_family": "release",
+  "rumor_target_key": "rumor.target.wood",
   "scopes": [
     {
       "type": "theme",

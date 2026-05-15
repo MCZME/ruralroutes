@@ -2,6 +2,8 @@
   "delta": -0.2,
   "id": "ruralroutes:theme/plains_pasture/full_sheds",
   "name_key": "market.ruralroutes.theme.plains_pasture.full_sheds",
+  "rumor_family": "surplus",
+  "rumor_target_key": "rumor.target.leather_fiber",
   "scopes": [
     {
       "type": "theme",

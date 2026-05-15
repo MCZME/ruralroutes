@@ -2,6 +2,8 @@
   "delta": 0.22,
   "id": "ruralroutes:theme/snowy_waystation/rations_low",
   "name_key": "market.ruralroutes.theme.snowy_waystation.rations_low",
+  "rumor_family": "shortage",
+  "rumor_target_key": "rumor.target.food",
   "scopes": [
     {
       "type": "theme",

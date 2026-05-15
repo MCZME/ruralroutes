@@ -2,6 +2,8 @@
   "delta": -0.1,
   "id": "ruralroutes:common/stone_glut",
   "name_key": "market.ruralroutes.common.stone_glut",
+  "rumor_family": "surplus",
+  "rumor_target_key": "rumor.target.stone",
   "scopes": [
     {
       "type": "global",

@@ -2,6 +2,8 @@
   "delta": -0.15,
   "id": "ruralroutes:biome/plains/harvest_year",
   "name_key": "market.ruralroutes.biome.plains.harvest_year",
+  "rumor_family": "surplus",
+  "rumor_target_key": "rumor.target.crop",
   "scopes": [
     {
       "type": "biome",

@@ -2,6 +2,8 @@
   "delta": -0.15,
   "id": "ruralroutes:biome/snowy/thaw",
   "name_key": "market.ruralroutes.biome.snowy.thaw",
+  "rumor_family": "release",
+  "rumor_target_key": "rumor.target.ice_snow",
   "scopes": [
     {
       "type": "biome",

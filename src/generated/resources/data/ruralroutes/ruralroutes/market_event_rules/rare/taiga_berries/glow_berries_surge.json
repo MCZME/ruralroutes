@@ -2,6 +2,7 @@
   "delta": 0.22,
   "id": "ruralroutes:rare/taiga_berries/glow_berries_surge",
   "name_key": "market.ruralroutes.rare.taiga_berries.glow_berries_surge",
+  "rumor_family": "demand",
   "scopes": [
     {
       "type": "theme",

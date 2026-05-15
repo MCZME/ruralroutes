@@ -2,6 +2,8 @@
   "delta": 0.2,
   "id": "ruralroutes:theme/desert_quarry/masonry_rush",
   "name_key": "market.ruralroutes.theme.desert_quarry.masonry_rush",
+  "rumor_family": "demand",
+  "rumor_target_key": "rumor.target.stone",
   "scopes": [
     {
       "type": "theme",

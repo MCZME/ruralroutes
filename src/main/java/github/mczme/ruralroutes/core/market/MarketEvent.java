@@ -2,6 +2,7 @@ package github.mczme.ruralroutes.core.market;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import github.mczme.ruralroutes.core.rumor.RumorFamily;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
@@ -17,7 +18,9 @@ public record MarketEvent(
         String targetRef,
         MarketScopeType scopeType,
         Optional<ResourceLocation> scopeTarget,
-        float delta
+        float delta,
+        RumorFamily rumorFamily,
+        Optional<String> rumorTargetKey
 ) {
     public static final Codec<MarketEvent> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
@@ -25,7 +28,9 @@ public record MarketEvent(
                     Codec.STRING.fieldOf("target_ref").forGetter(MarketEvent::targetRef),
                     MarketScopeType.CODEC.fieldOf("scope_type").forGetter(MarketEvent::scopeType),
                     ResourceLocation.CODEC.optionalFieldOf("scope_target").forGetter(MarketEvent::scopeTarget),
-                    Codec.FLOAT.fieldOf("delta").forGetter(MarketEvent::delta)
+                    Codec.FLOAT.fieldOf("delta").forGetter(MarketEvent::delta),
+                    RumorFamily.CODEC.fieldOf("rumor_family").forGetter(MarketEvent::rumorFamily),
+                    Codec.STRING.optionalFieldOf("rumor_target_key").forGetter(MarketEvent::rumorTargetKey)
             ).apply(instance, MarketEvent::new)
     );
 
@@ -45,13 +50,4 @@ public record MarketEvent(
         return isTargetTag() ? targetRef.substring(1) : targetRef;
     }
 
-    /**
-     * 获取涨跌方向描述
-     * @return "up" 表示上涨，"down" 表示下跌，"stable" 表示无变化
-     */
-    public String getDirectionKey() {
-        if (delta > 0.001f) return "up";
-        if (delta < -0.001f) return "down";
-        return "stable";
-    }
 }

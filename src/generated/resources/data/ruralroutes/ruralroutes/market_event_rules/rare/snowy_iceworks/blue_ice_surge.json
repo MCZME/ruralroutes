@@ -2,6 +2,7 @@
   "delta": 0.3,
   "id": "ruralroutes:rare/snowy_iceworks/blue_ice_surge",
   "name_key": "market.ruralroutes.rare.snowy_iceworks.blue_ice_surge",
+  "rumor_family": "demand",
   "scopes": [
     {
       "type": "theme",

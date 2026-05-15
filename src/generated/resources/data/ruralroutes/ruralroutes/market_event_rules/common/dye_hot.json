@@ -2,6 +2,8 @@
   "delta": 0.14,
   "id": "ruralroutes:common/dye_hot",
   "name_key": "market.ruralroutes.common.dye_hot",
+  "rumor_family": "demand",
+  "rumor_target_key": "rumor.target.decor",
   "scopes": [
     {
       "type": "global",

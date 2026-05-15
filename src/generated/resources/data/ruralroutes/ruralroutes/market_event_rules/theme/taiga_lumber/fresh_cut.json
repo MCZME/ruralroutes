@@ -2,6 +2,8 @@
   "delta": -0.22,
   "id": "ruralroutes:theme/taiga_lumber/fresh_cut",
   "name_key": "market.ruralroutes.theme.taiga_lumber.fresh_cut",
+  "rumor_family": "release",
+  "rumor_target_key": "rumor.target.wood",
   "scopes": [
     {
       "type": "theme",

@@ -2,6 +2,8 @@
   "delta": 0.28,
   "id": "ruralroutes:rare/nether_goods_surge",
   "name_key": "market.ruralroutes.rare.nether_goods_surge",
+  "rumor_family": "demand",
+  "rumor_target_key": "rumor.target.nether_goods",
   "scopes": [
     {
       "type": "global",
