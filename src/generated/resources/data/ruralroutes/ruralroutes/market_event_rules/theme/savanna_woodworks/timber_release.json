@@ -1,0 +1,16 @@
+{
+  "delta": -0.2,
+  "id": "ruralroutes:theme/savanna_woodworks/timber_release",
+  "name_key": "market.ruralroutes.theme.savanna_woodworks.timber_release",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:savanna_woodworks"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/wood",
+  "weight": 35
+}

@@ -1,0 +1,16 @@
+{
+  "delta": -0.2,
+  "id": "ruralroutes:theme/taiga_berries/berry_season",
+  "name_key": "market.ruralroutes.theme.taiga_berries.berry_season",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:taiga_berries"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/food",
+  "weight": 35
+}

@@ -174,6 +174,7 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         // 涨跌
         add("rumor.direction.up", "上涨");
         add("rumor.direction.down", "下跌");
+        add("rumor.direction.stable", "平稳");
 
         // 作用域
         add("rumor.scope.global", "世界各地");
@@ -188,5 +189,36 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         // 标签翻译（按需添加）
         add("ruralroutes.tag.minecraft.planks", "木板类物品");
         add("ruralroutes.tag.minecraft.crops", "农作物类");
+
+        // 系统池标签翻译
+        add("ruralroutes.tag.ruralroutes.pool/food", "食品货");
+        add("ruralroutes.tag.ruralroutes.pool/crop", "农货");
+        add("ruralroutes.tag.ruralroutes.pool/wood", "木料");
+        add("ruralroutes.tag.ruralroutes.pool/stone", "石料");
+        add("ruralroutes.tag.ruralroutes.pool/mineral", "矿料");
+        add("ruralroutes.tag.ruralroutes.pool/dye_decor", "染装货");
+        add("ruralroutes.tag.ruralroutes.pool/leather_fiber", "皮革纤维货");
+        add("ruralroutes.tag.ruralroutes.pool/ice_snow", "冰雪货");
+        add("ruralroutes.tag.ruralroutes.pool/nether_goods", "下界货");
+        add("ruralroutes.tag.ruralroutes.pool/ocean_goods", "海货");
+        add("ruralroutes.tag.ruralroutes.pool/end_goods", "末地货");
+        add("ruralroutes.tag.ruralroutes.pool/precious", "珍材");
+
+        // 主题翻译
+        add("ruralroutes.theme.plains_granary", "平原粮仓");
+        add("ruralroutes.theme.plains_pasture", "牧野集市");
+        add("ruralroutes.theme.plains_workshop", "平原匠坊");
+        add("ruralroutes.theme.desert_quarry", "砂岩采石场");
+        add("ruralroutes.theme.desert_oasis", "绿洲田园");
+        add("ruralroutes.theme.desert_dyeworks", "染料工坊");
+        add("ruralroutes.theme.savanna_woodworks", "金合欢木场");
+        add("ruralroutes.theme.savanna_terracotta", "陶瓦窑");
+        add("ruralroutes.theme.savanna_herder", "高原牧场");
+        add("ruralroutes.theme.taiga_lumber", "云杉林场");
+        add("ruralroutes.theme.taiga_berries", "浆果之乡");
+        add("ruralroutes.theme.taiga_fur", "毛皮驿站");
+        add("ruralroutes.theme.snowy_iceworks", "冰矿坊");
+        add("ruralroutes.theme.snowy_waystation", "雪原旅站");
+        add("ruralroutes.theme.snowy_hunter", "极地猎户");
     }
 }

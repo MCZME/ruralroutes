@@ -1,0 +1,16 @@
+{
+  "delta": 0.14,
+  "id": "ruralroutes:biome/taiga/fur_demand",
+  "name_key": "market.ruralroutes.biome.taiga.fur_demand",
+  "scopes": [
+    {
+      "type": "biome",
+      "selector": "list",
+      "targets": [
+        "minecraft:taiga"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/leather_fiber",
+  "weight": 50
+}

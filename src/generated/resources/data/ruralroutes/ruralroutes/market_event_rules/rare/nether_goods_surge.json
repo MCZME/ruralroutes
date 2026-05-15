@@ -1,0 +1,13 @@
+{
+  "delta": 0.28,
+  "id": "ruralroutes:rare/nether_goods_surge",
+  "name_key": "market.ruralroutes.rare.nether_goods_surge",
+  "scopes": [
+    {
+      "type": "global",
+      "selector": "all"
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/nether_goods",
+  "weight": 10
+}

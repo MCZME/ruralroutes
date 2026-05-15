@@ -1,0 +1,16 @@
+{
+  "delta": -0.22,
+  "id": "ruralroutes:theme/snowy_iceworks/cold_storage",
+  "name_key": "market.ruralroutes.theme.snowy_iceworks.cold_storage",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:snowy_iceworks"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/ice_snow",
+  "weight": 40
+}

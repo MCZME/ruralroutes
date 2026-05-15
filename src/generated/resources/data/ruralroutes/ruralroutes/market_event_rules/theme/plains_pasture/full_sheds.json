@@ -1,0 +1,16 @@
+{
+  "delta": -0.2,
+  "id": "ruralroutes:theme/plains_pasture/full_sheds",
+  "name_key": "market.ruralroutes.theme.plains_pasture.full_sheds",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:plains_pasture"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/leather_fiber",
+  "weight": 35
+}

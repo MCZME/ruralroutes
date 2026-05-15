@@ -1,0 +1,16 @@
+{
+  "delta": 0.22,
+  "id": "ruralroutes:theme/taiga_fur/winter_fur",
+  "name_key": "market.ruralroutes.theme.taiga_fur.winter_fur",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:taiga_fur"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/leather_fiber",
+  "weight": 35
+}

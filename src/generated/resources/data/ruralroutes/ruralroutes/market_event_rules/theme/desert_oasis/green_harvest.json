@@ -1,0 +1,16 @@
+{
+  "delta": -0.22,
+  "id": "ruralroutes:theme/desert_oasis/green_harvest",
+  "name_key": "market.ruralroutes.theme.desert_oasis.green_harvest",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:desert_oasis"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/crop",
+  "weight": 40
+}

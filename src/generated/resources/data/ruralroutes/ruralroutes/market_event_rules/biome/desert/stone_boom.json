@@ -1,0 +1,16 @@
+{
+  "delta": 0.14,
+  "id": "ruralroutes:biome/desert/stone_boom",
+  "name_key": "market.ruralroutes.biome.desert.stone_boom",
+  "scopes": [
+    {
+      "type": "biome",
+      "selector": "list",
+      "targets": [
+        "minecraft:desert"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/stone",
+  "weight": 55
+}

@@ -1,0 +1,16 @@
+{
+  "delta": 0.14,
+  "id": "ruralroutes:biome/plains/tool_demand",
+  "name_key": "market.ruralroutes.biome.plains.tool_demand",
+  "scopes": [
+    {
+      "type": "biome",
+      "selector": "list",
+      "targets": [
+        "minecraft:plains"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/mineral",
+  "weight": 55
+}

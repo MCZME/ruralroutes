@@ -1,0 +1,13 @@
+{
+  "delta": -0.12,
+  "id": "ruralroutes:common/crop_surplus",
+  "name_key": "market.ruralroutes.common.crop_surplus",
+  "scopes": [
+    {
+      "type": "global",
+      "selector": "all"
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/crop",
+  "weight": 90
+}

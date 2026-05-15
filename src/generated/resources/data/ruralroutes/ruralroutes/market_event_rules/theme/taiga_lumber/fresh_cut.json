@@ -1,0 +1,16 @@
+{
+  "delta": -0.22,
+  "id": "ruralroutes:theme/taiga_lumber/fresh_cut",
+  "name_key": "market.ruralroutes.theme.taiga_lumber.fresh_cut",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:taiga_lumber"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/wood",
+  "weight": 40
+}

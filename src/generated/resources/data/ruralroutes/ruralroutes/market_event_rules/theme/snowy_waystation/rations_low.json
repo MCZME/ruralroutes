@@ -1,0 +1,16 @@
+{
+  "delta": 0.22,
+  "id": "ruralroutes:theme/snowy_waystation/rations_low",
+  "name_key": "market.ruralroutes.theme.snowy_waystation.rations_low",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:snowy_waystation"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/food",
+  "weight": 35
+}

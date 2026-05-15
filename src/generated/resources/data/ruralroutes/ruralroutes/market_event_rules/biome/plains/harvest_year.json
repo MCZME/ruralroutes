@@ -1,0 +1,16 @@
+{
+  "delta": -0.15,
+  "id": "ruralroutes:biome/plains/harvest_year",
+  "name_key": "market.ruralroutes.biome.plains.harvest_year",
+  "scopes": [
+    {
+      "type": "biome",
+      "selector": "list",
+      "targets": [
+        "minecraft:plains"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/crop",
+  "weight": 65
+}

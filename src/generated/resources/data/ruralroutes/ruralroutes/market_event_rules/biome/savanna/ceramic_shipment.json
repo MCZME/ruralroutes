@@ -1,0 +1,16 @@
+{
+  "delta": -0.12,
+  "id": "ruralroutes:biome/savanna/ceramic_shipment",
+  "name_key": "market.ruralroutes.biome.savanna.ceramic_shipment",
+  "scopes": [
+    {
+      "type": "biome",
+      "selector": "list",
+      "targets": [
+        "minecraft:savanna"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/dye_decor",
+  "weight": 50
+}

@@ -1,0 +1,16 @@
+{
+  "delta": -0.22,
+  "id": "ruralroutes:theme/plains_granary/bumper_crop",
+  "name_key": "market.ruralroutes.theme.plains_granary.bumper_crop",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:plains_granary"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/crop",
+  "weight": 40
+}

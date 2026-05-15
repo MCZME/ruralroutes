@@ -1,0 +1,16 @@
+{
+  "delta": 0.18,
+  "id": "ruralroutes:biome/snowy/cold_supply",
+  "name_key": "market.ruralroutes.biome.snowy.cold_supply",
+  "scopes": [
+    {
+      "type": "biome",
+      "selector": "list",
+      "targets": [
+        "minecraft:snowy_plains"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/food",
+  "weight": 60
+}

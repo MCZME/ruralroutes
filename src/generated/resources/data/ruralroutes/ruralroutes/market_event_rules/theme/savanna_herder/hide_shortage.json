@@ -1,0 +1,16 @@
+{
+  "delta": 0.22,
+  "id": "ruralroutes:theme/savanna_herder/hide_shortage",
+  "name_key": "market.ruralroutes.theme.savanna_herder.hide_shortage",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:savanna_herder"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/leather_fiber",
+  "weight": 35
+}

@@ -1,0 +1,13 @@
+{
+  "delta": 0.15,
+  "id": "ruralroutes:common/mineral_rush",
+  "name_key": "market.ruralroutes.common.mineral_rush",
+  "scopes": [
+    {
+      "type": "global",
+      "selector": "all"
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/mineral",
+  "weight": 100
+}

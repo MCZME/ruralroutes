@@ -1,0 +1,16 @@
+{
+  "delta": -0.15,
+  "id": "ruralroutes:biome/snowy/thaw",
+  "name_key": "market.ruralroutes.biome.snowy.thaw",
+  "scopes": [
+    {
+      "type": "biome",
+      "selector": "list",
+      "targets": [
+        "minecraft:snowy_plains"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/ice_snow",
+  "weight": 50
+}

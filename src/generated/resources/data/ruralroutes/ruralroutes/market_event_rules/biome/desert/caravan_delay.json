@@ -1,0 +1,16 @@
+{
+  "delta": 0.16,
+  "id": "ruralroutes:biome/desert/caravan_delay",
+  "name_key": "market.ruralroutes.biome.desert.caravan_delay",
+  "scopes": [
+    {
+      "type": "biome",
+      "selector": "list",
+      "targets": [
+        "minecraft:desert"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/food",
+  "weight": 60
+}

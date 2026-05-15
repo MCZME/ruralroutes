@@ -1,0 +1,13 @@
+{
+  "delta": 0.14,
+  "id": "ruralroutes:common/dye_hot",
+  "name_key": "market.ruralroutes.common.dye_hot",
+  "scopes": [
+    {
+      "type": "global",
+      "selector": "all"
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/dye_decor",
+  "weight": 80
+}

@@ -1,0 +1,16 @@
+{
+  "delta": 0.2,
+  "id": "ruralroutes:theme/desert_quarry/masonry_rush",
+  "name_key": "market.ruralroutes.theme.desert_quarry.masonry_rush",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:desert_quarry"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/stone",
+  "weight": 35
+}

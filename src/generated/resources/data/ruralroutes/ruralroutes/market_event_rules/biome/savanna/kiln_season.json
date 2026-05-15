@@ -1,0 +1,16 @@
+{
+  "delta": 0.15,
+  "id": "ruralroutes:biome/savanna/kiln_season",
+  "name_key": "market.ruralroutes.biome.savanna.kiln_season",
+  "scopes": [
+    {
+      "type": "biome",
+      "selector": "list",
+      "targets": [
+        "minecraft:savanna"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/wood",
+  "weight": 60
+}

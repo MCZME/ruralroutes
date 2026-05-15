@@ -1,0 +1,16 @@
+{
+  "delta": -0.2,
+  "id": "ruralroutes:theme/savanna_terracotta/new_firing",
+  "name_key": "market.ruralroutes.theme.savanna_terracotta.new_firing",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:savanna_terracotta"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/dye_decor",
+  "weight": 35
+}

@@ -1,0 +1,16 @@
+{
+  "delta": 0.22,
+  "id": "ruralroutes:theme/desert_dyeworks/dye_boom",
+  "name_key": "market.ruralroutes.theme.desert_dyeworks.dye_boom",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:desert_dyeworks"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/dye_decor",
+  "weight": 35
+}

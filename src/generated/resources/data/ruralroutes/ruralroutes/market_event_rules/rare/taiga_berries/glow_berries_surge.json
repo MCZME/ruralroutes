@@ -1,0 +1,16 @@
+{
+  "delta": 0.22,
+  "id": "ruralroutes:rare/taiga_berries/glow_berries_surge",
+  "name_key": "market.ruralroutes.rare.taiga_berries.glow_berries_surge",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:taiga_berries"
+      ]
+    }
+  ],
+  "target_ref": "minecraft:glow_berries",
+  "weight": 10
+}

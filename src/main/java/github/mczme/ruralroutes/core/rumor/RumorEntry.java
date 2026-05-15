@@ -59,6 +59,10 @@ public record RumorEntry(
      * @return 组合后的情报文本
      */
     public Component getDisplayText(Random random) {
+        if (isGossip()) {
+            return Component.translatable(targetNameKey);
+        }
+
         // 随机选择模板
         String templateKey = TEMPLATE_KEYS[random.nextInt(TEMPLATE_KEYS.length)];
 
@@ -70,15 +74,26 @@ public record RumorEntry(
         if (scopeType == MarketScopeType.GLOBAL) {
             scope = Component.translatable("rumor.scope.global");
         } else if (scopeType == MarketScopeType.BIOME) {
-            scope = Component.translatable("rumor.scope.biome", scopeTargetName);
+            scope = Component.translatable("rumor.scope.biome", getScopeTargetComponent());
         } else {
-            scope = Component.translatable("rumor.scope.theme", scopeTargetName);
+            scope = Component.translatable("rumor.scope.theme", getScopeTargetComponent());
         }
 
         // 涨跌
         Component direction = Component.translatable("rumor.direction." + directionKey);
 
         return Component.translatable(templateKey, target, scope, direction);
+    }
+
+    private boolean isGossip() {
+        return targetNameKey.startsWith("rumor.gossip.");
+    }
+
+    private Component getScopeTargetComponent() {
+        if (scopeTargetName.isEmpty()) {
+            return Component.empty();
+        }
+        return Component.translatable(scopeTargetName);
     }
 
     /**

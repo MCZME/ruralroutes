@@ -1,0 +1,16 @@
+{
+  "delta": -0.2,
+  "id": "ruralroutes:theme/snowy_hunter/good_hunt",
+  "name_key": "market.ruralroutes.theme.snowy_hunter.good_hunt",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:snowy_hunter"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/leather_fiber",
+  "weight": 35
+}

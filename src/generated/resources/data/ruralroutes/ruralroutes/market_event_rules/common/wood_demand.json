@@ -1,0 +1,13 @@
+{
+  "delta": 0.12,
+  "id": "ruralroutes:common/wood_demand",
+  "name_key": "market.ruralroutes.common.wood_demand",
+  "scopes": [
+    {
+      "type": "global",
+      "selector": "all"
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/wood",
+  "weight": 85
+}

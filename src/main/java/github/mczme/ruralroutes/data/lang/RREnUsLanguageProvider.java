@@ -174,6 +174,7 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         // Direction
         add("rumor.direction.up", "risen");
         add("rumor.direction.down", "fallen");
+        add("rumor.direction.stable", "stable");
 
         // Scope
         add("rumor.scope.global", "everywhere");
@@ -188,5 +189,36 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         // Tag translations
         add("ruralroutes.tag.minecraft.planks", "Plank items");
         add("ruralroutes.tag.minecraft.crops", "Crop items");
+
+        // System pool tag translations
+        add("ruralroutes.tag.ruralroutes.pool/food", "Food goods");
+        add("ruralroutes.tag.ruralroutes.pool/crop", "Crop goods");
+        add("ruralroutes.tag.ruralroutes.pool/wood", "Timber goods");
+        add("ruralroutes.tag.ruralroutes.pool/stone", "Stone goods");
+        add("ruralroutes.tag.ruralroutes.pool/mineral", "Mineral goods");
+        add("ruralroutes.tag.ruralroutes.pool/dye_decor", "Dyed and decorative goods");
+        add("ruralroutes.tag.ruralroutes.pool/leather_fiber", "Leather and fiber goods");
+        add("ruralroutes.tag.ruralroutes.pool/ice_snow", "Ice and snow goods");
+        add("ruralroutes.tag.ruralroutes.pool/nether_goods", "Nether goods");
+        add("ruralroutes.tag.ruralroutes.pool/ocean_goods", "Ocean goods");
+        add("ruralroutes.tag.ruralroutes.pool/end_goods", "End goods");
+        add("ruralroutes.tag.ruralroutes.pool/precious", "Precious goods");
+
+        // Theme translations
+        add("ruralroutes.theme.plains_granary", "Plains Granary");
+        add("ruralroutes.theme.plains_pasture", "Pasture Market");
+        add("ruralroutes.theme.plains_workshop", "Plains Workshop");
+        add("ruralroutes.theme.desert_quarry", "Desert Quarry");
+        add("ruralroutes.theme.desert_oasis", "Oasis Farm");
+        add("ruralroutes.theme.desert_dyeworks", "Desert Dyeworks");
+        add("ruralroutes.theme.savanna_woodworks", "Acacia Lumberyard");
+        add("ruralroutes.theme.savanna_terracotta", "Terracotta Kiln");
+        add("ruralroutes.theme.savanna_herder", "Highland Ranch");
+        add("ruralroutes.theme.taiga_lumber", "Spruce Lumber Camp");
+        add("ruralroutes.theme.taiga_berries", "Berry Hamlet");
+        add("ruralroutes.theme.taiga_fur", "Fur Waystation");
+        add("ruralroutes.theme.snowy_iceworks", "Iceworks");
+        add("ruralroutes.theme.snowy_waystation", "Snowy Waystation");
+        add("ruralroutes.theme.snowy_hunter", "Polar Hunters");
     }
 }

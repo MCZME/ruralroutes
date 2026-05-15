@@ -1,0 +1,13 @@
+{
+  "delta": -0.1,
+  "id": "ruralroutes:common/stone_glut",
+  "name_key": "market.ruralroutes.common.stone_glut",
+  "scopes": [
+    {
+      "type": "global",
+      "selector": "all"
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/stone",
+  "weight": 80
+}

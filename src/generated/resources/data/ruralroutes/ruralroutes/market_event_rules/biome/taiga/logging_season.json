@@ -1,0 +1,16 @@
+{
+  "delta": -0.15,
+  "id": "ruralroutes:biome/taiga/logging_season",
+  "name_key": "market.ruralroutes.biome.taiga.logging_season",
+  "scopes": [
+    {
+      "type": "biome",
+      "selector": "list",
+      "targets": [
+        "minecraft:taiga"
+      ]
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/wood",
+  "weight": 60
+}

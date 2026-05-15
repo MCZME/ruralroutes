@@ -1,0 +1,13 @@
+{
+  "delta": -0.1,
+  "id": "ruralroutes:common/leather_slump",
+  "name_key": "market.ruralroutes.common.leather_slump",
+  "scopes": [
+    {
+      "type": "global",
+      "selector": "all"
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/leather_fiber",
+  "weight": 75
+}

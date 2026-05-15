@@ -1,0 +1,13 @@
+{
+  "delta": 0.15,
+  "id": "ruralroutes:common/food_shortage",
+  "name_key": "market.ruralroutes.common.food_shortage",
+  "scopes": [
+    {
+      "type": "global",
+      "selector": "all"
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/food",
+  "weight": 100
+}

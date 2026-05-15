@@ -1,0 +1,13 @@
+{
+  "delta": 0.25,
+  "id": "ruralroutes:rare/ocean_goods_shortage",
+  "name_key": "market.ruralroutes.rare.ocean_goods_shortage",
+  "scopes": [
+    {
+      "type": "global",
+      "selector": "all"
+    }
+  ],
+  "target_ref": "#ruralroutes:pool/ocean_goods",
+  "weight": 10
+}

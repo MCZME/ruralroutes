@@ -1,0 +1,16 @@
+{
+  "delta": 0.3,
+  "id": "ruralroutes:rare/snowy_iceworks/blue_ice_surge",
+  "name_key": "market.ruralroutes.rare.snowy_iceworks.blue_ice_surge",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:snowy_iceworks"
+      ]
+    }
+  ],
+  "target_ref": "minecraft:blue_ice",
+  "weight": 8
+}
