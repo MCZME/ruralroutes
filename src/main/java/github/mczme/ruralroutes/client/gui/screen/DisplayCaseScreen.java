@@ -1,86 +1,124 @@
 package github.mczme.ruralroutes.client.gui.screen;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.platform.InputConstants;
+import github.mczme.ruralroutes.RuralRoutes;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 /**
  * 展示柜 GUI 屏幕
- * 纯展示物品信息，不需要 Menu
+ * 极简展柜特写：仅展示展品与铭牌。
  */
 public class DisplayCaseScreen extends Screen {
 
-    // GUI 尺寸
-    private static final int GUI_WIDTH = 176;
-    private static final int GUI_HEIGHT = 120;
+    private static final ResourceLocation GUI_TEXTURE =
+        ResourceLocation.fromNamespaceAndPath(RuralRoutes.MODID, "textures/gui/display_case.png");
 
-    // 物品显示位置
-    private static final int ITEM_X = 80;
-    private static final int ITEM_Y = 30;
+    private static final int GUI_WIDTH = 214;
+    private static final int GUI_HEIGHT = 168;
+    private static final int ITEM_RENDER_SCALE = 3;
+    private static final int ITEM_HOVER_SIZE = 48;
+    private static final int ITEM_CENTER_Y = 70;
+    private static final int NAME_PLATE_Y = 139;
 
-    // 背景颜色
-    private static final int BACKGROUND_COLOR = 0xCC4A3728;
-    private static final int BORDER_COLOR = 0xFF8B7355;
+    private static final int BACKDROP_TOP = 0xD915100C;
+    private static final int BACKDROP_BOTTOM = 0xF0080604;
+
+    private static final int TEXT_MUTED = 0xFFB49D84;
+    private static final int TEXT_PLATE = 0xFFF1D6A5;
 
     private final ItemStack displayItem;
+    private int leftPos;
+    private int topPos;
 
     public DisplayCaseScreen(ItemStack displayItem) {
         super(Component.translatable("block.ruralroutes.display_case"));
-        this.displayItem = displayItem;
+        this.displayItem = displayItem.copy();
     }
 
     @Override
     protected void init() {
         super.init();
+        leftPos = (this.width - GUI_WIDTH) / 2;
+        topPos = (this.height - GUI_HEIGHT) / 2;
     }
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        renderBackdrop(guiGraphics);
+        renderBoard(guiGraphics);
+        renderShowcase(guiGraphics);
+        renderItemTooltip(guiGraphics, mouseX, mouseY);
+    }
 
-        // 计算居中位置
-        int leftPos = (this.width - GUI_WIDTH) / 2;
-        int topPos = (this.height - GUI_HEIGHT) / 2;
+    private void renderBackdrop(GuiGraphics guiGraphics) {
+        guiGraphics.fillGradient(0, 0, this.width, this.height, BACKDROP_TOP, BACKDROP_BOTTOM);
+    }
 
-        // 渲染背景
-        guiGraphics.fill(leftPos, topPos, leftPos + GUI_WIDTH, topPos + GUI_HEIGHT, BACKGROUND_COLOR);
-        guiGraphics.renderOutline(leftPos, topPos, GUI_WIDTH, GUI_HEIGHT, BORDER_COLOR);
+    private void renderBoard(GuiGraphics guiGraphics) {
+        guiGraphics.blit(GUI_TEXTURE, leftPos, topPos, 0, 0, GUI_WIDTH, GUI_HEIGHT);
+        guiGraphics.drawCenteredString(font, this.title, leftPos + GUI_WIDTH / 2, topPos + 12, TEXT_MUTED);
+    }
 
-        // 绘制物品槽背景
-        int slotX = leftPos + ITEM_X - 2;
-        int slotY = topPos + ITEM_Y - 2;
-        guiGraphics.fill(slotX, slotY, slotX + 20, slotY + 20, 0x55000000);
-        guiGraphics.renderOutline(slotX, slotY, 20, 20, 0xFF6B5344);
+    private void renderShowcase(GuiGraphics guiGraphics) {
+        if (displayItem.isEmpty()) {
+            guiGraphics.drawCenteredString(font,
+                Component.translatable("block.ruralroutes.display_case.empty"),
+                leftPos + GUI_WIDTH / 2,
+                topPos + ITEM_CENTER_Y - font.lineHeight / 2,
+                TEXT_MUTED);
+            return;
+        }
 
-        // 渲染标题
-        guiGraphics.drawCenteredString(font, this.title, leftPos + GUI_WIDTH / 2, topPos + 5, 0xFFFFFF);
+        int itemCenterX = leftPos + GUI_WIDTH / 2;
+        int itemCenterY = topPos + ITEM_CENTER_Y;
+        PoseStack poseStack = guiGraphics.pose();
+        poseStack.pushPose();
+        poseStack.translate(itemCenterX, itemCenterY, 0);
+        poseStack.scale(ITEM_RENDER_SCALE, ITEM_RENDER_SCALE, 1.0F);
+        guiGraphics.renderItem(displayItem, -8, -8);
+        poseStack.popPose();
 
-        // 渲染展示物品
-        if (!displayItem.isEmpty()) {
-            // 渲染物品图标
-            guiGraphics.renderItem(displayItem, leftPos + ITEM_X, topPos + ITEM_Y);
+        renderNamePlate(guiGraphics);
+    }
 
-            // 渲染物品名称
-            Component itemName = displayItem.getDisplayName();
-            guiGraphics.drawCenteredString(font, itemName, leftPos + GUI_WIDTH / 2, topPos + ITEM_Y + 20, 0xFFFFFF);
+    private void renderNamePlate(GuiGraphics guiGraphics) {
+        int plateWidth = Math.min(144, Math.max(92, font.width(displayItem.getHoverName()) + 20));
+        int plateX = leftPos + (GUI_WIDTH - plateWidth) / 2;
+        guiGraphics.drawCenteredString(font, displayItem.getHoverName(), plateX + plateWidth / 2, topPos + NAME_PLATE_Y, TEXT_PLATE);
+    }
 
-            // 如果鼠标悬停在物品上，渲染 tooltip
-            if (isHovering(leftPos + ITEM_X, topPos + ITEM_Y, 16, 16, mouseX, mouseY)) {
-                guiGraphics.renderTooltip(font, displayItem, mouseX, mouseY);
-            }
-        } else {
-            // 无展示物品时显示提示
-            Component emptyText = Component.translatable("block.ruralroutes.display_case.empty");
-            guiGraphics.drawCenteredString(font, emptyText, leftPos + GUI_WIDTH / 2, topPos + ITEM_Y + 8, 0xAAAAAA);
+    private void renderItemTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        if (!displayItem.isEmpty() && isHoveringItem(mouseX, mouseY)) {
+            guiGraphics.renderTooltip(font, displayItem, mouseX, mouseY);
         }
     }
 
-    /**
-     * 检查鼠标是否悬停在指定区域
-     */
-    private boolean isHovering(int x, int y, int width, int height, int mouseX, int mouseY) {
-        return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+    private boolean isHoveringItem(int mouseX, int mouseY) {
+        int itemCenterX = leftPos + GUI_WIDTH / 2;
+        int itemCenterY = topPos + ITEM_CENTER_Y;
+        int itemLeft = itemCenterX - ITEM_HOVER_SIZE / 2;
+        int itemTop = itemCenterY - ITEM_HOVER_SIZE / 2;
+        return mouseX >= itemLeft && mouseX < itemLeft + ITEM_HOVER_SIZE
+            && mouseY >= itemTop && mouseY < itemTop + ITEM_HOVER_SIZE;
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        InputConstants.Key inputKey = InputConstants.getKey(keyCode, scanCode);
+        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+        if (this.minecraft != null && this.minecraft.options.keyInventory.isActiveAndMatches(inputKey)) {
+            this.onClose();
+            return true;
+        }
+        return false;
     }
 
     @Override
