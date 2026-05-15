@@ -134,6 +134,15 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.rumor_board.time_days", "%d days");
         add("gui.ruralroutes.rumor_board.time_hours", "%d hours");
         add("gui.ruralroutes.rumor_board.time_soon", "soon");
+        add("gui.ruralroutes.rumor_board.family.shortage", "Short");
+        add("gui.ruralroutes.rumor_board.family.surplus", "Surplus");
+        add("gui.ruralroutes.rumor_board.family.demand", "Demand");
+        add("gui.ruralroutes.rumor_board.family.release", "Supply");
+        add("gui.ruralroutes.rumor_board.family.gossip", "Quiet");
+        add("gui.ruralroutes.rumor_board.scope.global", "All");
+        add("gui.ruralroutes.rumor_board.scope.biome", "Biome");
+        add("gui.ruralroutes.rumor_board.scope.theme", "Theme");
+        add("gui.ruralroutes.rumor_board.page", "%s/%s");
 
         // 交易结果
         add("trade.success", "Trade successful");

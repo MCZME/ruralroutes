@@ -1,138 +1,223 @@
 package github.mczme.ruralroutes.client.gui.component;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import github.mczme.ruralroutes.RuralRoutes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import org.joml.AxisAngle4f;
-import org.joml.Quaternionf;
 
 import java.util.List;
 
 /**
- * 便签组件
- * 支持旋转渲染、分层显示
+ * 基于精灵图渲染的便签组件。
  */
 public class StickyNoteWidget extends AbstractWidget {
 
+    public static final int NOTE_SOURCE_WIDTH = 14;
+    public static final int NOTE_SOURCE_HEIGHT = 14;
+    public static final int NOTES_TEXTURE_WIDTH = 50;
+    public static final int NOTES_TEXTURE_HEIGHT = 29;
+    public static final int ICONS_TEXTURE_WIDTH = 24;
+    public static final int ICONS_TEXTURE_HEIGHT = 16;
+
+    private static final ResourceLocation NOTES_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(RuralRoutes.MODID, "textures/gui/notes.png");
+    private static final ResourceLocation ICONS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(RuralRoutes.MODID, "textures/gui/icons.png");
+
+    private static final int PIN_SOURCE_U = 0;
+    private static final int PIN_HOVER_SOURCE_U = 6;
+    private static final int PIN_SOURCE_V = 0;
+    private static final int PIN_SOURCE_SIZE = 5;
+    private static final int HOVER_LIFT = 2;
+    private static final int DRAG_LIFT = 3;
+    private static final int TEXT_COLOR = 0xFF24180E;
+    private static final int LABEL_COLOR = 0xFF321F11;
+    private static final int SCOPE_COLOR = 0xFF3B2817;
+
     private final Component text;
-    private final int backgroundColor;
+    private final Component familyLabel;
+    private final Component scopeLabel;
+    private final int noteSourceU;
+    private final int noteSourceV;
+    private final int pinScale;
     private final float rotation;
     private final int layer;
+    private final int labelInsetLeft;
+    private final int labelInsetRight;
+    private final int labelTop;
+    private final int bodyInsetLeft;
+    private final int bodyInsetRight;
+    private final int bodyTop;
+    private final int bodyBottom;
+    private float extraRotation = 0.0f;
+    private float scaleMultiplier = 1.0f;
+    private boolean dragging = false;
 
-    // 字体颜色
-    private static final int TEXT_COLOR = 0x333333;
-
-    // 图钉效果
-    private static final int PIN_COLOR = 0xFFD32F2F;
-    private static final int PIN_SIZE = 6;
-
-    public StickyNoteWidget(int x, int y, int width, int height,
-                            Component text, int backgroundColor, float rotation, int layer) {
+    public StickyNoteWidget(
+            int x,
+            int y,
+            int width,
+            int height,
+            Component text,
+            Component familyLabel,
+            Component scopeLabel,
+            int noteSourceU,
+            int noteSourceV,
+            int pinScale,
+            float rotation,
+            int layer,
+            int labelInsetLeft,
+            int labelInsetRight,
+            int labelTop,
+            int bodyInsetLeft,
+            int bodyInsetRight,
+            int bodyTop,
+            int bodyBottom
+    ) {
         super(x, y, width, height, text);
         this.text = text;
-        this.backgroundColor = backgroundColor;
+        this.familyLabel = familyLabel;
+        this.scopeLabel = scopeLabel;
+        this.noteSourceU = noteSourceU;
+        this.noteSourceV = noteSourceV;
+        this.pinScale = pinScale;
         this.rotation = rotation;
         this.layer = layer;
+        this.labelInsetLeft = labelInsetLeft;
+        this.labelInsetRight = labelInsetRight;
+        this.labelTop = labelTop;
+        this.bodyInsetLeft = bodyInsetLeft;
+        this.bodyInsetRight = bodyInsetRight;
+        this.bodyTop = bodyTop;
+        this.bodyBottom = bodyBottom;
     }
 
-    /**
-     * 设置位置
-     */
     public void setPosition(int x, int y) {
-        this.setX(x);
-        this.setY(y);
+        setX(x);
+        setY(y);
     }
 
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        PoseStack poseStack = guiGraphics.pose();
-
+        boolean hovered = isHoveredOrFocused();
+        int renderX = getX();
+        int lift = dragging ? DRAG_LIFT : (hovered ? HOVER_LIFT : 0);
+        int renderY = getY() - lift;
+        float scaleX = getWidth() / (float) NOTE_SOURCE_WIDTH;
+        float scaleY = getHeight() / (float) NOTE_SOURCE_HEIGHT;
+        var poseStack = guiGraphics.pose();
         poseStack.pushPose();
-
-        // 移动到便签中心
-        float centerX = getX() + getWidth() / 2.0f;
-        float centerY = getY() + getHeight() / 2.0f;
+        float centerX = renderX + getWidth() / 2.0f;
+        float centerY = renderY + getHeight() / 2.0f;
         poseStack.translate(centerX, centerY, 0);
-
-        // 旋转（围绕 Z 轴）
-        poseStack.mulPose(new Quaternionf(new AxisAngle4f((float) Math.toRadians(rotation), 0, 0, 1)));
-
-        // 移回原位
+        poseStack.mulPose(new org.joml.Quaternionf().rotationZ((float) Math.toRadians(rotation + extraRotation)));
+        poseStack.scale(scaleMultiplier, scaleMultiplier, 1.0f);
         poseStack.translate(-centerX, -centerY, 0);
 
-        // 绘制阴影（仅顶层便签）
-        if (layer == 1) {
-            fill(poseStack, guiGraphics,
-                    getX() + 3, getY() + 3,
-                    getWidth(), getHeight(),
-                    0x40000000);
-        }
+        renderScaledSprite(
+                guiGraphics,
+                NOTES_TEXTURE,
+                renderX,
+                renderY,
+                scaleX,
+                scaleY,
+                noteSourceU,
+                noteSourceV,
+                NOTE_SOURCE_WIDTH,
+                NOTE_SOURCE_HEIGHT,
+                NOTES_TEXTURE_WIDTH,
+                NOTES_TEXTURE_HEIGHT
+        );
 
-        // 绘制便签背景
-        fill(poseStack, guiGraphics,
-                getX(), getY(),
-                getWidth(), getHeight(),
-                backgroundColor);
-
-        // 绘制便签边框（轻微深色）
-        guiGraphics.renderOutline(getX(), getY(), getWidth(), getHeight(), 0x40333333);
-
-        // 绘制图钉（在顶部中心）
-        renderPin(guiGraphics);
-
-        // 绘制文本（自动换行）
-        renderText(guiGraphics);
-
+        renderPin(guiGraphics, renderX, renderY, hovered);
+        renderLabels(guiGraphics, renderX, renderY);
+        renderText(guiGraphics, renderX, renderY);
         poseStack.popPose();
     }
 
-    /**
-     * 渲染图钉效果
-     */
-    private void renderPin(GuiGraphics guiGraphics) {
-        int pinX = getX() + getWidth() / 2 - PIN_SIZE / 2;
-        int pinY = getY() - PIN_SIZE / 2 + 2;
-
-        // 图钉圆形
-        guiGraphics.fill(pinX, pinY, pinX + PIN_SIZE, pinY + PIN_SIZE, PIN_COLOR);
-
-        // 图钉高光
-        guiGraphics.fill(pinX + 1, pinY + 1, pinX + 3, pinY + 3, 0xFFFFFFFF);
+    private void renderPin(GuiGraphics guiGraphics, int x, int y, boolean hovered) {
+        int pinX = x + (getWidth() - PIN_SOURCE_SIZE * pinScale) / 2;
+        int pinY = y - pinScale;
+        renderScaledSprite(
+                guiGraphics,
+                ICONS_TEXTURE,
+                pinX,
+                pinY,
+                pinScale,
+                pinScale,
+                hovered ? PIN_HOVER_SOURCE_U : PIN_SOURCE_U,
+                PIN_SOURCE_V,
+                PIN_SOURCE_SIZE,
+                PIN_SOURCE_SIZE,
+                ICONS_TEXTURE_WIDTH,
+                ICONS_TEXTURE_HEIGHT
+        );
     }
 
-    /**
-     * 渲染文本（自动换行）
-     */
-    private void renderText(GuiGraphics guiGraphics) {
+    private void renderLabels(GuiGraphics guiGraphics, int x, int y) {
         var font = Minecraft.getInstance().font;
+        int labelY = y + labelTop;
+        guiGraphics.drawString(font, familyLabel, x + labelInsetLeft, labelY, LABEL_COLOR, false);
 
-        // 计算可用文本宽度
-        int maxWidth = getWidth() - 12;
+        if (scopeLabel == null || scopeLabel.getString().isEmpty()) {
+            return;
+        }
 
-        // 分割文本为多行
+        int scopeX = x + getWidth() - labelInsetRight - font.width(scopeLabel);
+        guiGraphics.drawString(font, scopeLabel, scopeX, labelY, SCOPE_COLOR, false);
+    }
+
+    private void renderText(GuiGraphics guiGraphics, int x, int y) {
+        var font = Minecraft.getInstance().font;
+        int maxWidth = getWidth() - bodyInsetLeft - bodyInsetRight;
         List<FormattedCharSequence> lines = font.split(text, maxWidth);
+        int lineHeight = font.lineHeight;
+        int bodyStartY = y + bodyTop;
+        int availableHeight = getHeight() - bodyTop - bodyBottom;
+        int maxLines = Math.max(1, availableHeight / lineHeight);
+        int visibleLines = Math.min(maxLines, lines.size());
 
-        int lineHeight = font.lineHeight + 1;
-        int totalHeight = lines.size() * lineHeight;
-        int startY = getY() + 12 + (getHeight() - 12 - totalHeight) / 2;
-
-        for (int i = 0; i < lines.size(); i++) {
-            FormattedCharSequence line = lines.get(i);
-            int lineWidth = font.width(line);
-            int x = getX() + (getWidth() - lineWidth) / 2;
-            int y = startY + i * lineHeight;
-
-            guiGraphics.drawString(font, line, x, y, TEXT_COLOR, false);
+        for (int i = 0; i < visibleLines; i++) {
+            guiGraphics.drawString(font, lines.get(i), x + bodyInsetLeft, bodyStartY + i * lineHeight, TEXT_COLOR, false);
         }
     }
 
-    private void fill(PoseStack poseStack, GuiGraphics guiGraphics, int x, int y, int width, int height, int color) {
-        guiGraphics.fill(x, y, x + width, y + height, color);
+    private static void renderScaledSprite(
+            GuiGraphics guiGraphics,
+            ResourceLocation texture,
+            int x,
+            int y,
+            float scaleX,
+            float scaleY,
+            int sourceU,
+            int sourceV,
+            int sourceWidth,
+            int sourceHeight,
+            int textureWidth,
+            int textureHeight
+    ) {
+        PoseStack poseStack = guiGraphics.pose();
+        poseStack.pushPose();
+        poseStack.translate(x, y, 0);
+        poseStack.scale(scaleX, scaleY, 1.0F);
+        guiGraphics.blit(texture, 0, 0, sourceU, sourceV, sourceWidth, sourceHeight, textureWidth, textureHeight);
+        poseStack.popPose();
+    }
+
+    public void setInteractionState(float extraRotation, float scaleMultiplier, boolean dragging) {
+        this.extraRotation = extraRotation;
+        this.scaleMultiplier = scaleMultiplier;
+        this.dragging = dragging;
+    }
+
+    public int layer() {
+        return layer;
     }
 
     @Override

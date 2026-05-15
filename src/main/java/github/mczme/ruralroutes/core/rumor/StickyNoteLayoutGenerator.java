@@ -21,7 +21,7 @@ public final class StickyNoteLayoutGenerator {
     private static final float MAX_OFFSET_X = 0.85f;    // 最大 X 偏移
     private static final float MIN_OFFSET_Y = 0.08f;    // 最小 Y 偏移（留出标题空间）
     private static final float MAX_OFFSET_Y = 0.82f;    // 最大 Y 偏移
-    private static final float ROTATION_RANGE = 15.0f;  // 最大旋转角度（±15°）
+    private static final float ROTATION_RANGE = 10.0f;  // 最大旋转角度（±10°）
 
     // 碰撞检测阈值（同层内）
     private static final float COLLISION_THRESHOLD_X = 0.15f;  // X 方向最小间距

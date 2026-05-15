@@ -134,6 +134,15 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.rumor_board.time_days", "%d 天");
         add("gui.ruralroutes.rumor_board.time_hours", "%d 小时");
         add("gui.ruralroutes.rumor_board.time_soon", "即将刷新");
+        add("gui.ruralroutes.rumor_board.family.shortage", "缺货");
+        add("gui.ruralroutes.rumor_board.family.surplus", "余货");
+        add("gui.ruralroutes.rumor_board.family.demand", "畅销");
+        add("gui.ruralroutes.rumor_board.family.release", "放货");
+        add("gui.ruralroutes.rumor_board.family.gossip", "闲谈");
+        add("gui.ruralroutes.rumor_board.scope.global", "各地");
+        add("gui.ruralroutes.rumor_board.scope.biome", "群系");
+        add("gui.ruralroutes.rumor_board.scope.theme", "主题");
+        add("gui.ruralroutes.rumor_board.page", "%s/%s");
 
         // 交易结果
         add("trade.success", "交易成功");
@@ -181,7 +190,7 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("rumor.surplus.theme.2", "%s这阵子在放%s。");
 
         // 传闻模板：demand
-        add("rumor.demand.global.1", "最近%s在各地都走俏。");
+        add("rumor.demand.global.1", "最近%s在各地都畅销。");
         add("rumor.demand.global.2", "这阵子%s卖得挺快。");
         add("rumor.demand.biome.1", "听说%s一带在抢%s。");
         add("rumor.demand.biome.2", "最近%s那边收%s收得勤。");
