@@ -293,6 +293,7 @@ public class TradeStationBlock extends BaseEntityBlock {
             // openMenu 完成后，客户端已创建 Menu，此时发送同步数据
             if (player.containerMenu instanceof TradeStationMenu tradeMenu) {
                 tradeMenu.syncSlotDataToClient(serverPlayer);
+                tradeMenu.syncCoinExchangeStateToClient(serverPlayer);
             }
         }
     }

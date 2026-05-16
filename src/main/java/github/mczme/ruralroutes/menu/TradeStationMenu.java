@@ -5,6 +5,7 @@ import github.mczme.ruralroutes.core.cycle.CycleManager;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.node.StockEntry;
+import github.mczme.ruralroutes.core.trade.CoinExchangeContract;
 import github.mczme.ruralroutes.core.trade.TradeContractExecutor;
 import github.mczme.ruralroutes.core.trade.TradeContractType;
 import github.mczme.ruralroutes.core.trade.TradePricingService;
@@ -17,9 +18,12 @@ import github.mczme.ruralroutes.core.util.TagLookupCache;
 import github.mczme.ruralroutes.menu.container.TradeDisplayContainer;
 import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
 import github.mczme.ruralroutes.menu.slot.TradeSlot;
+import github.mczme.ruralroutes.network.packet.CoinExchangeStatePayload;
+import github.mczme.ruralroutes.network.packet.TradeFeedbackPayload;
 import github.mczme.ruralroutes.network.packet.PendingTradeSyncPayload;
 import github.mczme.ruralroutes.network.packet.TradeSlotSyncPayload;
 import github.mczme.ruralroutes.register.RRItemTags;
+import github.mczme.ruralroutes.register.RRItems;
 import github.mczme.ruralroutes.register.RRMenuTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -67,6 +71,10 @@ public class TradeStationMenu extends AbstractContainerMenu {
 
     // 当前周期索引（用于跨周期检测）
     private long currentCycleIndex;
+    private ClientTradeFeedback activeTradeFeedback;
+    private long tradeFeedbackExpireAtMs;
+    private ClientCurrencyWallet playerCurrencyWallet = ClientCurrencyWallet.EMPTY;
+    private ClientCurrencyWallet villageCurrencyWallet = ClientCurrencyWallet.EMPTY;
 
 
     // 常量
@@ -620,7 +628,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
         // 获取商业节点数据
         CommercialNodeData nodeData = CommercialNodeManager.getNodeData(player.level(), blockPos);
         if (nodeData == null) {
-            player.sendSystemMessage(Component.translatable("gui.ruralroutes.trade_station.error.no_data"));
+            sendTradeFeedback(serverPlayer, "gui.ruralroutes.trade_station.error.no_data", TradeFeedbackPayload.FeedbackType.ERROR);
             return;
         }
 
@@ -656,8 +664,9 @@ public class TradeStationMenu extends AbstractContainerMenu {
             // 同步到客户端
             syncSlotDataToClient(serverPlayer);
             syncPendingTradeToClient();
+            syncCoinExchangeStateToClient(serverPlayer);
 
-            player.sendSystemMessage(Component.translatable("gui.ruralroutes.trade_station.success"));
+            sendTradeFeedback(serverPlayer, "gui.ruralroutes.trade_station.success", TradeFeedbackPayload.FeedbackType.SUCCESS);
         } else if (result.reason() == TradeResult.Reason.CYCLE_CHANGED) {
             // 周期变化：刷新 GUI 并通知玩家
             CycleManager cycleManager = CycleManager.get(serverPlayer.serverLevel());
@@ -676,12 +685,148 @@ public class TradeStationMenu extends AbstractContainerMenu {
 
             syncSlotDataToClient(serverPlayer);
             syncPendingTradeToClient();
-            player.sendSystemMessage(Component.translatable("gui.ruralroutes.trade_station.error.cycle_changed"));
+            syncCoinExchangeStateToClient(serverPlayer);
+            sendTradeFeedback(serverPlayer, "gui.ruralroutes.trade_station.error.cycle_changed", TradeFeedbackPayload.FeedbackType.WARNING);
         } else {
             // 其他交易失败：发送失败原因
-            Component failMessage = Component.translatable(result.reason().getTranslationKey());
-            player.sendSystemMessage(failMessage);
+            sendTradeFeedback(serverPlayer, result.reason().getTranslationKey(), TradeFeedbackPayload.FeedbackType.ERROR);
         }
+    }
+
+    /**
+     * 执行货币交换
+     * 由服务端在收到货币交换请求时调用。
+     */
+    public void executeCoinExchange(CoinExchangeContract.ExchangeType exchangeType, boolean exchangeAll) {
+        if (!(player instanceof ServerPlayer serverPlayer)) return;
+
+        CommercialNodeData nodeData = CommercialNodeManager.getNodeData(player.level(), blockPos);
+        if (nodeData == null) {
+            sendTradeFeedback(serverPlayer, "gui.ruralroutes.trade_station.error.no_data", TradeFeedbackPayload.FeedbackType.ERROR);
+            return;
+        }
+
+        int inputPerTrade = exchangeType.getInputCount();
+        int outputPerTrade = exchangeType.getOutputCount();
+        if (inputPerTrade <= 0 || outputPerTrade <= 0) {
+            sendTradeFeedback(serverPlayer, TradeResult.Reason.INVALID_REQUEST.getTranslationKey(), TradeFeedbackPayload.FeedbackType.ERROR);
+            return;
+        }
+
+        int playerCurrencyCount = countItemInInventory(serverPlayer, exchangeType.getInputItem());
+        int villageCurrencyCount = getVillageCurrencyStock(nodeData, exchangeType.getOutputItem());
+        int maxByPlayer = playerCurrencyCount / inputPerTrade;
+        int maxByVillage = villageCurrencyCount / outputPerTrade;
+
+        if (maxByPlayer <= 0) {
+            syncCoinExchangeStateToClient(serverPlayer);
+            sendTradeFeedback(serverPlayer,
+                "gui.ruralroutes.trade_station.coin_exchange.fail.player_insufficient",
+                TradeFeedbackPayload.FeedbackType.ERROR);
+            return;
+        }
+        if (maxByVillage <= 0) {
+            syncCoinExchangeStateToClient(serverPlayer);
+            sendTradeFeedback(serverPlayer,
+                "gui.ruralroutes.trade_station.coin_exchange.fail.village_insufficient",
+                TradeFeedbackPayload.FeedbackType.ERROR);
+            return;
+        }
+
+        int requestedTrades = exchangeAll ? Math.min(maxByPlayer, maxByVillage) : 1;
+        CoinExchangeContract contract = new CoinExchangeContract(exchangeType);
+        int executedTrades = 0;
+
+        for (int i = 0; i < requestedTrades; i++) {
+            CommercialNodeData currentData = CommercialNodeManager.getNodeData(player.level(), blockPos);
+            if (currentData == null) {
+                break;
+            }
+
+            TradeResult result = TradeContractExecutor.INSTANCE.executeContract(
+                serverPlayer.serverLevel(),
+                currentData,
+                serverPlayer,
+                contract,
+                blockPos
+            );
+
+            if (!result.isSuccess()) {
+                break;
+            }
+            executedTrades++;
+        }
+
+        syncCoinExchangeStateToClient(serverPlayer);
+
+        if (executedTrades > 0) {
+            sendTradeFeedback(serverPlayer,
+                "gui.ruralroutes.trade_station.coin_exchange.success",
+                TradeFeedbackPayload.FeedbackType.SUCCESS);
+        } else {
+            sendTradeFeedback(serverPlayer,
+                "gui.ruralroutes.trade_station.coin_exchange.fail.village_insufficient",
+                TradeFeedbackPayload.FeedbackType.ERROR);
+        }
+    }
+
+    private void sendTradeFeedback(ServerPlayer player, String translationKey, TradeFeedbackPayload.FeedbackType feedbackType) {
+        PacketDistributor.sendToPlayer(player, new TradeFeedbackPayload(containerId, translationKey, feedbackType));
+    }
+
+    public void syncCoinExchangeStateToClient(ServerPlayer player) {
+        CommercialNodeData nodeData = CommercialNodeManager.getNodeData(player.level(), blockPos);
+        ClientCurrencyWallet playerWallet = extractPlayerCurrencyWallet(player);
+        ClientCurrencyWallet villageWallet = extractVillageCurrencyWallet(nodeData);
+        PacketDistributor.sendToPlayer(player, new CoinExchangeStatePayload(
+            containerId,
+            playerWallet.copperCount(),
+            playerWallet.ironCount(),
+            playerWallet.goldCount(),
+            villageWallet.copperCount(),
+            villageWallet.ironCount(),
+            villageWallet.goldCount()
+        ));
+    }
+
+    private ClientCurrencyWallet extractPlayerCurrencyWallet(Player player) {
+        if (player == null) {
+            return ClientCurrencyWallet.EMPTY;
+        }
+
+        return new ClientCurrencyWallet(
+            countItemInInventory(player, RRItems.COPPER_COIN.get()),
+            countItemInInventory(player, RRItems.IRON_COIN.get()),
+            countItemInInventory(player, RRItems.GOLD_COIN.get())
+        );
+    }
+
+    private ClientCurrencyWallet extractVillageCurrencyWallet(CommercialNodeData nodeData) {
+        if (nodeData == null) {
+            return ClientCurrencyWallet.EMPTY;
+        }
+
+        return new ClientCurrencyWallet(
+            getVillageCurrencyStock(nodeData, RRItems.COPPER_COIN.get()),
+            getVillageCurrencyStock(nodeData, RRItems.IRON_COIN.get()),
+            getVillageCurrencyStock(nodeData, RRItems.GOLD_COIN.get())
+        );
+    }
+
+    private int getVillageCurrencyStock(CommercialNodeData nodeData, Item item) {
+        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
+        StockEntry stockEntry = nodeData.stocks().get(itemId);
+        return stockEntry != null ? stockEntry.current() : 0;
+    }
+
+    private int countItemInInventory(Player player, Item item) {
+        int count = 0;
+        for (ItemStack stack : player.getInventory().items) {
+            if (stack.getItem() == item) {
+                count += stack.getCount();
+            }
+        }
+        return count;
     }
 
     /**
@@ -943,6 +1088,72 @@ public class TradeStationMenu extends AbstractContainerMenu {
                     buySlots.get(buyIndex).setPendingCount(pendingCount);
                 }
             }
+        }
+    }
+
+    /**
+     * 接收交易反馈（客户端调用）
+     */
+    public void receiveTradeFeedback(TradeFeedbackPayload payload) {
+        this.activeTradeFeedback = new ClientTradeFeedback(
+            Component.translatable(payload.translationKey()),
+            payload.feedbackType()
+        );
+        this.tradeFeedbackExpireAtMs = System.currentTimeMillis() + 2800L;
+    }
+
+    /**
+     * 接收村庄货币库存同步（客户端调用）
+     */
+    public void receiveCoinExchangeState(CoinExchangeStatePayload payload) {
+        this.playerCurrencyWallet = new ClientCurrencyWallet(
+            payload.playerCopperCount(),
+            payload.playerIronCount(),
+            payload.playerGoldCount()
+        );
+        this.villageCurrencyWallet = new ClientCurrencyWallet(
+            payload.villageCopperCount(),
+            payload.villageIronCount(),
+            payload.villageGoldCount()
+        );
+    }
+
+    public ClientTradeFeedback getActiveTradeFeedback() {
+        if (activeTradeFeedback == null) {
+            return null;
+        }
+        if (System.currentTimeMillis() > tradeFeedbackExpireAtMs) {
+            activeTradeFeedback = null;
+            return null;
+        }
+        return activeTradeFeedback;
+    }
+
+    public record ClientTradeFeedback(Component message, TradeFeedbackPayload.FeedbackType type) {
+    }
+
+    public ClientCurrencyWallet getPlayerCurrencyWallet() {
+        return playerCurrencyWallet;
+    }
+
+    public ClientCurrencyWallet getVillageCurrencyWallet() {
+        return villageCurrencyWallet;
+    }
+
+    public record ClientCurrencyWallet(int copperCount, int ironCount, int goldCount) {
+        public static final ClientCurrencyWallet EMPTY = new ClientCurrencyWallet(0, 0, 0);
+
+        public int count(Item item) {
+            if (item == RRItems.COPPER_COIN.get()) {
+                return copperCount;
+            }
+            if (item == RRItems.IRON_COIN.get()) {
+                return ironCount;
+            }
+            if (item == RRItems.GOLD_COIN.get()) {
+                return goldCount;
+            }
+            return 0;
         }
     }
 

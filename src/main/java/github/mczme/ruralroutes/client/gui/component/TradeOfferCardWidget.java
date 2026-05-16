@@ -1,5 +1,6 @@
 package github.mczme.ruralroutes.client.gui.component;
 
+import github.mczme.ruralroutes.client.gui.GuiTextStyles;
 import github.mczme.ruralroutes.core.trade.TradeContractType;
 import github.mczme.ruralroutes.menu.slot.TradeSlot;
 import net.minecraft.client.Minecraft;
@@ -32,13 +33,13 @@ public class TradeOfferCardWidget extends AbstractWidget {
     private static final int LINE_HEIGHT = 13;  // 压缩行高
 
     // 颜色常量
-    private static final int DEFAULT_BG = 0x40333333;
-    private static final int HOVER_BG = 0x60555555;
-    private static final int SELECTED_BG = 0x406666AA;
-    private static final int SELECTED_BORDER = 0xFF6666AA;
-    private static final int STOCK_COLOR = 0xFFFFFF;
-    private static final int OUT_OF_STOCK_COLOR = 0xFF5555;
-    private static final int PRICE_LABEL_COLOR = 0xAAAAAA;
+    private static final int DEFAULT_BG = 0x90E9D4A7;
+    private static final int HOVER_BG = 0xB0F4E4BC;
+    private static final int SELECTED_BG = 0x90D7BF8B;
+    private static final int SELECTED_BORDER = 0xFF8A5C2E;
+    private static final int STOCK_COLOR = 0xFF4A3827;
+    private static final int OUT_OF_STOCK_COLOR = 0xFF9B3A2E;
+    private static final int PRICE_LABEL_COLOR = 0xFF6C5843;
 
     private TradeSlot tradeSlot;
     private Consumer<TradeOfferCardWidget> onClick;
@@ -136,7 +137,7 @@ public class TradeOfferCardWidget extends AbstractWidget {
 
         int textX = itemX + ITEM_ICON_SIZE + PADDING;
         int textY = itemY + (ITEM_ICON_SIZE - 8) / 2;
-        guiGraphics.drawString(Minecraft.getInstance().font, stockText, textX, textY, stockColor);
+        guiGraphics.drawString(Minecraft.getInstance().font, GuiTextStyles.uniform(stockText), textX, textY, stockColor, false);
     }
 
     /**
@@ -168,7 +169,7 @@ public class TradeOfferCardWidget extends AbstractWidget {
 
         if (type == TradeContractType.CURRENCY_BASKET_DYNAMIC) {
             currentX = renderCurrencyBasket(guiGraphics, font, currentX, lineY);
-            guiGraphics.drawString(font, Component.translatable("gui.ruralroutes.trade_card.price_per"),
+            guiGraphics.drawString(font, GuiTextStyles.uniform(Component.translatable("gui.ruralroutes.trade_card.price_per")),
                 currentX + 2, lineY + 1, PRICE_LABEL_COLOR);
         } else {
             renderInputItems(guiGraphics, font, currentX, lineY);
@@ -191,7 +192,7 @@ public class TradeOfferCardWidget extends AbstractWidget {
             if (stack.isEmpty()) continue;
 
             String countText = String.valueOf(stack.getCount());
-            guiGraphics.drawString(font, countText, x, y + 1, 0xFFFFFF);
+            guiGraphics.drawString(font, GuiTextStyles.uniformLiteral(countText), x, y + 1, STOCK_COLOR, false);
             x += font.width(countText) + 1;
 
             renderItemScaled(guiGraphics, stack, x, y, CURRENCY_ICON_SIZE);
@@ -201,7 +202,7 @@ public class TradeOfferCardWidget extends AbstractWidget {
 
         if (hiddenCount > 0) {
             String moreText = "+" + hiddenCount;
-            guiGraphics.drawString(font, moreText, x, y + 1, 0xAAAAAA);
+            guiGraphics.drawString(font, GuiTextStyles.uniformLiteral(moreText), x, y + 1, PRICE_LABEL_COLOR, false);
         }
         return x;
     }
@@ -224,7 +225,7 @@ public class TradeOfferCardWidget extends AbstractWidget {
             renderItemScaled(guiGraphics, stack, x, y, CURRENCY_ICON_SIZE);
 
             String countText = String.valueOf(stack.getCount());
-            guiGraphics.drawString(font, countText, x + CURRENCY_ICON_SIZE + 1, y + 1, 0xFFFFFF);
+            guiGraphics.drawString(font, GuiTextStyles.uniformLiteral(countText), x + CURRENCY_ICON_SIZE + 1, y + 1, STOCK_COLOR, false);
 
             x += CURRENCY_ICON_SIZE + font.width(countText) + 2;
             shown++;
@@ -232,7 +233,7 @@ public class TradeOfferCardWidget extends AbstractWidget {
 
         if (hiddenCount > 0) {
             String moreText = "+" + hiddenCount;
-            guiGraphics.drawString(font, moreText, x, y + 1, 0xAAAAAA);
+            guiGraphics.drawString(font, GuiTextStyles.uniformLiteral(moreText), x, y + 1, PRICE_LABEL_COLOR, false);
         }
     }
 

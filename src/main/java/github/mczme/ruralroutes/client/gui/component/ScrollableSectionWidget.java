@@ -1,5 +1,6 @@
 package github.mczme.ruralroutes.client.gui.component;
 
+import github.mczme.ruralroutes.client.gui.GuiTextStyles;
 import github.mczme.ruralroutes.menu.slot.TradeSlot;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -25,9 +26,15 @@ public class ScrollableSectionWidget extends AbstractWidget {
     private static final int CARD_SPACING = 2;
     private static final int ROWS = 2;
 
-    private static final int PADDING = 4;
-    private static final int SCROLLBAR_HEIGHT = 4;
-    private static final int SCROLLBAR_MARGIN = 0;
+    private static final int TITLE_RIBBON_X = 0;
+    private static final int TITLE_RIBBON_Y = 24;
+    private static final int TITLE_RIBBON_WIDTH = 18;
+    private static final int TITLE_VERTICAL_SPACING = 9;
+    private static final int CONTENT_LEFT_INSET = 26;
+    private static final int CONTENT_RIGHT_INSET = 12;
+    private static final int CONTENT_OFFSET_Y = 17;
+    private static final int SCROLLBAR_HEIGHT = 2;
+    private static final int SCROLLBAR_MARGIN = 1;
 
     private final List<AbstractWidget> cards = new ArrayList<>();
     private final List<AbstractWidget> visibleCards = new ArrayList<>();
@@ -104,6 +111,14 @@ public class ScrollableSectionWidget extends AbstractWidget {
     }
 
     /**
+     * 当前布局下内容实际渲染所需的最小高度。
+     * 以第二排卡片底部为准，不裁掉已渲染内容。
+     */
+    public static int getRequiredHeight() {
+        return CONTENT_OFFSET_Y + ROWS * CARD_HEIGHT + (ROWS - 1) * CARD_SPACING;
+    }
+
+    /**
      * 更新指定索引卡片的数量
      */
     public void updateCardCount(int index, int newCount) {
@@ -119,7 +134,7 @@ public class ScrollableSectionWidget extends AbstractWidget {
     }
 
     private void updateLayout() {
-        maxScroll = Math.max(0, calculateContentWidth() - (getWidth() - PADDING * 2));
+        maxScroll = Math.max(0, calculateContentWidth() - getContentWidth());
     }
 
     private int calculateContentWidth() {
@@ -129,16 +144,16 @@ public class ScrollableSectionWidget extends AbstractWidget {
 
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        // 绘制背景
-        fill(guiGraphics, getX(), getY(), getWidth(), getHeight(), bgColor);
+        if ((bgColor >>> 24) != 0) {
+            fill(guiGraphics, getX(), getY(), getWidth(), getHeight(), bgColor);
+        }
 
-        // 绘制标题
-        guiGraphics.drawString(Minecraft.getInstance().font, getMessage(), getX() + PADDING, getY() + PADDING, titleColor);
+        renderVerticalTitle(guiGraphics);
 
         // 计算内容区域
-        int contentX = getX() + PADDING;
-        int contentY = getY() + PADDING + 12;
-        int contentWidth = getWidth() - PADDING * 2;
+        int contentX = getX() + CONTENT_LEFT_INSET;
+        int contentY = getY() + CONTENT_OFFSET_Y;
+        int contentWidth = getContentWidth();
         int contentHeight = ROWS * CARD_HEIGHT + (ROWS - 1) * CARD_SPACING;
 
         enableScissor(guiGraphics, contentX, contentY, contentX + contentWidth, contentY + contentHeight);
@@ -171,12 +186,12 @@ public class ScrollableSectionWidget extends AbstractWidget {
     private void renderScrollbar(GuiGraphics guiGraphics) {
         if (maxScroll <= 0) return;
 
-        int trackWidth = getWidth() - PADDING * 2;
+        int trackWidth = getContentWidth();
         int barWidth = Math.max(20, trackWidth * trackWidth / (calculateContentWidth() + trackWidth));
-        int barX = getX() + PADDING + (int) ((trackWidth - barWidth) * scrollOffset / (float) maxScroll);
+        int barX = getX() + CONTENT_LEFT_INSET + (int) ((trackWidth - barWidth) * scrollOffset / (float) maxScroll);
         int barY = getY() + getHeight() - SCROLLBAR_HEIGHT - SCROLLBAR_MARGIN;
 
-        fill(guiGraphics, barX, barY, barWidth, SCROLLBAR_HEIGHT, 0x80AAAAAA);
+        fill(guiGraphics, barX, barY, barWidth, SCROLLBAR_HEIGHT, 0x907E5D36);
     }
 
     @Override
@@ -210,7 +225,7 @@ public class ScrollableSectionWidget extends AbstractWidget {
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (dragging && maxScroll > 0) {
-            int trackWidth = getWidth() - PADDING * 2;
+            int trackWidth = getContentWidth();
             int barWidth = Math.max(20, trackWidth * trackWidth / (calculateContentWidth() + trackWidth));
 
             float mouseDelta = (float) mouseX - dragStartX;
@@ -238,6 +253,28 @@ public class ScrollableSectionWidget extends AbstractWidget {
 
     private void disableScissor(GuiGraphics guiGraphics) {
         guiGraphics.disableScissor();
+    }
+
+    private int getContentWidth() {
+        return getWidth() - CONTENT_LEFT_INSET - CONTENT_RIGHT_INSET;
+    }
+
+    private void renderVerticalTitle(GuiGraphics guiGraphics) {
+        var font = Minecraft.getInstance().font;
+        String text = getMessage().getString();
+        if (text == null || text.isEmpty()) {
+            return;
+        }
+
+        int baseX = getX() + TITLE_RIBBON_X;
+        int baseY = getY() + TITLE_RIBBON_Y;
+
+        for (int i = 0; i < text.length(); i++) {
+            String ch = String.valueOf(text.charAt(i));
+            int charX = baseX + (TITLE_RIBBON_WIDTH - font.width(ch)) / 2;
+            int charY = baseY + i * TITLE_VERTICAL_SPACING;
+            guiGraphics.drawString(font, GuiTextStyles.uniformLiteral(ch), charX, charY, titleColor, true);
+        }
     }
 
     @Override

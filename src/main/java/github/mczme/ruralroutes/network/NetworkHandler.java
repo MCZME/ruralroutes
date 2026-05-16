@@ -1,8 +1,12 @@
 package github.mczme.ruralroutes.network;
 
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.network.packet.CoinExchangeRequestPayload;
+import github.mczme.ruralroutes.network.packet.CoinExchangeStatePayload;
+import github.mczme.ruralroutes.network.packet.OpenNodeDataViewerPayload;
 import github.mczme.ruralroutes.network.packet.OpenRumorBoardPayload;
 import github.mczme.ruralroutes.network.packet.PendingTradeSyncPayload;
+import github.mczme.ruralroutes.network.packet.TradeFeedbackPayload;
 import github.mczme.ruralroutes.network.packet.TradeRequestPayload;
 import github.mczme.ruralroutes.network.packet.TradeSlotSyncPayload;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -26,6 +30,10 @@ public class NetworkHandler {
         registrar.playToServer(TradeRequestPayload.TYPE, TradeRequestPayload.STREAM_CODEC,
             TradeRequestPayload::handleServer);
 
+        // 货币交换请求（客户端→服务端）
+        registrar.playToServer(CoinExchangeRequestPayload.TYPE, CoinExchangeRequestPayload.STREAM_CODEC,
+            CoinExchangeRequestPayload::handleServer);
+
         // 贸易槽位同步（服务端→客户端）
         registrar.playToClient(TradeSlotSyncPayload.TYPE, TradeSlotSyncPayload.STREAM_CODEC,
             TradeSlotSyncPayload::handleClient);
@@ -33,6 +41,14 @@ public class NetworkHandler {
         // 暂存区交易同步（服务端→客户端）
         registrar.playToClient(PendingTradeSyncPayload.TYPE, PendingTradeSyncPayload.STREAM_CODEC,
             PendingTradeSyncPayload::handleClient);
+
+        // 货币交换状态同步（服务端→客户端）
+        registrar.playToClient(CoinExchangeStatePayload.TYPE, CoinExchangeStatePayload.STREAM_CODEC,
+            CoinExchangeStatePayload::handleClient);
+
+        // 交易反馈（服务端→客户端）
+        registrar.playToClient(TradeFeedbackPayload.TYPE, TradeFeedbackPayload.STREAM_CODEC,
+            TradeFeedbackPayload::handleClient);
 
         // 打开传闻板界面（服务端→客户端）
         registrar.playToClient(OpenRumorBoardPayload.TYPE, OpenRumorBoardPayload.STREAM_CODEC,

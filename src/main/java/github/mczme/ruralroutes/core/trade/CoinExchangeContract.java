@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -37,6 +38,14 @@ public record CoinExchangeContract(
         ExchangeType(net.minecraft.world.item.Item inputItem, net.minecraft.world.item.Item outputItem) {
             this.inputItem = inputItem;
             this.outputItem = outputItem;
+        }
+
+        public Item getInputItem() {
+            return inputItem;
+        }
+
+        public Item getOutputItem() {
+            return outputItem;
         }
 
         /**

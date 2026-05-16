@@ -57,6 +57,8 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         // 物品翻译
         addItem(RRItems.CONFIG_TOOL, "Config Tool");
         add("item.ruralroutes.config_tool.tooltip", "Developer tool for setting trade station themes and block styles");
+        addItem(RRItems.NODE_DATA_VIEWER, "Node Data Viewer");
+        add("item.ruralroutes.node_data_viewer.tooltip", "Developer tool for inspecting node data snapshots from core blocks");
 
         // 货币
         addItem(RRItems.COPPER_COIN, "Copper Coin");
@@ -108,15 +110,40 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.style.taiga", "Taiga Style");
         add("gui.ruralroutes.config_tool.style.snowy", "Snowy Style");
 
+        // Node data viewer GUI
+        add("gui.ruralroutes.node_data_viewer.title", "Node Data Viewer");
+        add("gui.ruralroutes.node_data_viewer.target.trade_station", "Trade Station");
+        add("gui.ruralroutes.node_data_viewer.target.display_case", "Display Case");
+        add("gui.ruralroutes.node_data_viewer.target.rumor_board", "Rumor Board");
+        add("gui.ruralroutes.node_data_viewer.section.summary", "Summary");
+        add("gui.ruralroutes.node_data_viewer.section.sell_items", "Sell Items");
+        add("gui.ruralroutes.node_data_viewer.section.buy_items", "Buy Items");
+        add("gui.ruralroutes.node_data_viewer.section.specialties", "Specialties");
+        add("gui.ruralroutes.node_data_viewer.section.stocks", "Stocks");
+        add("gui.ruralroutes.node_data_viewer.summary.trade_node_id", "Trade Node ID");
+        add("gui.ruralroutes.node_data_viewer.summary.theme", "Theme");
+        add("gui.ruralroutes.node_data_viewer.summary.refresh_timestamp", "Refresh Timestamp");
+        add("gui.ruralroutes.node_data_viewer.stock_pair", "%s/%s");
+        add("gui.ruralroutes.node_data_viewer.empty", "No node data is available for this target");
+        add("gui.ruralroutes.node_data_viewer.empty_list", "None");
+        add("gui.ruralroutes.node_data_viewer.footer", "Scroll to browse, press Esc or Inventory to close");
+        add("gui.ruralroutes.node_data_viewer.status.missing_station", "This block is not linked to a trade station yet");
+        add("gui.ruralroutes.node_data_viewer.status.missing_node_data", "The target does not have commercial node data yet");
+        add("gui.ruralroutes.node_data_viewer.missing_item", "Missing item: %s");
+
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "Theme: %s");
         add("gui.ruralroutes.trade_station.sell", "Selling");
         add("gui.ruralroutes.trade_station.buy", "Buying");
         add("gui.ruralroutes.trade_station.confirm", "Confirm Trade");
-        add("gui.ruralroutes.trade_station.coin_exchange", "Coin Exchange");
+        add("gui.ruralroutes.trade_station.coin_exchange", "Currency Exchange");
+        add("gui.ruralroutes.trade_station.coin_exchange.hint", "Click a currency to choose an exchange");
         add("gui.ruralroutes.trade_station.trade_area", "Trade Area");
         add("gui.ruralroutes.trade_station.want_area", "You Want");
         add("gui.ruralroutes.trade_station.pay_area", "You Pay");
+        add("gui.ruralroutes.trade_station.delete", "Delete");
+        add("gui.ruralroutes.trade_station.delete_active", "Deleting");
+        add("gui.ruralroutes.trade_station.empty_hint", "Click items above to add");
         add("block.ruralroutes.trade_station.mismatch", "Trade station data mismatch");
 
         // 展示柜交互
@@ -157,6 +184,19 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         // 交易站交易结果
         add("gui.ruralroutes.trade_station.success", "Trade successful!");
         add("gui.ruralroutes.trade_station.error.no_data", "Unable to get village data");
+        add("gui.ruralroutes.trade_station.error.cycle_changed", "Trade cycle refreshed. Please choose items again.");
+        add("gui.ruralroutes.trade_station.coin_exchange.success", "Currency exchange complete!");
+        add("gui.ruralroutes.trade_station.coin_exchange.fail.player_insufficient", "You do not have enough currency for this exchange");
+        add("gui.ruralroutes.trade_station.coin_exchange.fail.village_insufficient", "The village does not have enough reserve for this exchange");
+        add("gui.ruralroutes.trade_station.coin_exchange.popup.exchange", "Exchange");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.player_count", "You have: %d");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.village_count", "Village reserve: %d");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.max_trades", "Max exchanges: %d");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.open", "Click to view available exchanges");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.player_insufficient", "Not enough currency in your inventory");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.village_insufficient", "Village reserve is too low");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.single", "Click: exchange once");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.batch", "Shift+Click: exchange as much as possible");
 
         // Trade card UI
         add("gui.ruralroutes.trade_card.stock", "Stock %d");

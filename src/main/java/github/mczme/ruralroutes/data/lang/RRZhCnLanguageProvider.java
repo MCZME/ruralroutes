@@ -57,6 +57,8 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         // 物品翻译
         addItem(RRItems.CONFIG_TOOL, "配置工具");
         add("item.ruralroutes.config_tool.tooltip", "开发者工具，用于设置贸易站主题和方块外观");
+        addItem(RRItems.NODE_DATA_VIEWER, "节点数据查看器");
+        add("item.ruralroutes.node_data_viewer.tooltip", "开发者工具，用于查看核心方块对应的节点数据快照");
 
         // 货币
         addItem(RRItems.COPPER_COIN, "铜板");
@@ -108,15 +110,40 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.config_tool.style.taiga", "针叶林风格");
         add("gui.ruralroutes.config_tool.style.snowy", "雪地风格");
 
+        // 节点数据查看器 GUI
+        add("gui.ruralroutes.node_data_viewer.title", "节点数据查看器");
+        add("gui.ruralroutes.node_data_viewer.target.trade_station", "贸易站");
+        add("gui.ruralroutes.node_data_viewer.target.display_case", "展示柜");
+        add("gui.ruralroutes.node_data_viewer.target.rumor_board", "传闻板");
+        add("gui.ruralroutes.node_data_viewer.section.summary", "概要");
+        add("gui.ruralroutes.node_data_viewer.section.sell_items", "出售物品");
+        add("gui.ruralroutes.node_data_viewer.section.buy_items", "收购物品");
+        add("gui.ruralroutes.node_data_viewer.section.specialties", "特产");
+        add("gui.ruralroutes.node_data_viewer.section.stocks", "库存");
+        add("gui.ruralroutes.node_data_viewer.summary.trade_node_id", "节点 ID");
+        add("gui.ruralroutes.node_data_viewer.summary.theme", "主题");
+        add("gui.ruralroutes.node_data_viewer.summary.refresh_timestamp", "刷新时间戳");
+        add("gui.ruralroutes.node_data_viewer.stock_pair", "%s/%s");
+        add("gui.ruralroutes.node_data_viewer.empty", "当前没有可显示的节点数据");
+        add("gui.ruralroutes.node_data_viewer.empty_list", "无");
+        add("gui.ruralroutes.node_data_viewer.footer", "滚轮滚动，Esc 或背包键关闭");
+        add("gui.ruralroutes.node_data_viewer.status.missing_station", "当前方块还没有关联贸易站");
+        add("gui.ruralroutes.node_data_viewer.status.missing_node_data", "目标还没有商业节点数据");
+        add("gui.ruralroutes.node_data_viewer.missing_item", "缺失物品: %s");
+
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "主题: %s");
         add("gui.ruralroutes.trade_station.sell", "出售");
         add("gui.ruralroutes.trade_station.buy", "收购");
         add("gui.ruralroutes.trade_station.confirm", "确认交换");
-        add("gui.ruralroutes.trade_station.coin_exchange", "铸币");
+        add("gui.ruralroutes.trade_station.coin_exchange", "货币交换");
+        add("gui.ruralroutes.trade_station.coin_exchange.hint", "点击货币选择交换");
         add("gui.ruralroutes.trade_station.trade_area", "交易区");
         add("gui.ruralroutes.trade_station.want_area", "玩家想要的");
         add("gui.ruralroutes.trade_station.pay_area", "玩家支付的");
+        add("gui.ruralroutes.trade_station.delete", "删除");
+        add("gui.ruralroutes.trade_station.delete_active", "删除中");
+        add("gui.ruralroutes.trade_station.empty_hint", "点击上方卡片添加到交换清单");
         add("block.ruralroutes.trade_station.mismatch", "贸易站数据不匹配");
 
         // 展示柜交互
@@ -157,6 +184,19 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         // 交易站交易结果
         add("gui.ruralroutes.trade_station.success", "交易成功！");
         add("gui.ruralroutes.trade_station.error.no_data", "无法获取村庄数据");
+        add("gui.ruralroutes.trade_station.error.cycle_changed", "交易周期已刷新，请重新选择商品");
+        add("gui.ruralroutes.trade_station.coin_exchange.success", "货币交换成功！");
+        add("gui.ruralroutes.trade_station.coin_exchange.fail.player_insufficient", "你的货币不足，无法完成这次交换");
+        add("gui.ruralroutes.trade_station.coin_exchange.fail.village_insufficient", "村庄储备不足，暂时无法完成这次交换");
+        add("gui.ruralroutes.trade_station.coin_exchange.popup.exchange", "兑换");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.player_count", "你持有: %d");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.village_count", "村庄可供: %d");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.max_trades", "最多可换: %d 次");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.open", "点击查看可用交换");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.player_insufficient", "你的货币不足");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.village_insufficient", "村庄储备不足");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.single", "单击: 兑换 1 次");
+        add("gui.ruralroutes.trade_station.coin_exchange.tooltip.batch", "Shift+单击: 尽可能全部兑换");
 
         // 交易卡片 UI
         add("gui.ruralroutes.trade_card.stock", "库存 %d");

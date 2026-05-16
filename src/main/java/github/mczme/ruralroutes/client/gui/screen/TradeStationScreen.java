@@ -1,18 +1,23 @@
 package github.mczme.ruralroutes.client.gui.screen;
 
+import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.client.gui.GuiTextStyles;
 import github.mczme.ruralroutes.client.gui.component.CoinExchangeWidget;
 import github.mczme.ruralroutes.client.gui.component.ScrollableSectionWidget;
 import github.mczme.ruralroutes.client.gui.component.TradeAreaWidget;
 import github.mczme.ruralroutes.client.gui.component.TradeOfferCardWidget;
+import github.mczme.ruralroutes.core.trade.CoinExchangeContract;
 import github.mczme.ruralroutes.core.trade.TradeContractType;
 import github.mczme.ruralroutes.menu.TradeStationMenu;
 import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
 import github.mczme.ruralroutes.menu.slot.TradeSlot;
+import github.mczme.ruralroutes.network.packet.CoinExchangeRequestPayload;
 import github.mczme.ruralroutes.network.packet.TradeRequestPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -27,15 +32,44 @@ import java.util.List;
  */
 public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu> {
 
-    private static final int GUI_WIDTH = 320;
-    private static final int GUI_HEIGHT = 240;
-    private static final int MARGIN = 8;
-    private static final int SECTION_SPACING = 4;
+    private static final ResourceLocation GUI_TEXTURE =
+        ResourceLocation.fromNamespaceAndPath(RuralRoutes.MODID, "textures/gui/trade_station.png");
 
-    private static final int CARD_HEIGHT = 26;  // 压缩卡片高度
-    private static final int CARD_SPACING = 2;  // 压缩间距
-    private static final int ROWS = 2;
-    private static final int SECTION_HEIGHT = ROWS * CARD_HEIGHT + (ROWS - 1) * CARD_SPACING + 14;  // 标题区域也压缩
+    private static final int GUI_WIDTH = 384;
+    private static final int GUI_HEIGHT = 256;
+    private static final int TITLE_CENTER_X = GUI_WIDTH / 2;
+    private static final int TITLE_Y = 16;
+    private static final int TITLE_COLOR = 0xFF46461E;
+    private static final int TRADE_SECTION_HEIGHT = ScrollableSectionWidget.getRequiredHeight();
+
+    private static final int SELL_X = 35;
+    private static final int SELL_Y = 24;
+    private static final int SELL_WIDTH = 326;
+    private static final int SELL_HEIGHT = TRADE_SECTION_HEIGHT;
+
+    private static final int BUY_X = 35;
+    private static final int BUY_Y = 90;
+    private static final int BUY_WIDTH = 326;
+    private static final int BUY_HEIGHT = TRADE_SECTION_HEIGHT;
+
+    private static final int TRADE_X = 36;
+    private static final int TRADE_Y = 163;
+    private static final int TRADE_WIDTH = 228;
+    private static final int TRADE_HEIGHT = 79;
+
+    private static final int COIN_X = 268;
+    private static final int COIN_Y = 163;
+    private static final int COIN_WIDTH = 102;
+    private static final int COIN_HEIGHT = 80;
+    private static final int FEEDBACK_TEXT_COLOR = 0xFFF6EBD0;
+    private static final int FEEDBACK_SHADOW_COLOR = 0x30000000;
+    private static final int FEEDBACK_SUCCESS_BG = 0xD05F6A2F;
+    private static final int FEEDBACK_SUCCESS_BORDER = 0xFFB7C87E;
+    private static final int FEEDBACK_WARNING_BG = 0xD08D5B27;
+    private static final int FEEDBACK_WARNING_BORDER = 0xFFE3B16B;
+    private static final int FEEDBACK_ERROR_BG = 0xD0833A32;
+    private static final int FEEDBACK_ERROR_BORDER = 0xFFE2A08B;
+    private static final int FEEDBACK_HIGHLIGHT = 0x24FFF4D4;
 
     private ScrollableSectionWidget sellSection;
     private ScrollableSectionWidget buySection;
@@ -60,42 +94,33 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
         leftPos = (this.width - GUI_WIDTH) / 2;
         topPos = (this.height - GUI_HEIGHT) / 2;
 
-        int currentY = topPos;
-        int mainWidth = GUI_WIDTH - MARGIN * 2;
-
         // 出售区
         sellSection = new ScrollableSectionWidget(
-            leftPos + MARGIN, currentY, mainWidth, SECTION_HEIGHT,
-            0x55FF55, 0x40333333,
+            leftPos + SELL_X, topPos + SELL_Y, SELL_WIDTH, SELL_HEIGHT,
+            0xFFC4C07D, 0x00000000,
             Component.translatable("gui.ruralroutes.trade_station.sell"));
         sellSection.setSlots(menu.getSellSlots(), (x, y) -> new TradeOfferCardWidget(x, y));
         sellSection.setOnCardClickGeneric(card -> onSellSlotClicked(card));
 
-        currentY += sellSection.getHeight() + SECTION_SPACING;
-
         // 收购区
         buySection = new ScrollableSectionWidget(
-            leftPos + MARGIN, currentY, mainWidth, SECTION_HEIGHT,
-            0xFF5555, 0x40333333,
+            leftPos + BUY_X, topPos + BUY_Y, BUY_WIDTH, BUY_HEIGHT,
+            0xFFC89573, 0x00000000,
             Component.translatable("gui.ruralroutes.trade_station.buy"));
         buySection.setSlots(menu.getBuySlots(), (x, y) -> new TradeOfferCardWidget(x, y));
         buySection.setOnCardClickGeneric(card -> onBuySlotClicked(card));
 
-        currentY += buySection.getHeight() + SECTION_SPACING;
-
-        // 交易区 - 自动计算剩余高度
-        int tradeWidth = mainWidth * 7 / 10 - SECTION_SPACING / 2;
-        int tradeHeight = GUI_HEIGHT - MARGIN - (currentY - topPos);
-        tradeArea = new TradeAreaWidget(leftPos + MARGIN, currentY, tradeWidth, tradeHeight);
+        // 交易区
+        tradeArea = new TradeAreaWidget(leftPos + TRADE_X, topPos + TRADE_Y, TRADE_WIDTH, TRADE_HEIGHT);
         tradeArea.init(btn -> onConfirmClick());
         tradeArea.setOnPendingSlotRemove(this::onPendingSlotRemoved);
         tradeArea.setPendingSlots(menu.getPendingSlots(), menu.isBuyTrade());
 
-        // 铸币区
-        int coinWidth = mainWidth * 3 / 10 - SECTION_SPACING / 2;
-        int coinX = leftPos + MARGIN + tradeWidth + SECTION_SPACING;
-        coinExchange = new CoinExchangeWidget(coinX, currentY, coinWidth, tradeHeight);
-        coinExchange.init();
+        // 货币交换区
+        coinExchange = new CoinExchangeWidget(leftPos + COIN_X, topPos + COIN_Y, COIN_WIDTH, COIN_HEIGHT);
+        coinExchange.init(this::onCoinExchangeClick);
+        coinExchange.setPlayerWalletSupplier(menu::getPlayerCurrencyWallet);
+        coinExchange.setVillageWallet(menu.getVillageCurrencyWallet());
 
         // 初始化交易区显示
         updateTradeAreaDisplay();
@@ -113,11 +138,11 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
 
     @Override
     protected void renderBg(GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
-        // 绘制背景
-        guiGraphics.fill(leftPos, topPos, leftPos + GUI_WIDTH, topPos + GUI_HEIGHT, 0xCC222222);
+        guiGraphics.blit(GUI_TEXTURE, leftPos, topPos, 0, 0, GUI_WIDTH, GUI_HEIGHT, GUI_WIDTH, GUI_HEIGHT);
 
-        // 绘制标题
-        guiGraphics.drawCenteredString(font, this.title, leftPos + GUI_WIDTH / 2, topPos + 5, 0xFFFFFF);
+        guiGraphics.drawCenteredString(font,
+            GuiTextStyles.uniform(this.title),
+            leftPos + TITLE_CENTER_X, topPos + TITLE_Y, TITLE_COLOR);
     }
 
     @Override
@@ -131,17 +156,63 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
         // 渲染收购区
         buySection.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        // 渲染交易区和铸币区
+        // 渲染交易区和货币交换区
         tradeArea.render(guiGraphics, mouseX, mouseY, partialTick);
         coinExchange.render(guiGraphics, mouseX, mouseY, partialTick);
+        renderTradeFeedback(guiGraphics);
 
         // 渲染工具提示
         renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
+    private void renderTradeFeedback(GuiGraphics guiGraphics) {
+        TradeStationMenu.ClientTradeFeedback feedback = menu.getActiveTradeFeedback();
+        if (feedback == null) {
+            return;
+        }
+
+        int bannerWidth = Math.min(tradeArea.getWidth() - 12, Math.max(110, font.width(feedback.message()) + 20));
+        int bannerHeight = 14;
+        int bannerX = tradeArea.getX() + (tradeArea.getWidth() - bannerWidth) / 2;
+        int bannerY = tradeArea.getY() + 6;
+
+        int backgroundColor = switch (feedback.type()) {
+            case SUCCESS -> FEEDBACK_SUCCESS_BG;
+            case WARNING -> FEEDBACK_WARNING_BG;
+            case ERROR -> FEEDBACK_ERROR_BG;
+        };
+        int borderColor = switch (feedback.type()) {
+            case SUCCESS -> FEEDBACK_SUCCESS_BORDER;
+            case WARNING -> FEEDBACK_WARNING_BORDER;
+            case ERROR -> FEEDBACK_ERROR_BORDER;
+        };
+
+        guiGraphics.fill(bannerX + 1, bannerY + 1, bannerX + bannerWidth + 1, bannerY + bannerHeight + 1, FEEDBACK_SHADOW_COLOR);
+        guiGraphics.fill(bannerX, bannerY, bannerX + bannerWidth, bannerY + bannerHeight, backgroundColor);
+        guiGraphics.fill(bannerX + 1, bannerY + 1, bannerX + bannerWidth - 1, bannerY + 2, FEEDBACK_HIGHLIGHT);
+        guiGraphics.renderOutline(bannerX, bannerY, bannerWidth, bannerHeight, borderColor);
+
+        int textX = bannerX + (bannerWidth - font.width(feedback.message())) / 2;
+        int textY = bannerY + (bannerHeight - font.lineHeight) / 2;
+        guiGraphics.drawString(font, GuiTextStyles.uniform(feedback.message()), textX, textY, FEEDBACK_TEXT_COLOR, false);
+    }
+
     @Override
     protected void renderTooltip(GuiGraphics guiGraphics, int x, int y) {
         super.renderTooltip(guiGraphics, x, y);
+
+        List<Component> coinTooltip = coinExchange.getTooltip(x, y);
+        if (coinTooltip != null) {
+            guiGraphics.renderTooltip(font, coinTooltip.stream().map(Component::getVisualOrderText).toList(), x, y);
+            return;
+        }
+
+        // 检查交易区悬停的卡片
+        TradeAreaWidget.HoveredCardInfo tradeCardInfo = tradeArea.getHoveredCardInfo(x, y);
+        if (tradeCardInfo != null) {
+            renderTradeAreaCardTooltip(guiGraphics, tradeCardInfo, x, y);
+            return;
+        }
 
         // 检查出售区悬停的卡片
         for (AbstractWidget card : sellSection.getCards()) {
@@ -158,6 +229,18 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
                 return;
             }
         }
+    }
+
+    private void renderTradeAreaCardTooltip(GuiGraphics guiGraphics, TradeAreaWidget.HoveredCardInfo info, int x, int y) {
+        ItemStack stack = info.stack();
+        if (stack == null || stack.isEmpty()) return;
+
+        List<Component> tooltip = new ArrayList<>();
+        tooltip.add(stack.getDisplayName());
+        tooltip.add(Component.literal("×" + info.count())
+            .withStyle(style -> style.withColor(0xAAAAAA)));
+
+        guiGraphics.renderTooltip(font, tooltip.stream().map(Component::getVisualOrderText).toList(), x, y);
     }
 
     /**
@@ -280,6 +363,14 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
         }
     }
 
+    private void onCoinExchangeClick(CoinExchangeContract.ExchangeType exchangeType, Boolean exchangeAll) {
+        PacketDistributor.sendToServer(new CoinExchangeRequestPayload(
+            menu.containerId,
+            exchangeType,
+            Boolean.TRUE.equals(exchangeAll)
+        ));
+    }
+
     /**
      * 移除暂存槽位
      */
@@ -294,6 +385,8 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
     protected void containerTick() {
         super.containerTick();
         updateTradeAreaDisplay();
+        coinExchange.setPlayerWalletSupplier(menu::getPlayerCurrencyWallet);
+        coinExchange.setVillageWallet(menu.getVillageCurrencyWallet());
     }
 
     @Override
