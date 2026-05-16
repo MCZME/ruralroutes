@@ -22,8 +22,8 @@ public class DisplayCaseScreen extends Screen {
     private static final int GUI_HEIGHT = 168;
     private static final int ITEM_RENDER_SCALE = 3;
     private static final int ITEM_HOVER_SIZE = 48;
-    private static final int ITEM_CENTER_Y = 70;
-    private static final int NAME_PLATE_Y = 139;
+    private static final int ITEM_CENTER_Y = 80;
+    private static final int NAME_PLATE_Y = 144;
 
     private static final int BACKDROP_TOP = 0xD915100C;
     private static final int BACKDROP_BOTTOM = 0xF0080604;
