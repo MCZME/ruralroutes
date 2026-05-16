@@ -11,7 +11,8 @@
       ],
       "key": "snowy_waystation/valuables",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "name": "ruralroutes:snowy_waystation",
   "price_modifiers": {
@@ -47,7 +48,8 @@
       ],
       "key": "snowy_waystation/supplies",
       "pick": 4
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {

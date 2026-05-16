@@ -11,7 +11,8 @@
       ],
       "key": "savanna_terracotta/supplies",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "name": "ruralroutes:savanna_terracotta",
   "price_modifiers": {
@@ -41,7 +42,8 @@
     {
       "id": "#ruralroutes:candidate/theme/savanna_terracotta/kiln_goods",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {

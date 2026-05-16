@@ -11,7 +11,8 @@
       ],
       "key": "snowy_hunter/tools",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "name": "ruralroutes:snowy_hunter",
   "price_modifiers": {
@@ -37,7 +38,8 @@
       ],
       "key": "snowy_hunter/game_goods",
       "pick": 3
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {

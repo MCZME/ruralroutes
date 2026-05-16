@@ -11,7 +11,8 @@
       ],
       "key": "desert_oasis/inputs",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "name": "ruralroutes:desert_oasis",
   "price_modifiers": {
@@ -33,7 +34,8 @@
     {
       "id": "#ruralroutes:candidate/biome/desert/crop",
       "pick": 3
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {

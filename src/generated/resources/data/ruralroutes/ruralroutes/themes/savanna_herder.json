@@ -11,7 +11,8 @@
       ],
       "key": "savanna_herder/tools",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "name": "ruralroutes:savanna_herder",
   "price_modifiers": {
@@ -37,7 +38,8 @@
     {
       "id": "#ruralroutes:candidate/biome/savanna/food",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {

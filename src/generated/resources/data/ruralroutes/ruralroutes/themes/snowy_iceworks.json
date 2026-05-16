@@ -11,7 +11,8 @@
       ],
       "key": "snowy_iceworks/supplies",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "name": "ruralroutes:snowy_iceworks",
   "price_modifiers": {
@@ -37,7 +38,8 @@
     {
       "id": "#ruralroutes:candidate/theme/snowy_iceworks/ice_goods",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {

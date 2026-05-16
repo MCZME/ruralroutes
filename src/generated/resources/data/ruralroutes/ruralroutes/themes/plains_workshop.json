@@ -12,7 +12,8 @@
       ],
       "key": "plains_workshop/materials",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "name": "ruralroutes:plains_workshop",
   "price_modifiers": {
@@ -42,7 +43,8 @@
     {
       "id": "#ruralroutes:candidate/theme/plains_workshop/tool_goods",
       "pick": 3
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {

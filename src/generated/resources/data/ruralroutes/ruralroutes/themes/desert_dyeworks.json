@@ -11,7 +11,8 @@
       ],
       "key": "desert_dyeworks/inputs",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "name": "ruralroutes:desert_dyeworks",
   "price_modifiers": {
@@ -37,7 +38,8 @@
     {
       "id": "#ruralroutes:candidate/theme/desert_dyeworks/finished_goods",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {

@@ -512,7 +512,9 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
      * 创建主题构建器
      */
     private ThemeBuilder theme(String name) {
-        return ThemeBuilder.create(name).registrar(this::unconditional);
+        return ThemeBuilder.create(name)
+            .withCurrency()
+            .registrar(this::unconditional);
     }
 
     private static String tagRef(TagKey<Item> tag) {

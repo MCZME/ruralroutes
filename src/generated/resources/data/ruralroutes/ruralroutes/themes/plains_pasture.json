@@ -11,7 +11,8 @@
       ],
       "key": "plains_pasture/tools",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "name": "ruralroutes:plains_pasture",
   "price_modifiers": {
@@ -37,7 +38,8 @@
     {
       "id": "#ruralroutes:candidate/biome/plains/food",
       "pick": 2
-    }
+    },
+    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {
