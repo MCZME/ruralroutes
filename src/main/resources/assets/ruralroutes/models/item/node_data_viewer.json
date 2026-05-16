@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ruralroutes:item/node_data_viewer"
+  }
+}

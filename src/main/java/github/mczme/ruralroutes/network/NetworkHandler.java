@@ -37,5 +37,9 @@ public class NetworkHandler {
         // 打开传闻板界面（服务端→客户端）
         registrar.playToClient(OpenRumorBoardPayload.TYPE, OpenRumorBoardPayload.STREAM_CODEC,
             OpenRumorBoardPayload::handleClient);
+
+        // 打开节点数据查看器（服务端→客户端）
+        registrar.playToClient(OpenNodeDataViewerPayload.TYPE, OpenNodeDataViewerPayload.STREAM_CODEC,
+            OpenNodeDataViewerPayload::handleClient);
     }
 }

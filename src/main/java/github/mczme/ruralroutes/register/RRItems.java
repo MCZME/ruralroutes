@@ -2,6 +2,7 @@ package github.mczme.ruralroutes.register;
 
 import github.mczme.ruralroutes.RuralRoutes;
 import github.mczme.ruralroutes.item.ConfigToolItem;
+import github.mczme.ruralroutes.item.NodeDataViewerItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -64,6 +65,9 @@ public final class RRItems {
     // 工具
     public static final DeferredItem<ConfigToolItem> CONFIG_TOOL =
         register("config_tool", id -> new ConfigToolItem(new Item.Properties()));
+
+    public static final DeferredItem<NodeDataViewerItem> NODE_DATA_VIEWER =
+        register("node_data_viewer", id -> new NodeDataViewerItem(new Item.Properties()));
 
     // 货币物品
     public static final DeferredItem<Item> COPPER_COIN =
