@@ -10,6 +10,10 @@
       "selector": "all"
     }
   ],
+  "stock": {
+    "buy": -0.15,
+    "sell": 0.18
+  },
   "target_ref": "#ruralroutes:pool/leather_fiber",
   "weight": 75
 }

@@ -12,6 +12,10 @@
       ]
     }
   ],
+  "stock": {
+    "buy": 0.4,
+    "sell": -0.18
+  },
   "target_ref": "minecraft:blue_ice",
   "weight": 8
 }

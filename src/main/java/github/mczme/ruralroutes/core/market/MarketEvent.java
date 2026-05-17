@@ -19,6 +19,7 @@ public record MarketEvent(
         MarketScopeType scopeType,
         Optional<ResourceLocation> scopeTarget,
         float delta,
+        Optional<MarketStockModifier> stock,
         RumorFamily rumorFamily,
         Optional<String> rumorTargetKey
 ) {
@@ -29,6 +30,7 @@ public record MarketEvent(
                     MarketScopeType.CODEC.fieldOf("scope_type").forGetter(MarketEvent::scopeType),
                     ResourceLocation.CODEC.optionalFieldOf("scope_target").forGetter(MarketEvent::scopeTarget),
                     Codec.FLOAT.fieldOf("delta").forGetter(MarketEvent::delta),
+                    MarketStockModifier.CODEC.optionalFieldOf("stock").forGetter(MarketEvent::stock),
                     RumorFamily.CODEC.fieldOf("rumor_family").forGetter(MarketEvent::rumorFamily),
                     Codec.STRING.optionalFieldOf("rumor_target_key").forGetter(MarketEvent::rumorTargetKey)
             ).apply(instance, MarketEvent::new)

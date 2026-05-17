@@ -1,5 +1,6 @@
 package github.mczme.ruralroutes.core.market;
 
+import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
@@ -29,6 +30,16 @@ public record MarketContext(
      */
     public static MarketContext of(ResourceLocation themeId, ResourceLocation biomeId) {
         return new MarketContext(Optional.of(themeId), Optional.of(biomeId));
+    }
+
+    /**
+     * 从主题模板创建上下文
+     */
+    public static MarketContext fromTheme(ThemeTemplate template) {
+        if (template == null) {
+            return empty();
+        }
+        return of(template.name(), template.biome());
     }
 
     /**

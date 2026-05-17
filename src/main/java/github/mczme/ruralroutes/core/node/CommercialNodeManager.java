@@ -3,6 +3,10 @@ package github.mczme.ruralroutes.core.node;
 import github.mczme.ruralroutes.RuralRoutes;
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
 import github.mczme.ruralroutes.core.cycle.CycleManager;
+import github.mczme.ruralroutes.core.market.MarketContext;
+import github.mczme.ruralroutes.core.market.MarketState;
+import github.mczme.ruralroutes.core.market.MarketStockAdjustment;
+import github.mczme.ruralroutes.core.market.MarketStateResolver;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.util.TagLookupCache;
@@ -36,6 +40,31 @@ public class CommercialNodeManager {
         String sourceRefId,
         ResourceLocation itemId
     ) {}
+
+    /**
+     * 单个物品在库存初始化阶段的出售/收购基线。
+     */
+    private record StockPlan(
+        int sellBase,
+        int buyBase
+    ) {
+        private static final StockPlan EMPTY = new StockPlan(0, 0);
+
+        private StockPlan addSell(int amount) {
+            return new StockPlan(sellBase + amount, buyBase);
+        }
+
+        private StockPlan addBuy(int amount) {
+            return new StockPlan(sellBase, buyBase + amount);
+        }
+
+        private StockEntry toStockEntry() {
+            if (sellBase <= 0 && buyBase <= 0) {
+                return StockEntry.empty(0);
+            }
+            return new StockEntry(sellBase, sellBase + buyBase);
+        }
+    }
 
     /**
      * 获取区块中的商业节点数据
@@ -117,11 +146,13 @@ public class CommercialNodeManager {
         List<ResourceLocation> sellItems = toItemIds(selectedSellItems);
         List<ResourceLocation> buyItems = toItemIds(selectedBuyItems);
         List<ResourceLocation> specialties = generateSpecialties(template);
-        Map<ResourceLocation, StockEntry> stocks = initializeStocks(template, selectedSellItems, selectedBuyItems);
+        MarketState marketState = getCurrentMarketState(level);
+        Map<ResourceLocation, StockEntry> stocks = initializeStocks(
+            template, selectedSellItems, selectedBuyItems, marketState);
 
         // 将特产加入出售列表和库存
         addSpecialtiesToSellItems(sellItems, specialties);
-        addSpecialtiesToStocks(stocks, template, specialties);
+        addSpecialtiesToStocks(stocks, template, specialties, marketState);
 
         long timestamp = level instanceof ServerLevel serverLevel 
             ? CycleManager.getEffectiveTime(serverLevel) 
@@ -195,11 +226,12 @@ public class CommercialNodeManager {
      * 将特产加入库存（作为出售物品，初始满库存）
      */
     private static void addSpecialtiesToStocks(Map<ResourceLocation, StockEntry> stocks,
-            ThemeTemplate template, List<ResourceLocation> specialties) {
+            ThemeTemplate template, List<ResourceLocation> specialties, MarketState marketState) {
 
         // 默认库存范围
         int defaultMin = 8;
         int defaultMax = 16;
+        MarketContext marketContext = MarketContext.fromTheme(template);
 
         if (template.stock().isPresent()) {
             ThemeTemplate.StockConfig stockConfig = template.stock().get();
@@ -212,8 +244,10 @@ public class CommercialNodeManager {
 
         for (ResourceLocation specialtyId : specialties) {
             if (!stocks.containsKey(specialtyId)) {
-                int max = getStockMax(template, specialtyId.toString(), specialtyId, defaultMin, defaultMax);
-                stocks.put(specialtyId, StockEntry.full(max));
+                int baseMax = getBaseStockMax(template, specialtyId.toString(), specialtyId, defaultMin, defaultMax);
+                MarketStockAdjustment stockAdjustment = resolveStockAdjustment(marketState, marketContext, specialtyId);
+                int sellBase = stockAdjustment.applySellBase(baseMax);
+                stocks.put(specialtyId, StockEntry.full(sellBase));
             }
         }
     }
@@ -292,12 +326,14 @@ public class CommercialNodeManager {
      * 仅为当前周期实际入选的物品建立库存条目。
      */
     private static Map<ResourceLocation, StockEntry> initializeStocks(ThemeTemplate template,
-            List<SelectedTradeItem> selectedSellItems, List<SelectedTradeItem> selectedBuyItems) {
-        Map<ResourceLocation, StockEntry> stocks = new HashMap<>();
+            List<SelectedTradeItem> selectedSellItems, List<SelectedTradeItem> selectedBuyItems,
+            MarketState marketState) {
+        Map<ResourceLocation, StockPlan> plans = new HashMap<>();
 
         // 默认库存范围
         int defaultMin = 8;
         int defaultMax = 16;
+        MarketContext marketContext = MarketContext.fromTheme(template);
 
         if (template.stock().isPresent()) {
             ThemeTemplate.StockConfig stockConfig = template.stock().get();
@@ -312,39 +348,44 @@ public class CommercialNodeManager {
 
         // 添加出售物品（村庄卖给玩家）
         for (SelectedTradeItem item : selectedSellItems) {
-            processStockEntry(stocks, template, item.sourceRefId(), item.itemId(), defaultMin, defaultMax, true);
+            processStockEntry(plans, template, marketState, marketContext,
+                item.sourceRefId(), item.itemId(), defaultMin, defaultMax, true);
         }
 
         // 添加收购物品（玩家卖给村庄）
         for (SelectedTradeItem item : selectedBuyItems) {
-            processStockEntry(stocks, template, item.sourceRefId(), item.itemId(), defaultMin, defaultMax, false);
+            processStockEntry(plans, template, marketState, marketContext,
+                item.sourceRefId(), item.itemId(), defaultMin, defaultMax, false);
         }
 
+        Map<ResourceLocation, StockEntry> stocks = new HashMap<>();
+        for (Map.Entry<ResourceLocation, StockPlan> entry : plans.entrySet()) {
+            StockEntry stockEntry = entry.getValue().toStockEntry();
+            if (stockEntry.max() > 0) {
+                stocks.put(entry.getKey(), stockEntry);
+            }
+        }
         return stocks;
     }
 
     /**
      * 处理单个物品的库存条目
      */
-    private static void processStockEntry(Map<ResourceLocation, StockEntry> stocks,
-            ThemeTemplate template, String itemRefId, ResourceLocation itemId,
+    private static void processStockEntry(Map<ResourceLocation, StockPlan> plans,
+            ThemeTemplate template, MarketState marketState, MarketContext marketContext,
+            String itemRefId, ResourceLocation itemId,
             int defaultMin, int defaultMax, boolean isSellItem) {
 
-        int max = getStockMax(template, itemRefId, itemId, defaultMin, defaultMax);
+        int baseAmount = getBaseStockMax(template, itemRefId, itemId, defaultMin, defaultMax);
+        MarketStockAdjustment stockAdjustment = resolveStockAdjustment(marketState, marketContext, itemId);
+        StockPlan existing = plans.getOrDefault(itemId, StockPlan.EMPTY);
 
         if (isSellItem) {
-            // 出售物品：库存满
-            stocks.put(itemId, StockEntry.full(max));
+            int sellBase = stockAdjustment.applySellBase(baseAmount);
+            plans.put(itemId, existing.addSell(sellBase));
         } else {
-            // 收购物品
-            StockEntry existing = stocks.get(itemId);
-            if (existing == null) {
-                // 不存在：库存空
-                stocks.put(itemId, StockEntry.empty(max));
-            } else {
-                // 已存在（同时在出售清单中）：current 不变，max 增加
-                stocks.put(itemId, new StockEntry(existing.current(), existing.max() + max));
-            }
+            int buyBase = stockAdjustment.applyBuyBase(baseAmount);
+            plans.put(itemId, existing.addBuy(buyBase));
         }
     }
 
@@ -353,7 +394,7 @@ public class CommercialNodeManager {
      * @param itemRefId 物品引用ID（可能带#前缀的标签ID或精确物品ID）
      * @param itemId 实际物品ID（不带#前缀）
      */
-    private static int getStockMax(ThemeTemplate template, String itemRefId, ResourceLocation itemId,
+    private static int getBaseStockMax(ThemeTemplate template, String itemRefId, ResourceLocation itemId,
             int defaultMin, int defaultMax) {
 
         if (template.stock().isPresent()) {
@@ -478,16 +519,18 @@ public class CommercialNodeManager {
         List<SelectedTradeItem> selectedBuyItems = selectTradeItems(template.buyItems());
         List<ResourceLocation> newSellItems = toItemIds(selectedSellItems);
         List<ResourceLocation> newBuyItems = toItemIds(selectedBuyItems);
+        MarketState marketState = CycleManager.get(level).getOrInitMarketState();
 
         // 重新初始化库存（全量恢复）
-        Map<ResourceLocation, StockEntry> newStocks = initializeStocks(template, selectedSellItems, selectedBuyItems);
+        Map<ResourceLocation, StockEntry> newStocks = initializeStocks(
+            template, selectedSellItems, selectedBuyItems, marketState);
 
         // 重新生成特产
         List<ResourceLocation> newSpecialties = generateSpecialties(template);
 
         // 重新生成出售列表（包含新特产）
         addSpecialtiesToSellItems(newSellItems, newSpecialties);
-        addSpecialtiesToStocks(newStocks, template, newSpecialties);
+        addSpecialtiesToStocks(newStocks, template, newSpecialties, marketState);
 
         // 创建新数据，更新时间戳
         CommercialNodeData newData = CommercialNodeData.create(
@@ -508,5 +551,21 @@ public class CommercialNodeManager {
                 newData.tradeNodeId(), newStocks.size(), newSpecialties.size());
 
         return newData;
+    }
+
+    private static MarketState getCurrentMarketState(Level level) {
+        if (level instanceof ServerLevel serverLevel) {
+            CycleManager cycleManager = CycleManager.get(serverLevel);
+            cycleManager.updateCurrentCycle(serverLevel);
+            return cycleManager.getOrInitMarketState();
+        }
+        return MarketState.empty(-1);
+    }
+
+    private static MarketStockAdjustment resolveStockAdjustment(
+            MarketState marketState,
+            MarketContext marketContext,
+            ResourceLocation itemId) {
+        return MarketStateResolver.resolveStockAdjustment(marketState, marketContext, itemId);
     }
 }

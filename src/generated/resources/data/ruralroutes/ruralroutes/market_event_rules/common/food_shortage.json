@@ -10,6 +10,10 @@
       "selector": "all"
     }
   ],
+  "stock": {
+    "buy": 0.1,
+    "sell": -0.35
+  },
   "target_ref": "#ruralroutes:pool/food",
   "weight": 100
 }

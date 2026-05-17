@@ -10,6 +10,10 @@
       "selector": "all"
     }
   ],
+  "stock": {
+    "buy": -0.15,
+    "sell": 0.15
+  },
   "target_ref": "#ruralroutes:pool/stone",
   "weight": 80
 }

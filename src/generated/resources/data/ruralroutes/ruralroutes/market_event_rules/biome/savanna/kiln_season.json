@@ -13,6 +13,10 @@
       ]
     }
   ],
+  "stock": {
+    "buy": 0.26,
+    "sell": -0.08
+  },
   "target_ref": "#ruralroutes:pool/wood",
   "weight": 60
 }

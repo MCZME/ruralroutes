@@ -13,6 +13,10 @@
       ]
     }
   ],
+  "stock": {
+    "buy": 0.32,
+    "sell": -0.12
+  },
   "target_ref": "#ruralroutes:pool/dye_decor",
   "weight": 35
 }

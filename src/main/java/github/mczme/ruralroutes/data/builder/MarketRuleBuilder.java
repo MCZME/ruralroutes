@@ -3,6 +3,7 @@ package github.mczme.ruralroutes.data.builder;
 import github.mczme.ruralroutes.RuralRoutes;
 import github.mczme.ruralroutes.core.market.MarketEventRule;
 import github.mczme.ruralroutes.core.market.MarketEventScopeRule;
+import github.mczme.ruralroutes.core.market.MarketStockModifier;
 import github.mczme.ruralroutes.core.rumor.RumorFamily;
 import net.minecraft.resources.ResourceLocation;
 
@@ -24,6 +25,7 @@ public class MarketRuleBuilder {
     private String targetRef;
     private final List<MarketEventScopeRule> scopes = new ArrayList<>();
     private float delta;
+    private MarketStockModifier stock;
     private Integer weight;
     private RumorFamily rumorFamily;
     private String rumorTargetKey;
@@ -76,6 +78,14 @@ public class MarketRuleBuilder {
     }
 
     /**
+     * 设置库存修正
+     */
+    public MarketRuleBuilder stock(float sellDelta, float buyDelta) {
+        this.stock = new MarketStockModifier(sellDelta, buyDelta);
+        return this;
+    }
+
+    /**
      * 设置权重
      */
     public MarketRuleBuilder weight(int weight) {
@@ -110,6 +120,7 @@ public class MarketRuleBuilder {
                 targetRef,
                 List.copyOf(scopes),
                 delta,
+                Optional.ofNullable(stock),
                 Optional.ofNullable(weight),
                 Objects.requireNonNull(rumorFamily, "rumorFamily"),
                 Optional.ofNullable(rumorTargetKey)

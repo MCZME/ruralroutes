@@ -43,11 +43,13 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("ruralroutes.configuration.market.button", "市场");
         add("ruralroutes.configuration.market.tooltip", "市场系统设置");
         add("ruralroutes.configuration.enabled", "启用市场");
-        add("ruralroutes.configuration.enabled.tooltip", "启用后每个贸易周期会生成市场事件影响物品价格");
+        add("ruralroutes.configuration.enabled.tooltip", "启用后每个贸易周期会生成市场事件影响物品价格与库存基线");
         add("ruralroutes.configuration.rule_pick_count", "规则选择数量");
         add("ruralroutes.configuration.rule_pick_count.tooltip", "每个贸易周期随机选择的市场事件规则数量（1-20）");
         add("ruralroutes.configuration.max_delta", "最大价格调整幅度");
         add("ruralroutes.configuration.max_delta.tooltip", "市场事件叠加后的最大价格调整百分比（0.1-1.0）");
+        add("ruralroutes.configuration.max_stock_delta", "最大库存调整幅度");
+        add("ruralroutes.configuration.max_stock_delta.tooltip", "市场事件叠加后的最大库存调整百分比（0.0-1.0）");
 
         // 方块翻译
         addBlock(RRBlocks.TRADE_STATION, "贸易站");

@@ -72,7 +72,7 @@ public class Config {
      * 市场系统开关
      */
     public static final ModConfigSpec.BooleanValue MARKET_ENABLED = BUILDER
-            .comment("是否启用市场系统", "启用后每个贸易周期会生成市场事件影响物品价格")
+            .comment("是否启用市场系统", "启用后每个贸易周期会生成市场事件影响物品价格与库存基线")
             .define("market.enabled", true);
 
     /**
@@ -88,6 +88,13 @@ public class Config {
     public static final ModConfigSpec.DoubleValue MARKET_MAX_DELTA = BUILDER
             .comment("市场事件叠加后的最大价格调整百分比", "0.50 表示最多涨跌50%", "范围：0.1-1.0")
             .defineInRange("market.max_delta", 0.50, 0.1, 1.0);
+
+    /**
+     * 最大库存调整幅度
+     */
+    public static final ModConfigSpec.DoubleValue MARKET_MAX_STOCK_DELTA = BUILDER
+            .comment("市场事件叠加后的最大库存调整百分比", "0.75 表示最多增减75%", "范围：0.0-1.0")
+            .defineInRange("market.max_stock_delta", 0.75, 0.0, 1.0);
 
     static final ModConfigSpec SPEC = BUILDER.build();
 

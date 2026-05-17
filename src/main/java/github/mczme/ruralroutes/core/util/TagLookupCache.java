@@ -61,6 +61,30 @@ public final class TagLookupCache {
     }
 
     /**
+     * 判断物品 ID 是否匹配引用
+     * @param itemId 物品注册表 ID
+     * @param itemRef 引用字符串，如 "#minecraft:axes" 或 "minecraft:bread"
+     * @return 是否匹配
+     */
+    public static boolean matchesItem(ResourceLocation itemId, String itemRef) {
+        if (itemId == null) {
+            return false;
+        }
+
+        if (isTagRef(itemRef)) {
+            Item item = BuiltInRegistries.ITEM.get(itemId);
+            return item != null && getItems(itemRef).contains(item);
+        }
+
+        try {
+            return itemId.equals(ResourceLocation.parse(itemRef));
+        } catch (Exception e) {
+            RuralRoutes.LOGGER.warn("Invalid item reference: {}", itemRef);
+            return false;
+        }
+    }
+
+    /**
      * 获取引用下的所有物品
      * @param ref 引用字符串，如 "#minecraft:axes" 或 "minecraft:bread"
      * @return 不可变的物品集合，如果是精确物品则返回单元素集合

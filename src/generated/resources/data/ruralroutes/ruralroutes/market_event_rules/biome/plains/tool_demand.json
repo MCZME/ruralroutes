@@ -13,6 +13,10 @@
       ]
     }
   ],
+  "stock": {
+    "buy": 0.22,
+    "sell": -0.1
+  },
   "target_ref": "#ruralroutes:pool/mineral",
   "weight": 55
 }

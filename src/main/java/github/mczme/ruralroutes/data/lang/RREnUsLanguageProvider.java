@@ -43,11 +43,13 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("ruralroutes.configuration.market.button", "Market");
         add("ruralroutes.configuration.market.tooltip", "Market system settings");
         add("ruralroutes.configuration.enabled", "Market Enabled");
-        add("ruralroutes.configuration.enabled.tooltip", "Enable market events that affect item prices each trade cycle");
+        add("ruralroutes.configuration.enabled.tooltip", "Enable market events that affect item prices and stock baselines each trade cycle");
         add("ruralroutes.configuration.rule_pick_count", "Rule Pick Count");
         add("ruralroutes.configuration.rule_pick_count.tooltip", "Number of market event rules selected per cycle (1-20)");
         add("ruralroutes.configuration.max_delta", "Max Price Delta");
         add("ruralroutes.configuration.max_delta.tooltip", "Maximum price adjustment percentage after market event stacking (0.1-1.0)");
+        add("ruralroutes.configuration.max_stock_delta", "Max Stock Delta");
+        add("ruralroutes.configuration.max_stock_delta.tooltip", "Maximum stock adjustment percentage after market event stacking (0.0-1.0)");
 
         // 方块翻译
         addBlock(RRBlocks.TRADE_STATION, "Trade Station");

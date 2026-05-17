@@ -10,6 +10,10 @@
       "selector": "all"
     }
   ],
+  "stock": {
+    "buy": 0.32,
+    "sell": -0.25
+  },
   "target_ref": "#ruralroutes:pool/precious",
   "weight": 5
 }

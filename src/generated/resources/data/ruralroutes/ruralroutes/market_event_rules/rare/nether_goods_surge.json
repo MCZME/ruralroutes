@@ -10,6 +10,10 @@
       "selector": "all"
     }
   ],
+  "stock": {
+    "buy": 0.35,
+    "sell": -0.2
+  },
   "target_ref": "#ruralroutes:pool/nether_goods",
   "weight": 10
 }

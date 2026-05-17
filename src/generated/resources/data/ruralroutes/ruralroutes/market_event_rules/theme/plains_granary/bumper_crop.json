@@ -13,6 +13,10 @@
       ]
     }
   ],
+  "stock": {
+    "buy": -0.12,
+    "sell": 0.4
+  },
   "target_ref": "#ruralroutes:pool/crop",
   "weight": 40
 }

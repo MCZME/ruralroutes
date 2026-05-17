@@ -10,6 +10,10 @@
       "selector": "all"
     }
   ],
+  "stock": {
+    "buy": 0.4,
+    "sell": -0.22
+  },
   "target_ref": "#ruralroutes:pool/end_goods",
   "weight": 8
 }

@@ -20,6 +20,7 @@ public record MarketEventRule(
         String targetRef,
         List<MarketEventScopeRule> scopes,
         float delta,
+        Optional<MarketStockModifier> stock,
         Optional<Integer> weight,
         RumorFamily rumorFamily,
         Optional<String> rumorTargetKey
@@ -31,6 +32,7 @@ public record MarketEventRule(
                     Codec.STRING.fieldOf("target_ref").forGetter(MarketEventRule::targetRef),
                     MarketEventScopeRule.CODEC.listOf().fieldOf("scopes").forGetter(MarketEventRule::scopes),
                     Codec.FLOAT.fieldOf("delta").forGetter(MarketEventRule::delta),
+                    MarketStockModifier.CODEC.optionalFieldOf("stock").forGetter(MarketEventRule::stock),
                     Codec.INT.optionalFieldOf("weight").forGetter(MarketEventRule::weight),
                     RumorFamily.CODEC.fieldOf("rumor_family").forGetter(MarketEventRule::rumorFamily),
                     Codec.STRING.optionalFieldOf("rumor_target_key").forGetter(MarketEventRule::rumorTargetKey)
@@ -68,6 +70,7 @@ public record MarketEventRule(
                 List.of(MarketEventScopeRule.global()),
                 delta,
                 Optional.empty(),
+                Optional.empty(),
                 rumorFamily,
                 Optional.empty()
         );
@@ -83,6 +86,7 @@ public record MarketEventRule(
                 id, nameKey, targetRef,
                 scopes,
                 delta,
+                Optional.empty(),
                 Optional.of(weight),
                 rumorFamily,
                 Optional.empty()

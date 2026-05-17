@@ -118,6 +118,7 @@ public final class MarketStateGenerator {
                                 ? java.util.Optional.empty()
                                 : java.util.Optional.of(scopeTarget),
                         rule.delta(),
+                        rule.stock(),
                         rule.rumorFamily(),
                         rule.rumorTargetKey()
                 );

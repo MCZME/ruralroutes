@@ -12,6 +12,10 @@
       ]
     }
   ],
+  "stock": {
+    "buy": 0.3,
+    "sell": -0.1
+  },
   "target_ref": "minecraft:glow_berries",
   "weight": 10
 }

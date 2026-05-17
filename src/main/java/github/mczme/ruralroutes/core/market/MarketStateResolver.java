@@ -37,28 +37,39 @@ public final class MarketStateResolver {
         }
 
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        List<MarketEvent> matchedEvents = new ArrayList<>();
-
-        for (MarketEvent event : marketState.events()) {
-            if (matchesItem(event, stack, itemId) && matchesScope(event, context)) {
-                matchedEvents.add(event);
-            }
-        }
+        List<MarketEvent> matchedEvents = collectMatchedEvents(marketState, context, itemId);
 
         float maxDelta = Config.MARKET_MAX_DELTA.get().floatValue();
         return MarketPriceAdjustment.of(matchedEvents, maxDelta);
     }
 
     /**
-     * 检查事件是否匹配物品
+     * 解析物品的库存调整
      *
-     * @param event 市场事件
-     * @param stack 要检查的物品栈
-     * @param itemId 物品的注册表 ID（用于精确匹配）
-     * @return 如果事件目标匹配物品则返回 true
+     * @param marketState 当前市场状态
+     * @param context 市场上下文
+     * @param itemId 物品注册表 ID
+     * @return 库存调整结果
      */
-    private static boolean matchesItem(MarketEvent event, ItemStack stack, ResourceLocation itemId) {
-        return TagLookupCache.matchesItem(stack, event.targetRef());
+    public static MarketStockAdjustment resolveStockAdjustment(
+            MarketState marketState,
+            MarketContext context,
+            ResourceLocation itemId) {
+
+        if (marketState == null || marketState.isEmpty() || itemId == null) {
+            return MarketStockAdjustment.NONE;
+        }
+
+        List<MarketEvent> matchedEvents = collectMatchedEvents(marketState, context, itemId);
+        float maxDelta = Config.MARKET_MAX_STOCK_DELTA.get().floatValue();
+        return MarketStockAdjustment.of(matchedEvents, maxDelta);
+    }
+
+    /**
+     * 检查事件是否匹配物品 ID
+     */
+    private static boolean matchesItem(MarketEvent event, ResourceLocation itemId) {
+        return TagLookupCache.matchesItem(itemId, event.targetRef());
     }
 
     /**
@@ -93,15 +104,7 @@ public final class MarketStateResolver {
         }
 
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        List<MarketEvent> result = new ArrayList<>();
-
-        for (MarketEvent event : marketState.events()) {
-            if (matchesItem(event, stack, itemId)) {
-                result.add(event);
-            }
-        }
-
-        return result;
+        return collectItemEvents(marketState, itemId);
     }
 
     /**
@@ -116,5 +119,29 @@ public final class MarketStateResolver {
             return List.of();
         }
         return marketState.getEventsByScopeType(scopeType);
+    }
+
+    private static List<MarketEvent> collectMatchedEvents(
+            MarketState marketState,
+            MarketContext context,
+            ResourceLocation itemId) {
+
+        List<MarketEvent> matchedEvents = new ArrayList<>();
+        for (MarketEvent event : marketState.events()) {
+            if (matchesItem(event, itemId) && matchesScope(event, context)) {
+                matchedEvents.add(event);
+            }
+        }
+        return matchedEvents;
+    }
+
+    private static List<MarketEvent> collectItemEvents(MarketState marketState, ResourceLocation itemId) {
+        List<MarketEvent> result = new ArrayList<>();
+        for (MarketEvent event : marketState.events()) {
+            if (matchesItem(event, itemId)) {
+                result.add(event);
+            }
+        }
+        return result;
     }
 }
