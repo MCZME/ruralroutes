@@ -21,6 +21,7 @@ import github.mczme.ruralroutes.menu.slot.TradeSlot;
 import github.mczme.ruralroutes.network.packet.CoinExchangeStatePayload;
 import github.mczme.ruralroutes.network.packet.TradeFeedbackPayload;
 import github.mczme.ruralroutes.network.packet.PendingTradeSyncPayload;
+import github.mczme.ruralroutes.network.packet.TradeRequestPayload;
 import github.mczme.ruralroutes.network.packet.TradeSlotSyncPayload;
 import github.mczme.ruralroutes.register.RRItemTags;
 import github.mczme.ruralroutes.register.RRItems;
@@ -499,7 +500,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
      * @param isBuy true=购买交易（点击出售槽位），false=出售交易（点击收购槽位）
      * @param slotIndex 来源槽位索引
      */
-    public void addTradeEntry(boolean isBuy, int slotIndex) {
+    public void addTradeEntry(boolean isBuy, int slotIndex, int requestedAmount) {
         // 获取来源槽位
         List<TradeSlot> sourceSlots = isBuy ? sellSlots : buySlots;
         if (slotIndex < 0 || slotIndex >= sourceSlots.size()) return;
@@ -512,7 +513,9 @@ public class TradeStationMenu extends AbstractContainerMenu {
             if (sourceSlot.getDisplayStack().isEmpty()) return;
         }
 
-        int toAdd = 1;
+        int toAdd = requestedAmount == TradeRequestPayload.ALL_AMOUNT
+            ? sourceSlot.getStockCount()
+            : Math.max(0, requestedAmount);
         int actualAdd = sourceSlot.addPending(toAdd, isBuy);
         if (actualAdd <= 0) return;
 
@@ -578,6 +581,37 @@ public class TradeStationMenu extends AbstractContainerMenu {
         syncPendingTradeToClient();
     }
 
+    private void removeTradeEntryByType(boolean isBuy, int sourceSlotIndex, int amount, boolean clearAll) {
+        for (int i = 0; i < pendingSlots.size(); i++) {
+            PendingTradeSlot pending = pendingSlots.get(i);
+            if (pending.isBuy() != isBuy || pending.getSourceSlotIndex() != sourceSlotIndex) {
+                continue;
+            }
+
+            List<TradeSlot> sourceSlots = isBuy ? sellSlots : buySlots;
+            int removeAmount = clearAll ? pending.getBaseStock() : Math.min(Math.max(1, amount), pending.getBaseStock());
+
+            if (sourceSlotIndex >= 0 && sourceSlotIndex < sourceSlots.size()) {
+                TradeSlot source = sourceSlots.get(sourceSlotIndex);
+                source.setPendingCount(Math.max(0, source.getPendingCount() - removeAmount));
+            }
+
+            int remaining = pending.getBaseStock() - removeAmount;
+            if (remaining > 0 && !clearAll) {
+                pending.setBaseStock(remaining);
+            } else {
+                pendingSlots.remove(i);
+            }
+
+            if (pendingSlots.isEmpty()) {
+                isBuyTrade = true;
+            }
+
+            syncPendingTradeToClient();
+            return;
+        }
+    }
+
     /**
      * 清空暂存区
      */
@@ -604,15 +638,17 @@ public class TradeStationMenu extends AbstractContainerMenu {
      * @param requestType 请求类型：0=ADD_BUY, 1=ADD_SELL, 2=REMOVE_ENTRY, 3=CLEAR, 4=REMOVE_BUY, 5=REMOVE_SELL, 6=CONFIRM
      * @param slotIndex 槽位索引或条目索引
      */
-    public void handleTradeRequest(int requestType, int slotIndex) {
+    public void handleTradeRequest(int requestType, int slotIndex, int amount) {
         switch (requestType) {
-            case 0 -> addTradeEntry(true, slotIndex);   // ADD_BUY
-            case 1 -> addTradeEntry(false, slotIndex);  // ADD_SELL
+            case 0 -> addTradeEntry(true, slotIndex, amount);   // ADD_BUY
+            case 1 -> addTradeEntry(false, slotIndex, amount);  // ADD_SELL
             case 2 -> removeTradeEntry(slotIndex);       // REMOVE_ENTRY (legacy)
             case 3 -> clearPendingTrade();               // CLEAR
-            case 4 -> removeTradeEntryByType(true, slotIndex);  // REMOVE_BUY
-            case 5 -> removeTradeEntryByType(false, slotIndex); // REMOVE_SELL
+            case 4 -> removeTradeEntryByType(true, slotIndex, amount, false);   // REMOVE_BUY
+            case 5 -> removeTradeEntryByType(false, slotIndex, amount, false);  // REMOVE_SELL
             case 6 -> executeTrade();                    // CONFIRM
+            case 7 -> removeTradeEntryByType(true, slotIndex, amount, true);    // CLEAR_BUY
+            case 8 -> removeTradeEntryByType(false, slotIndex, amount, true);   // CLEAR_SELL
         }
     }
 
@@ -884,31 +920,6 @@ public class TradeStationMenu extends AbstractContainerMenu {
      * @param isBuy true=移除买入条目，false=移除卖出条目
      * @param sourceSlotIndex 来源槽位索引
      */
-    private void removeTradeEntryByType(boolean isBuy, int sourceSlotIndex) {
-        // 找到对应的 pendingSlot
-        for (int i = 0; i < pendingSlots.size(); i++) {
-            PendingTradeSlot pending = pendingSlots.get(i);
-            if (pending.isBuy() == isBuy && pending.getSourceSlotIndex() == sourceSlotIndex) {
-                // 恢复来源槽位的暂存计数
-                List<TradeSlot> sourceSlots = isBuy ? sellSlots : buySlots;
-                if (sourceSlotIndex >= 0 && sourceSlotIndex < sourceSlots.size()) {
-                    TradeSlot source = sourceSlots.get(sourceSlotIndex);
-                    int currentPending = source.getPendingCount();
-                    source.setPendingCount(Math.max(0, currentPending - pending.getBaseStock()));
-                }
-
-                pendingSlots.remove(i);
-                break;
-            }
-        }
-
-        if (pendingSlots.isEmpty()) {
-            isBuyTrade = true;
-        }
-
-        syncPendingTradeToClient();
-    }
-
     /**
      * 接收从服务端同步的槽位数据（客户端调用）
      */

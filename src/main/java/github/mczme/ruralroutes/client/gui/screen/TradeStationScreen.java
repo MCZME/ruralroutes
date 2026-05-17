@@ -15,6 +15,7 @@ import github.mczme.ruralroutes.network.packet.CoinExchangeRequestPayload;
 import github.mczme.ruralroutes.network.packet.TradeRequestPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -70,6 +71,7 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
     private static final int FEEDBACK_ERROR_BG = 0xD0833A32;
     private static final int FEEDBACK_ERROR_BORDER = 0xFFE2A08B;
     private static final int FEEDBACK_HIGHLIGHT = 0x24FFF4D4;
+    private static final int TOOLTIP_HINT_COLOR = 0xAA8A7762;
 
     private ScrollableSectionWidget sellSection;
     private ScrollableSectionWidget buySection;
@@ -134,6 +136,34 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
         boolean isBuyTrade = menu.isBuyTrade();
 
         tradeArea.setPendingSlots(pendingSlots, isBuyTrade);
+        updateSourceSelectionState();
+    }
+
+    private void updateSourceSelectionState() {
+        updateSectionSelectionState(sellSection, menu.getSellSlots(), true);
+        updateSectionSelectionState(buySection, menu.getBuySlots(), false);
+    }
+
+    private void updateSectionSelectionState(ScrollableSectionWidget section, List<TradeSlot> slots, boolean isBuySection) {
+        List<AbstractWidget> cards = section.getCards();
+        for (int i = 0; i < cards.size() && i < slots.size(); i++) {
+            AbstractWidget card = cards.get(i);
+            if (card instanceof TradeOfferCardWidget offerCard) {
+                offerCard.setSelected(getPendingCountForSource(isBuySection, i) > 0);
+            }
+        }
+    }
+
+    private int getPendingCountForSource(boolean isBuy, int sourceIndex) {
+        int total = 0;
+        for (PendingTradeSlot pending : menu.getPendingSlots()) {
+            if (pending.isBuy() == isBuy
+                && pending.getSourceSlotIndex() == sourceIndex
+                && pending.getBaseStock() > 0) {
+                total += pending.getBaseStock();
+            }
+        }
+        return total;
     }
 
     @Override
@@ -239,6 +269,14 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
         tooltip.add(stack.getDisplayName());
         tooltip.add(Component.literal("×" + info.count())
             .withStyle(style -> style.withColor(0xAAAAAA)));
+        if (tradeArea.isDeleteMode() && info.editable()) {
+            tooltip.add(Component.translatable("gui.ruralroutes.trade_station.tooltip.remove_one")
+                .withStyle(style -> style.withColor(TOOLTIP_HINT_COLOR)));
+            tooltip.add(Component.translatable("gui.ruralroutes.trade_station.tooltip.clear_entry")
+                .withStyle(style -> style.withColor(TOOLTIP_HINT_COLOR)));
+            tooltip.add(Component.translatable("gui.ruralroutes.trade_station.tooltip.clear_all")
+                .withStyle(style -> style.withColor(TOOLTIP_HINT_COLOR)));
+        }
 
         guiGraphics.renderTooltip(font, tooltip.stream().map(Component::getVisualOrderText).toList(), x, y);
     }
@@ -268,6 +306,14 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
             String stockKey = slot.isBuy() ? "gui.ruralroutes.trade_card.tooltip.stock" : "gui.ruralroutes.trade_card.tooltip.can_buy";
             tooltip.add(Component.translatable(stockKey, stockCount)
                 .withStyle(style -> style.withColor(stockCount > 0 ? 0xFFFFFF : 0xFF5555)));
+            int sourceIndex = (slot.isBuy() ? menu.getSellSlots() : menu.getBuySlots()).indexOf(slot);
+            int pendingCount = sourceIndex >= 0 ? getPendingCountForSource(slot.isBuy(), sourceIndex) : 0;
+            tooltip.add(Component.translatable("gui.ruralroutes.trade_card.tooltip.selected", pendingCount)
+                .withStyle(style -> style.withColor(0xD5C39D)));
+            tooltip.add(Component.translatable("gui.ruralroutes.trade_card.tooltip.shift_scroll")
+                .withStyle(style -> style.withColor(TOOLTIP_HINT_COLOR)));
+            tooltip.add(Component.translatable("gui.ruralroutes.trade_card.tooltip.shift_click")
+                .withStyle(style -> style.withColor(TOOLTIP_HINT_COLOR)));
 
             TradeContractType type = slot.getTradeType();
 
@@ -320,10 +366,47 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (Screen.hasShiftDown() && handleShiftScroll(mouseX, mouseY, scrollY)) {
+            return true;
+        }
         if (sellSection.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) return true;
         if (buySection.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) return true;
         if (tradeArea.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) return true;
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    private boolean handleShiftScroll(double mouseX, double mouseY, double scrollY) {
+        if (scrollY == 0) {
+            return false;
+        }
+
+        if (handleShiftScrollForSection(sellSection, menu.getSellSlots(), TradeRequestPayload.ADD_BUY, TradeRequestPayload.REMOVE_BUY, mouseX, mouseY, scrollY)) {
+            return true;
+        }
+        return handleShiftScrollForSection(buySection, menu.getBuySlots(), TradeRequestPayload.ADD_SELL, TradeRequestPayload.REMOVE_SELL, mouseX, mouseY, scrollY);
+    }
+
+    private boolean handleShiftScrollForSection(ScrollableSectionWidget section, List<TradeSlot> slots,
+                                                int addRequestType, int removeRequestType,
+                                                double mouseX, double mouseY, double scrollY) {
+        AbstractWidget hovered = section.getHoveredCard(mouseX, mouseY);
+        if (!(hovered instanceof TradeOfferCardWidget offerCard)) {
+            return false;
+        }
+
+        TradeSlot slot = offerCard.getTradeSlot();
+        if (slot == null) {
+            return false;
+        }
+
+        int index = slots.indexOf(slot);
+        if (index < 0) {
+            return false;
+        }
+
+        int requestType = scrollY < 0 ? addRequestType : removeRequestType;
+        sendTradeRequest(requestType, index, 1);
+        return true;
     }
 
     /**
@@ -335,7 +418,8 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
             if (slot == null) return;
             int index = menu.getSellSlots().indexOf(slot);
             if (index >= 0) {
-                PacketDistributor.sendToServer(new TradeRequestPayload(menu.containerId, TradeRequestPayload.ADD_BUY, index));
+                int amount = Screen.hasShiftDown() ? TradeRequestPayload.ALL_AMOUNT : TradeRequestPayload.DEFAULT_AMOUNT;
+                sendTradeRequest(TradeRequestPayload.ADD_BUY, index, amount);
             }
         }
     }
@@ -349,7 +433,8 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
             if (slot == null) return;
             int index = menu.getBuySlots().indexOf(slot);
             if (index >= 0) {
-                PacketDistributor.sendToServer(new TradeRequestPayload(menu.containerId, TradeRequestPayload.ADD_SELL, index));
+                int amount = Screen.hasShiftDown() ? TradeRequestPayload.ALL_AMOUNT : TradeRequestPayload.DEFAULT_AMOUNT;
+                sendTradeRequest(TradeRequestPayload.ADD_SELL, index, amount);
             }
         }
     }
@@ -371,13 +456,29 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
         ));
     }
 
+    private void sendTradeRequest(int requestType, int slotIndex, int amount) {
+        PacketDistributor.sendToServer(new TradeRequestPayload(menu.containerId, requestType, slotIndex, amount));
+    }
+
     /**
      * 移除暂存槽位
      */
-    private void onPendingSlotRemoved(PendingTradeSlot slot) {
-        if (slot != null && slot.hasSource()) {
-            int requestType = slot.isSourceIsBuy() ? TradeRequestPayload.REMOVE_BUY : TradeRequestPayload.REMOVE_SELL;
-            PacketDistributor.sendToServer(new TradeRequestPayload(menu.containerId, requestType, slot.getSourceSlotIndex()));
+    private void onPendingSlotRemoved(PendingTradeSlot slot, boolean clearAll) {
+        if (slot == null) {
+            if (clearAll) {
+                sendTradeRequest(TradeRequestPayload.CLEAR, 0, TradeRequestPayload.DEFAULT_AMOUNT);
+            }
+            return;
+        }
+
+        if (slot.hasSource()) {
+            int requestType;
+            if (slot.isSourceIsBuy()) {
+                requestType = clearAll ? TradeRequestPayload.CLEAR_BUY : TradeRequestPayload.REMOVE_BUY;
+            } else {
+                requestType = clearAll ? TradeRequestPayload.CLEAR_SELL : TradeRequestPayload.REMOVE_SELL;
+            }
+            sendTradeRequest(requestType, slot.getSourceSlotIndex(), TradeRequestPayload.DEFAULT_AMOUNT);
         }
     }
 

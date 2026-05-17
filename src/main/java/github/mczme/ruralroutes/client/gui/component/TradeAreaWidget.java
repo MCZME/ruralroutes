@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -18,7 +19,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * 交易区组件 - 双行卡片布局 + 两侧独立滚动
@@ -97,7 +98,7 @@ public class TradeAreaWidget extends AbstractWidget {
 
     private boolean isDeleteMode = false;
 
-    private Consumer<PendingTradeSlot> onRemoveSlot;
+    private BiConsumer<PendingTradeSlot, Boolean> onRemoveSlot;
 
     public TradeAreaWidget(int x, int y, int width, int height) {
         super(x, y, width, height, Component.empty());
@@ -117,6 +118,10 @@ public class TradeAreaWidget extends AbstractWidget {
         deleteButton = Button.builder(
             GuiTextStyles.uniform(Component.translatable("gui.ruralroutes.trade_station.delete")),
             btn -> {
+                if (Screen.hasShiftDown() && hasContent() && onRemoveSlot != null) {
+                    onRemoveSlot.accept(null, true);
+                    return;
+                }
                 isDeleteMode = !isDeleteMode;
                 updateDeleteButtonStyle();
             }
@@ -149,7 +154,7 @@ public class TradeAreaWidget extends AbstractWidget {
     /**
      * 设置移除暂存槽位的回调
      */
-    public void setOnPendingSlotRemove(Consumer<PendingTradeSlot> callback) {
+    public void setOnPendingSlotRemove(BiConsumer<PendingTradeSlot, Boolean> callback) {
         this.onRemoveSlot = callback;
     }
 
@@ -252,10 +257,10 @@ public class TradeAreaWidget extends AbstractWidget {
      */
     public HoveredCardInfo getHoveredCardInfo(int mouseX, int mouseY) {
         CardInfo wantHit = findHoveredCard(cachedWantCards, wantScrollOffset, getWantAreaX(), getCardsAreaY(), mouseX, mouseY);
-        if (wantHit != null) return new HoveredCardInfo(wantHit.stack, wantHit.count);
+        if (wantHit != null) return new HoveredCardInfo(wantHit.stack, wantHit.count, isEditableCard(wantHit));
 
         CardInfo payHit = findHoveredCard(cachedPayCards, payScrollOffset, getPayAreaX(), getCardsAreaY(), mouseX, mouseY);
-        if (payHit != null) return new HoveredCardInfo(payHit.stack, payHit.count);
+        if (payHit != null) return new HoveredCardInfo(payHit.stack, payHit.count, isEditableCard(payHit));
 
         return null;
     }
@@ -469,16 +474,16 @@ public class TradeAreaWidget extends AbstractWidget {
      * 卡片信息，包含物品、数量和来源暂存槽位列表
      * 合并后的货币卡片包含多个来源，删除时级联移除所有关联条目
      */
-    private record CardInfo(ItemStack stack, int count, List<PendingTradeSlot> sourceSlots) {
+    private record CardInfo(ItemStack stack, int count, List<PendingTradeSlot> sourceSlots, boolean editable) {
         CardInfo(ItemStack stack, int count, PendingTradeSlot sourceSlot) {
-            this(stack, count, List.of(sourceSlot));
+            this(stack, count, List.of(sourceSlot), true);
         }
     }
 
     /**
      * 悬停卡片信息，供 Tooltip 渲染使用
      */
-    public record HoveredCardInfo(ItemStack stack, int count) {}
+    public record HoveredCardInfo(ItemStack stack, int count, boolean editable) {}
 
     /**
      * 构建左侧（玩家获得）卡片列表
@@ -498,7 +503,7 @@ public class TradeAreaWidget extends AbstractWidget {
                 for (ItemStack priceStack : slot.getPriceStacks()) {
                     ItemStack scaled = priceStack.copy();
                     scaled.setCount(priceStack.getCount() * multiplier);
-                    currencyCards.add(new CardInfo(scaled, scaled.getCount(), slot));
+                    currencyCards.add(new CardInfo(scaled, scaled.getCount(), List.of(slot), false));
                 }
             }
         }
@@ -527,13 +532,13 @@ public class TradeAreaWidget extends AbstractWidget {
                 for (ItemStack inputStack : slot.getInputStacks()) {
                     ItemStack scaled = inputStack.copy();
                     scaled.setCount(inputStack.getCount() * multiplier);
-                    currencyCards.add(new CardInfo(scaled, scaled.getCount(), slot));
+                    currencyCards.add(new CardInfo(scaled, scaled.getCount(), List.of(slot), false));
                 }
             } else {
                 for (ItemStack priceStack : slot.getPriceStacks()) {
                     ItemStack scaled = priceStack.copy();
                     scaled.setCount(priceStack.getCount() * multiplier);
-                    currencyCards.add(new CardInfo(scaled, scaled.getCount(), slot));
+                    currencyCards.add(new CardInfo(scaled, scaled.getCount(), List.of(slot), false));
                 }
             }
         }
@@ -573,10 +578,14 @@ public class TradeAreaWidget extends AbstractWidget {
                     allSources.addAll(card.sourceSlots);
                 }
                 template.setCount(totalCount);
-                result.add(new CardInfo(template, totalCount, allSources));
+                result.add(new CardInfo(template, totalCount, allSources, false));
             }
         }
         return result;
+    }
+
+    private boolean isEditableCard(CardInfo card) {
+        return card != null && card.editable;
     }
 
     /**
@@ -661,12 +670,10 @@ public class TradeAreaWidget extends AbstractWidget {
         }
 
         if (isDeleteMode) {
-            List<PendingTradeSlot> hitSlots = findClickedPendingSlots((int) mouseX, (int) mouseY);
-            if (!hitSlots.isEmpty()) {
+            PendingTradeSlot hitSlot = findClickedPendingSlot((int) mouseX, (int) mouseY);
+            if (hitSlot != null) {
                 if (onRemoveSlot != null) {
-                    for (PendingTradeSlot slot : hitSlots) {
-                        onRemoveSlot.accept(slot);
-                    }
+                    onRemoveSlot.accept(hitSlot, Screen.hasShiftDown());
                 }
                 return true;
             }
@@ -705,17 +712,17 @@ public class TradeAreaWidget extends AbstractWidget {
     }
 
     /**
-     * 查找鼠标点击位置对应的暂存槽位列表
-     * 合并货币卡片返回所有关联来源，物品卡片返回单个来源
+     * 查找鼠标点击位置对应的可编辑暂存槽位。
+     * 派生货币卡片不可编辑，因此不会命中。
      */
-    private List<PendingTradeSlot> findClickedPendingSlots(int mouseX, int mouseY) {
+    private PendingTradeSlot findClickedPendingSlot(int mouseX, int mouseY) {
         CardInfo wantHit = findHoveredCard(cachedWantCards, wantScrollOffset, getWantAreaX(), getCardsAreaY(), mouseX, mouseY);
-        if (wantHit != null) return wantHit.sourceSlots;
+        if (isEditableCard(wantHit)) return wantHit.sourceSlots.get(0);
 
         CardInfo payHit = findHoveredCard(cachedPayCards, payScrollOffset, getPayAreaX(), getCardsAreaY(), mouseX, mouseY);
-        if (payHit != null) return payHit.sourceSlots;
+        if (isEditableCard(payHit)) return payHit.sourceSlots.get(0);
 
-        return List.of();
+        return null;
     }
 
     @Override

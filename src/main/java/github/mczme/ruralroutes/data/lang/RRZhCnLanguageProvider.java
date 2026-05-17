@@ -206,9 +206,15 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_card.price_per", "/个");
         add("gui.ruralroutes.trade_card.tooltip.stock", "库存: %d");
         add("gui.ruralroutes.trade_card.tooltip.can_buy", "可收购: %d");
+        add("gui.ruralroutes.trade_card.tooltip.selected", "已加入: %d");
         add("gui.ruralroutes.trade_card.tooltip.price", "价格:");
         add("gui.ruralroutes.trade_card.tooltip.need", "需要:");
+        add("gui.ruralroutes.trade_card.tooltip.shift_scroll", "Shift+滚轮: 增减数量");
+        add("gui.ruralroutes.trade_card.tooltip.shift_click", "Shift+左键: 全部添加");
         add("gui.ruralroutes.trade_card.empty_slot", "空槽位");
+        add("gui.ruralroutes.trade_station.tooltip.remove_one", "左键: 减少 1");
+        add("gui.ruralroutes.trade_station.tooltip.clear_entry", "Shift+左键: 清空该项");
+        add("gui.ruralroutes.trade_station.tooltip.clear_all", "Shift+左键删除按钮: 清空交易区");
 
         // 创造模式标签页
         add("itemGroup.ruralroutes", "乡野商路");

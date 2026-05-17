@@ -206,9 +206,15 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_card.price_per", "/ea");
         add("gui.ruralroutes.trade_card.tooltip.stock", "Stock: %d");
         add("gui.ruralroutes.trade_card.tooltip.can_buy", "Can buy: %d");
+        add("gui.ruralroutes.trade_card.tooltip.selected", "Selected: %d");
         add("gui.ruralroutes.trade_card.tooltip.price", "Price:");
         add("gui.ruralroutes.trade_card.tooltip.need", "Need:");
+        add("gui.ruralroutes.trade_card.tooltip.shift_scroll", "Shift+Scroll: Adjust amount");
+        add("gui.ruralroutes.trade_card.tooltip.shift_click", "Shift+Left Click: Add all");
         add("gui.ruralroutes.trade_card.empty_slot", "Empty slot");
+        add("gui.ruralroutes.trade_station.tooltip.remove_one", "Left Click: Remove 1");
+        add("gui.ruralroutes.trade_station.tooltip.clear_entry", "Shift+Left Click: Clear entry");
+        add("gui.ruralroutes.trade_station.tooltip.clear_all", "Shift+Left Click Delete: Clear trade list");
 
         // 创造模式标签页
         add("itemGroup.ruralroutes", "Rural Routes");

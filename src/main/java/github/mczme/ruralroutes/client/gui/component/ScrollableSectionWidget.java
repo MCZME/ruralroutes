@@ -110,6 +110,19 @@ public class ScrollableSectionWidget extends AbstractWidget {
         return cards;
     }
 
+    public AbstractWidget getHoveredCard(double mouseX, double mouseY) {
+        if (!isMouseOver(mouseX, mouseY)) {
+            return null;
+        }
+
+        for (AbstractWidget card : visibleCards) {
+            if (card.isMouseOver(mouseX, mouseY)) {
+                return card;
+            }
+        }
+        return null;
+    }
+
     /**
      * 当前布局下内容实际渲染所需的最小高度。
      * 以第二排卡片底部为准，不裁掉已渲染内容。
