@@ -28,6 +28,26 @@ sourceSets.main.resources {
 
 repositories {
     // Add here additional repositories if required by some of the dependencies below.
+    exclusiveContent {
+        forRepository {
+            mavenCentral()
+        }
+        filter {
+            includeGroup("org.junit")
+            includeGroup("org.junit.jupiter")
+            includeGroup("org.junit.platform")
+            includeGroup("org.opentest4j")
+            includeGroup("org.apiguardian")
+        }
+    }
+    maven {
+        name = "NeoForged Mirror"
+        url = "https://neoforged.forgecdn.net/releases"
+    }
+    maven {
+        name = "Minecraft Libraries Mirror"
+        url = "https://neoforged.forgecdn.net/mojang-meta"
+    }
 }
 
 base {
@@ -107,6 +127,11 @@ neoForge {
             sourceSet(sourceSets.main)
         }
     }
+
+    unitTest {
+        enable()
+        testedMod = mods."${mod_id}"
+    }
 }
 
 // Sets up a dependency configuration called 'localRuntime'.
@@ -118,6 +143,10 @@ configurations {
 }
 
 dependencies {
+    testImplementation platform("org.junit:junit-bom:5.12.2")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
     // Example optional mod dependency with JEI
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
@@ -181,6 +210,15 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+tasks.named('test', Test).configure {
+    useJUnitPlatform()
+
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
 }
 
 // IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.

@@ -9,7 +9,6 @@ import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.item.ConfigToolItem;
 import github.mczme.ruralroutes.register.RRMenuTypes;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -41,6 +40,7 @@ public class ConfigToolMenu extends AbstractContainerMenu {
     }
 
     private final BlockPos blockPos;
+    private final Level level;
     private final List<ResourceLocation> availableThemes;
     private final List<VillageStyle> availableStyles;
     private ResourceLocation selectedTheme;
@@ -55,6 +55,7 @@ public class ConfigToolMenu extends AbstractContainerMenu {
     public ConfigToolMenu(int containerId, Inventory playerInventory, BlockPos blockPos) {
         super(RRMenuTypes.CONFIG_TOOL.get(), containerId);
         this.blockPos = blockPos;
+        this.level = playerInventory.player.level();
         this.availableThemes = new ArrayList<>(ThemeManager.INSTANCE.getAllThemes().keySet());
         this.availableThemes.sort(Comparator.comparing(ResourceLocation::toString));
         this.availableStyles = List.of(VillageStyle.values());
@@ -112,16 +113,13 @@ public class ConfigToolMenu extends AbstractContainerMenu {
      * 获取方块类型
      */
     public BlockType getBlockType() {
-        Level level = Minecraft.getInstance().level;
-        if (level != null) {
-            BlockEntity be = level.getBlockEntity(blockPos);
-            if (be instanceof TradeStationBlockEntity) {
-                return BlockType.TRADE_STATION;
-            } else if (be instanceof DisplayCaseBlockEntity) {
-                return BlockType.DISPLAY_CASE;
-            } else if (be instanceof RumorBoardBlockEntity) {
-                return BlockType.RUMOR_BOARD;
-            }
+        BlockEntity be = level.getBlockEntity(blockPos);
+        if (be instanceof TradeStationBlockEntity) {
+            return BlockType.TRADE_STATION;
+        } else if (be instanceof DisplayCaseBlockEntity) {
+            return BlockType.DISPLAY_CASE;
+        } else if (be instanceof RumorBoardBlockEntity) {
+            return BlockType.RUMOR_BOARD;
         }
         return BlockType.UNKNOWN;
     }
@@ -145,12 +143,9 @@ public class ConfigToolMenu extends AbstractContainerMenu {
      * 获取当前主题 - 仅贸易站有效
      */
     public ResourceLocation getCurrentTheme() {
-        Level level = Minecraft.getInstance().level;
-        if (level != null) {
-            BlockEntity be = level.getBlockEntity(blockPos);
-            if (be instanceof TradeStationBlockEntity station) {
-                return station.getVillageTheme();
-            }
+        BlockEntity be = level.getBlockEntity(blockPos);
+        if (be instanceof TradeStationBlockEntity station) {
+            return station.getVillageTheme();
         }
         return null;
     }
@@ -159,11 +154,6 @@ public class ConfigToolMenu extends AbstractContainerMenu {
      * 获取当前外观风格
      */
     public VillageStyle getCurrentStyle() {
-        Level level = Minecraft.getInstance().level;
-        if (level == null) {
-            return null;
-        }
-
         BlockState state = level.getBlockState(blockPos);
         if (!BlockStyleHelper.hasStyle(state)) {
             return null;
@@ -176,14 +166,11 @@ public class ConfigToolMenu extends AbstractContainerMenu {
      * 获取当前节点ID
      */
     public UUID getCurrentTradeNodeId() {
-        Level level = Minecraft.getInstance().level;
-        if (level != null) {
-            BlockEntity be = level.getBlockEntity(blockPos);
-            if (be instanceof TradeStationBlockEntity station) {
-                return station.getTradeNodeId();
-            } else if (be instanceof TradeNodeBlockEntity nodeEntity) {
-                return nodeEntity.getTradeNodeId();
-            }
+        BlockEntity be = level.getBlockEntity(blockPos);
+        if (be instanceof TradeStationBlockEntity station) {
+            return station.getTradeNodeId();
+        } else if (be instanceof TradeNodeBlockEntity nodeEntity) {
+            return nodeEntity.getTradeNodeId();
         }
         return null;
     }
@@ -192,12 +179,9 @@ public class ConfigToolMenu extends AbstractContainerMenu {
      * 获取当前贸易站位置（仅贸易站有效）
      */
     public BlockPos getCurrentStationPos() {
-        Level level = Minecraft.getInstance().level;
-        if (level != null) {
-            BlockEntity be = level.getBlockEntity(blockPos);
-            if (be instanceof TradeStationBlockEntity) {
-                return blockPos;
-            }
+        BlockEntity be = level.getBlockEntity(blockPos);
+        if (be instanceof TradeStationBlockEntity) {
+            return blockPos;
         }
         return null;
     }

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.core.util.WeightedRandomSelector;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -91,33 +92,11 @@ public final class MarketEventRuleCatalog extends SimpleJsonResourceReloadListen
      * @return 选中的规则列表
      */
     public List<MarketEventRule> selectRandomRules(Random random, int count) {
-        if (allRules.isEmpty() || count <= 0) {
-            return List.of();
-        }
-
-        List<MarketEventRule> candidates = new ArrayList<>(allRules);
-        List<MarketEventRule> selected = new ArrayList<>();
-        int totalWeight = candidates.stream().mapToInt(MarketEventRule::effectiveWeight).sum();
-
-        for (int i = 0; i < Math.min(count, allRules.size()); i++) {
-            if (totalWeight <= 0) break;
-
-            int roll = random.nextInt(totalWeight);
-            int cumulative = 0;
-
-            for (int j = 0; j < candidates.size(); j++) {
-                MarketEventRule rule = candidates.get(j);
-                cumulative += rule.effectiveWeight();
-
-                if (roll < cumulative) {
-                    selected.add(rule);
-                    totalWeight -= rule.effectiveWeight();
-                    candidates.remove(j);
-                    break;
-                }
-            }
-        }
-
-        return selected;
+        return WeightedRandomSelector.selectWithoutReplacement(
+                allRules,
+                MarketEventRule::effectiveWeight,
+                random,
+                count
+        );
     }
 }

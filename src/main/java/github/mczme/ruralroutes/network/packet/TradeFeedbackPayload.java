@@ -2,12 +2,12 @@ package github.mczme.ruralroutes.network.packet;
 
 import github.mczme.ruralroutes.RuralRoutes;
 import github.mczme.ruralroutes.menu.TradeStationMenu;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
@@ -58,7 +58,7 @@ public record TradeFeedbackPayload(
      */
     public static void handleClient(TradeFeedbackPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            var player = Minecraft.getInstance().player;
+            Player player = context.player();
             if (player == null) return;
 
             if (player.containerMenu instanceof TradeStationMenu tradeMenu

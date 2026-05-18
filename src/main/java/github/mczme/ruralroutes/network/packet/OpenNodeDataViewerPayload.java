@@ -1,9 +1,8 @@
 package github.mczme.ruralroutes.network.packet;
 
 import github.mczme.ruralroutes.RuralRoutes;
-import github.mczme.ruralroutes.client.gui.screen.NodeDataViewerScreen;
+import github.mczme.ruralroutes.client.ClientGuiHooks;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -101,8 +100,6 @@ public record OpenNodeDataViewerPayload(
     }
 
     public static void handleClient(OpenNodeDataViewerPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> Minecraft.getInstance().setScreen(
-            new NodeDataViewerScreen(payload.targetBlockType, payload.viewStatus, payload.nodeData)
-        ));
+        context.enqueueWork(() -> ClientGuiHooks.openNodeDataViewerScreen(payload));
     }
 }

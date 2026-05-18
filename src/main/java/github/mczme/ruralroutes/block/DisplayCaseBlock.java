@@ -1,12 +1,11 @@
 package github.mczme.ruralroutes.block;
 
 import github.mczme.ruralroutes.blockentity.DisplayCaseBlockEntity;
-import github.mczme.ruralroutes.client.gui.screen.DisplayCaseScreen;
+import github.mczme.ruralroutes.client.ClientGuiHooks;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.register.RRBlockEntities;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
@@ -95,8 +94,7 @@ public class DisplayCaseBlock extends BaseEntityBlock {
                 if (displayCase.getTradeStationPos() == null) {
                     return InteractionResult.PASS;
                 }
-                // 打开 Screen
-                Minecraft.getInstance().setScreen(new DisplayCaseScreen(displayCase.getDisplayItem()));
+                ClientGuiHooks.openDisplayCaseScreen(displayCase.getDisplayItem());
                 return InteractionResult.SUCCESS;
             } else {
                 // 服务端：校验数据

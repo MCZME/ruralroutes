@@ -42,31 +42,6 @@ public class CommercialNodeManager {
     ) {}
 
     /**
-     * 单个物品在库存初始化阶段的出售/收购基线。
-     */
-    private record StockPlan(
-        int sellBase,
-        int buyBase
-    ) {
-        private static final StockPlan EMPTY = new StockPlan(0, 0);
-
-        private StockPlan addSell(int amount) {
-            return new StockPlan(sellBase + amount, buyBase);
-        }
-
-        private StockPlan addBuy(int amount) {
-            return new StockPlan(sellBase, buyBase + amount);
-        }
-
-        private StockEntry toStockEntry() {
-            if (sellBase <= 0 && buyBase <= 0) {
-                return StockEntry.empty(0);
-            }
-            return new StockEntry(sellBase, sellBase + buyBase);
-        }
-    }
-
-    /**
      * 获取区块中的商业节点数据
      * @param level 世界
      * @param chunkPos 区块坐标
@@ -328,7 +303,7 @@ public class CommercialNodeManager {
     private static Map<ResourceLocation, StockEntry> initializeStocks(ThemeTemplate template,
             List<SelectedTradeItem> selectedSellItems, List<SelectedTradeItem> selectedBuyItems,
             MarketState marketState) {
-        Map<ResourceLocation, StockPlan> plans = new HashMap<>();
+        Map<ResourceLocation, NodeStockPlan> plans = new HashMap<>();
 
         // 默认库存范围
         int defaultMin = 8;
@@ -359,7 +334,7 @@ public class CommercialNodeManager {
         }
 
         Map<ResourceLocation, StockEntry> stocks = new HashMap<>();
-        for (Map.Entry<ResourceLocation, StockPlan> entry : plans.entrySet()) {
+        for (Map.Entry<ResourceLocation, NodeStockPlan> entry : plans.entrySet()) {
             StockEntry stockEntry = entry.getValue().toStockEntry();
             if (stockEntry.max() > 0) {
                 stocks.put(entry.getKey(), stockEntry);
@@ -371,14 +346,14 @@ public class CommercialNodeManager {
     /**
      * 处理单个物品的库存条目
      */
-    private static void processStockEntry(Map<ResourceLocation, StockPlan> plans,
+    private static void processStockEntry(Map<ResourceLocation, NodeStockPlan> plans,
             ThemeTemplate template, MarketState marketState, MarketContext marketContext,
             String itemRefId, ResourceLocation itemId,
             int defaultMin, int defaultMax, boolean isSellItem) {
 
         int baseAmount = getBaseStockMax(template, itemRefId, itemId, defaultMin, defaultMax);
         MarketStockAdjustment stockAdjustment = resolveStockAdjustment(marketState, marketContext, itemId);
-        StockPlan existing = plans.getOrDefault(itemId, StockPlan.EMPTY);
+        NodeStockPlan existing = plans.getOrDefault(itemId, NodeStockPlan.EMPTY);
 
         if (isSellItem) {
             int sellBase = stockAdjustment.applySellBase(baseAmount);

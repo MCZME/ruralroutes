@@ -1,9 +1,8 @@
 package github.mczme.ruralroutes.network.packet;
 
 import github.mczme.ruralroutes.RuralRoutes;
-import github.mczme.ruralroutes.client.gui.screen.RumorBoardScreen;
+import github.mczme.ruralroutes.client.ClientGuiHooks;
 import github.mczme.ruralroutes.core.market.MarketState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -66,7 +65,6 @@ public record OpenRumorBoardPayload(
      * 客户端处理
      */
     public static void handleClient(OpenRumorBoardPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> Minecraft.getInstance()
-            .setScreen(new RumorBoardScreen(payload.blockPos, payload.marketState)));
+        context.enqueueWork(() -> ClientGuiHooks.openRumorBoardScreen(payload));
     }
 }
