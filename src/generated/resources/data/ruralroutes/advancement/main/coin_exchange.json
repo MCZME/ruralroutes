@@ -1,0 +1,29 @@
+{
+  "parent": "ruralroutes:main/first_trade",
+  "criteria": {
+    "coin_exchange": {
+      "conditions": {
+        "event": "coin_exchange"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.main.coin_exchange.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:gold_nugget"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.main.coin_exchange.title"
+    }
+  },
+  "requirements": [
+    [
+      "coin_exchange"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

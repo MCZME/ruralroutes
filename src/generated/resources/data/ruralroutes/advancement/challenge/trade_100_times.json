@@ -1,0 +1,30 @@
+{
+  "parent": "ruralroutes:challenge/trade_10_times",
+  "criteria": {
+    "trade_100_times": {
+      "conditions": {
+        "event": "trade_100_times"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.challenge.trade_100_times.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "count": 1,
+      "id": "minecraft:enchanted_book"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.challenge.trade_100_times.title"
+    }
+  },
+  "requirements": [
+    [
+      "trade_100_times"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

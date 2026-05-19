@@ -1,0 +1,171 @@
+{
+  "parent": "ruralroutes:travel/enter_different_village_styles",
+  "criteria": {
+    "theme_desert_dyeworks": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:desert_dyeworks"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_desert_oasis": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:desert_oasis"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_desert_quarry": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:desert_quarry"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_plains_granary": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:plains_granary"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_plains_pasture": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:plains_pasture"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_plains_workshop": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:plains_workshop"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_savanna_herder": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:savanna_herder"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_savanna_terracotta": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:savanna_terracotta"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_savanna_woodworks": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:savanna_woodworks"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_snowy_hunter": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:snowy_hunter"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_snowy_iceworks": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:snowy_iceworks"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_snowy_waystation": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:snowy_waystation"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_taiga_berries": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:taiga_berries"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_taiga_fur": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:taiga_fur"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "theme_taiga_lumber": {
+      "conditions": {
+        "event": "discover_village_theme",
+        "village_theme": "ruralroutes:taiga_lumber"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.travel.enter_all_village_themes.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "count": 1,
+      "id": "minecraft:filled_map"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.travel.enter_all_village_themes.title"
+    }
+  },
+  "requirements": [
+    [
+      "theme_plains_granary"
+    ],
+    [
+      "theme_plains_pasture"
+    ],
+    [
+      "theme_plains_workshop"
+    ],
+    [
+      "theme_desert_quarry"
+    ],
+    [
+      "theme_desert_oasis"
+    ],
+    [
+      "theme_desert_dyeworks"
+    ],
+    [
+      "theme_savanna_woodworks"
+    ],
+    [
+      "theme_savanna_terracotta"
+    ],
+    [
+      "theme_savanna_herder"
+    ],
+    [
+      "theme_taiga_lumber"
+    ],
+    [
+      "theme_taiga_berries"
+    ],
+    [
+      "theme_taiga_fur"
+    ],
+    [
+      "theme_snowy_iceworks"
+    ],
+    [
+      "theme_snowy_waystation"
+    ],
+    [
+      "theme_snowy_hunter"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

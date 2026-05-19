@@ -1,0 +1,29 @@
+{
+  "parent": "ruralroutes:main/first_trade",
+  "criteria": {
+    "fixed_trade": {
+      "conditions": {
+        "event": "fixed_trade"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.main.barter_trade.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:bundle"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.main.barter_trade.title"
+    }
+  },
+  "requirements": [
+    [
+      "fixed_trade"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

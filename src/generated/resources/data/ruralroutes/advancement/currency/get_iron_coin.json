@@ -1,0 +1,33 @@
+{
+  "parent": "ruralroutes:currency/get_copper_coin",
+  "criteria": {
+    "get_iron_coin": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ruralroutes:iron_coin"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.currency.get_iron_coin.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "ruralroutes:iron_coin"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.currency.get_iron_coin.title"
+    }
+  },
+  "requirements": [
+    [
+      "get_iron_coin"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

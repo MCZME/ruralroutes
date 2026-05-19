@@ -1,0 +1,29 @@
+{
+  "parent": "ruralroutes:main/first_trade_station",
+  "criteria": {
+    "open_rumor_board": {
+      "conditions": {
+        "event": "open_rumor_board"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.side.open_rumor_board.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "ruralroutes:rumor_board"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.side.open_rumor_board.title"
+    }
+  },
+  "requirements": [
+    [
+      "open_rumor_board"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

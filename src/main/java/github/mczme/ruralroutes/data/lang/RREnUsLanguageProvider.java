@@ -219,6 +219,42 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         // 创造模式标签页
         add("itemGroup.ruralroutes", "Rural Routes");
 
+        // Advancements
+        add("advancements.ruralroutes.root.title", "Enter a Village");
+        add("advancements.ruralroutes.root.description", "Step into a village for the first time");
+        add("advancements.ruralroutes.main.first_trade_station.title", "First Trade Station");
+        add("advancements.ruralroutes.main.first_trade_station.description", "Find and open a trade station in a village");
+        add("advancements.ruralroutes.main.first_trade.title", "First Business");
+        add("advancements.ruralroutes.main.first_trade.description", "Complete your first trade at a trade station");
+        add("advancements.ruralroutes.main.barter_trade.title", "Barter");
+        add("advancements.ruralroutes.main.barter_trade.description", "Complete a fixed contract trade");
+        add("advancements.ruralroutes.main.coin_exchange.title", "Coin Exchange");
+        add("advancements.ruralroutes.main.coin_exchange.description", "Complete your first coin exchange");
+        add("advancements.ruralroutes.side.open_rumor_board.title", "Open the Rumor Board");
+        add("advancements.ruralroutes.side.open_rumor_board.description", "Read the rumor board in a village");
+        add("advancements.ruralroutes.side.open_display_case.title", "Open the Display Case");
+        add("advancements.ruralroutes.side.open_display_case.description", "Inspect the display case in a village");
+        add("advancements.ruralroutes.side.buy_specialty.title", "Buy a Specialty");
+        add("advancements.ruralroutes.side.buy_specialty.description", "Buy a specialty from a village");
+        add("advancements.ruralroutes.side.collector.title", "Collector");
+        add("advancements.ruralroutes.side.collector.description", "Purchase 3 different village specialties");
+        add("advancements.ruralroutes.travel.enter_different_village_styles.title", "Far and Wide");
+        add("advancements.ruralroutes.travel.enter_different_village_styles.description", "Find trade stations in villages of all five styles");
+        add("advancements.ruralroutes.travel.enter_all_village_themes.title", "Know Every Road");
+        add("advancements.ruralroutes.travel.enter_all_village_themes.description", "Find trade stations in villages of every theme");
+        add("advancements.ruralroutes.currency.get_copper_coin.title", "Get a Copper Coin");
+        add("advancements.ruralroutes.currency.get_copper_coin.description", "Obtain a copper coin for the first time");
+        add("advancements.ruralroutes.currency.get_iron_coin.title", "Get an Iron Coin");
+        add("advancements.ruralroutes.currency.get_iron_coin.description", "Obtain an iron coin for the first time");
+        add("advancements.ruralroutes.currency.get_gold_coin.title", "Get a Gold Coin");
+        add("advancements.ruralroutes.currency.get_gold_coin.description", "Obtain a gold coin for the first time");
+        add("advancements.ruralroutes.currency.big_spender.title", "Big Spender");
+        add("advancements.ruralroutes.currency.big_spender.description", "Close a deal worth 300 in a single trade");
+        add("advancements.ruralroutes.challenge.trade_10_times.title", "Regular");
+        add("advancements.ruralroutes.challenge.trade_10_times.description", "Complete 10 successful trades");
+        add("advancements.ruralroutes.challenge.trade_100_times.title", "Patron");
+        add("advancements.ruralroutes.challenge.trade_100_times.description", "Complete 100 successful trades");
+
         // ===== Rumor System =====
 
         // Rumor templates: shortage

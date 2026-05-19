@@ -1,0 +1,33 @@
+{
+  "parent": "ruralroutes:root",
+  "criteria": {
+    "get_copper_coin": {
+      "conditions": {
+        "items": [
+          {
+            "items": "ruralroutes:copper_coin"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.currency.get_copper_coin.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "ruralroutes:copper_coin"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.currency.get_copper_coin.title"
+    }
+  },
+  "requirements": [
+    [
+      "get_copper_coin"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,0 +1,29 @@
+{
+  "parent": "ruralroutes:main/first_trade_station",
+  "criteria": {
+    "first_trade": {
+      "conditions": {
+        "event": "first_trade"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.main.first_trade.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:emerald"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.main.first_trade.title"
+    }
+  },
+  "requirements": [
+    [
+      "first_trade"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

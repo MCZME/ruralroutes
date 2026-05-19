@@ -219,6 +219,42 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         // 创造模式标签页
         add("itemGroup.ruralroutes", "乡野商路");
 
+        // 进度
+        add("advancements.ruralroutes.root.title", "进入村庄");
+        add("advancements.ruralroutes.root.description", "第一次走进一个村庄");
+        add("advancements.ruralroutes.main.first_trade_station.title", "初见贸易站");
+        add("advancements.ruralroutes.main.first_trade_station.description", "在村庄中找到并打开贸易站");
+        add("advancements.ruralroutes.main.first_trade.title", "第一笔生意");
+        add("advancements.ruralroutes.main.first_trade.description", "在贸易站完成第一笔交换");
+        add("advancements.ruralroutes.main.barter_trade.title", "以物易物");
+        add("advancements.ruralroutes.main.barter_trade.description", "完成一次固定合约交易");
+        add("advancements.ruralroutes.main.coin_exchange.title", "货币兑换");
+        add("advancements.ruralroutes.main.coin_exchange.description", "第一次完成货币兑换");
+        add("advancements.ruralroutes.side.open_rumor_board.title", "打开传闻板");
+        add("advancements.ruralroutes.side.open_rumor_board.description", "查看村庄中的传闻板");
+        add("advancements.ruralroutes.side.open_display_case.title", "打开展示柜");
+        add("advancements.ruralroutes.side.open_display_case.description", "查看村庄中的展示柜");
+        add("advancements.ruralroutes.side.buy_specialty.title", "购买特产");
+        add("advancements.ruralroutes.side.buy_specialty.description", "从村庄买到一件特产");
+        add("advancements.ruralroutes.side.collector.title", "收藏家");
+        add("advancements.ruralroutes.side.collector.description", "购买 3 种不同的村庄特产");
+        add("advancements.ruralroutes.travel.enter_different_village_styles.title", "走南闯北");
+        add("advancements.ruralroutes.travel.enter_different_village_styles.description", "在五种不同风格的村庄中找到贸易站");
+        add("advancements.ruralroutes.travel.enter_all_village_themes.title", "识遍乡野");
+        add("advancements.ruralroutes.travel.enter_all_village_themes.description", "在所有主题的村庄中找到贸易站");
+        add("advancements.ruralroutes.currency.get_copper_coin.title", "获得铜币");
+        add("advancements.ruralroutes.currency.get_copper_coin.description", "第一次得到铜板");
+        add("advancements.ruralroutes.currency.get_iron_coin.title", "获得铁币");
+        add("advancements.ruralroutes.currency.get_iron_coin.description", "第一次得到铁币");
+        add("advancements.ruralroutes.currency.get_gold_coin.title", "获得金币");
+        add("advancements.ruralroutes.currency.get_gold_coin.description", "第一次得到金币");
+        add("advancements.ruralroutes.currency.big_spender.title", "一掷千金");
+        add("advancements.ruralroutes.currency.big_spender.description", "完成一笔交易额达到 300 的大单");
+        add("advancements.ruralroutes.challenge.trade_10_times.title", "熟客");
+        add("advancements.ruralroutes.challenge.trade_10_times.description", "成功完成 10 次交易");
+        add("advancements.ruralroutes.challenge.trade_100_times.title", "老主顾");
+        add("advancements.ruralroutes.challenge.trade_100_times.description", "成功完成 100 次交易");
+
         // ===== 情报系统 =====
 
         // 传闻模板：shortage

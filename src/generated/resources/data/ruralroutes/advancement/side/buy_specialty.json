@@ -1,0 +1,29 @@
+{
+  "parent": "ruralroutes:side/open_display_case",
+  "criteria": {
+    "buy_specialty": {
+      "conditions": {
+        "event": "buy_specialty"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.side.buy_specialty.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:item_frame"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.side.buy_specialty.title"
+    }
+  },
+  "requirements": [
+    [
+      "buy_specialty"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

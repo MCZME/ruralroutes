@@ -3,12 +3,16 @@ package github.mczme.ruralroutes.block;
 import github.mczme.ruralroutes.blockentity.DisplayCaseBlockEntity;
 import github.mczme.ruralroutes.blockentity.TradeNodeBlockEntity;
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
+import github.mczme.ruralroutes.advancement.trigger.OpenTradeStationTrigger.TradeStationEvent;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.node.StockEntry;
+import github.mczme.ruralroutes.core.theme.ThemeManager;
+import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.menu.TradeStationMenu;
 import github.mczme.ruralroutes.register.RRBlockEntities;
+import github.mczme.ruralroutes.register.RRCriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -122,6 +126,10 @@ public class TradeStationBlock extends BaseEntityBlock {
                                 refreshDisplayCases(level, pos, nodeData);
                             }
                         }
+                        if (player instanceof ServerPlayer serverPlayer) {
+                            recordVillageDiscovery(serverPlayer, themeName);
+                            RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(serverPlayer, TradeStationEvent.OPEN);
+                        }
                         openMenu(player, station);
                         return InteractionResult.CONSUME;
                     }
@@ -146,6 +154,10 @@ public class TradeStationBlock extends BaseEntityBlock {
                     station.setTradeNodeId(nodeId);
                     // 同步 tradeNodeId 到附近的展示柜和传闻板，并分配展示物品
                     syncNodeIdToNearbyBlocks(level, pos, nodeId, newData);
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        recordVillageDiscovery(serverPlayer, themeName);
+                        RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(serverPlayer, TradeStationEvent.OPEN);
+                    }
                     openMenu(player, station);
                     return InteractionResult.CONSUME;
                 }
@@ -296,6 +308,28 @@ public class TradeStationBlock extends BaseEntityBlock {
                 tradeMenu.syncCoinExchangeStateToClient(serverPlayer);
             }
         }
+    }
+
+    private void recordVillageDiscovery(ServerPlayer player, ResourceLocation themeName) {
+        ThemeTemplate theme = ThemeManager.INSTANCE.getTheme(themeName);
+        if (theme == null) {
+            return;
+        }
+
+        VillageStyle.tryFromBiome(theme.biome()).ifPresent(style ->
+            RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(
+                player,
+                TradeStationEvent.DISCOVER_VILLAGE_STYLE,
+                style.getSerializedName(),
+                null
+            )
+        );
+        RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(
+            player,
+            TradeStationEvent.DISCOVER_VILLAGE_THEME,
+            null,
+            themeName.toString()
+        );
     }
     
     @Override

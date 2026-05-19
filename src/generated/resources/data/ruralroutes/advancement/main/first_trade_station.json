@@ -1,0 +1,29 @@
+{
+  "parent": "ruralroutes:root",
+  "criteria": {
+    "open_trade_station": {
+      "conditions": {
+        "event": "open"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.main.first_trade_station.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "ruralroutes:trade_station"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.main.first_trade_station.title"
+    }
+  },
+  "requirements": [
+    [
+      "open_trade_station"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,7 +1,9 @@
 package github.mczme.ruralroutes.data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import github.mczme.ruralroutes.core.trade.TradeSide;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
@@ -10,6 +12,7 @@ import github.mczme.ruralroutes.register.RRItemTags;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -29,9 +32,19 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
 
     @Override
     protected void gather() {
+        defineThemes(builder -> builder.registrar(this::unconditional).register());
+    }
+
+    public static List<ResourceLocation> collectBuiltinThemeIds() {
+        List<ResourceLocation> ids = new ArrayList<>();
+        defineThemes(builder -> ids.add(builder.getId()));
+        return List.copyOf(ids);
+    }
+
+    private static void defineThemes(Consumer<ThemeBuilder> consumer) {
         // ==================== 平原群系 ====================
 
-        theme("plains_granary")
+        consumer.accept(theme("plains_granary")
             .biome("minecraft:plains")
             .sell("minecraft:oak_planks")
             .sellPick("plains_granary/staples", 3,
@@ -62,10 +75,9 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 refs(priceTagRef(RRItemTags.POOL_MINERAL)),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
                 ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
-            .specialty("minecraft:golden_carrot")
-            .register();
+            .specialty("minecraft:golden_carrot"));
 
-        theme("plains_pasture")
+        consumer.accept(theme("plains_pasture")
             .biome("minecraft:plains")
             .sell("minecraft:leather")
             .sellPick(tagRef(RRItemTags.CANDIDATE_BIOME_PLAINS_LEATHER_FIBER), 2)
@@ -94,10 +106,9 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 refs("minecraft:iron_sword", "minecraft:iron_axe", "minecraft:shears"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
                 ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
-            .specialty("minecraft:saddle")
-            .register();
+            .specialty("minecraft:saddle"));
 
-        theme("plains_workshop")
+        consumer.accept(theme("plains_workshop")
             .biome("minecraft:plains")
             .sell("minecraft:iron_pickaxe")
             .sellPick(tagRef(RRItemTags.CANDIDATE_BIOME_PLAINS_WOOD), 2)
@@ -136,12 +147,11 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 refs(priceTagRef(RRItemTags.POOL_MINERAL)),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
                 ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
-            .specialty("minecraft:anvil")
-            .register();
+            .specialty("minecraft:anvil"));
 
         // ==================== 沙漠群系 ====================
 
-        theme("desert_quarry")
+        consumer.accept(theme("desert_quarry")
             .biome("minecraft:desert")
             .sell("minecraft:sandstone")
             .sellPick(tagRef(RRItemTags.CANDIDATE_BIOME_DESERT_STONE), 3)
@@ -166,10 +176,9 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 in("minecraft:red_sandstone", 2),
                 in("minecraft:stick", 1)),
                 outputs(out("minecraft:chiseled_sandstone", 1)))
-            .specialty("minecraft:chiseled_sandstone")
-            .register();
+            .specialty("minecraft:chiseled_sandstone"));
 
-        theme("desert_oasis")
+        consumer.accept(theme("desert_oasis")
             .biome("minecraft:desert")
             .sell("minecraft:wheat")
             .sellPick(tagRef(RRItemTags.CANDIDATE_BIOME_DESERT_CROP), 3)
@@ -196,10 +205,9 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 refs(priceTagRef(RRItemTags.POOL_MINERAL), "minecraft:bucket"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
                 ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
-            .specialty("minecraft:golden_carrot")
-            .register();
+            .specialty("minecraft:golden_carrot"));
 
-        theme("desert_dyeworks")
+        consumer.accept(theme("desert_dyeworks")
             .biome("minecraft:desert")
             .sell("minecraft:terracotta")
             .sellPick(tagRef(RRItemTags.CANDIDATE_BIOME_DESERT_DYE_DECOR), 2)
@@ -224,12 +232,11 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 in("minecraft:cactus", 1),
                 in("minecraft:bone_meal", 1)),
                 outputs(out("minecraft:cyan_dye", 1)))
-            .specialty("minecraft:cyan_dye")
-            .register();
+            .specialty("minecraft:cyan_dye"));
 
         // ==================== 热带草原群系 ====================
 
-        theme("savanna_woodworks")
+        consumer.accept(theme("savanna_woodworks")
             .biome("minecraft:savanna")
             .sell("minecraft:acacia_log", "minecraft:charcoal")
             .sellPick(tagRef(RRItemTags.CANDIDATE_BIOME_SAVANNA_WOOD), 3)
@@ -257,10 +264,9 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 refs(priceTagRef(RRItemTags.POOL_MINERAL), "minecraft:iron_axe"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
                 ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
-            .specialty("minecraft:saddle")
-            .register();
+            .specialty("minecraft:saddle"));
 
-        theme("savanna_terracotta")
+        consumer.accept(theme("savanna_terracotta")
             .biome("minecraft:savanna")
             .sell("minecraft:terracotta")
             .sellPick(tagRef(RRItemTags.CANDIDATE_BIOME_SAVANNA_DYE_DECOR), 2)
@@ -284,10 +290,9 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 in("minecraft:terracotta", 1),
                 in("minecraft:charcoal", 1)),
                 outputs(out("minecraft:yellow_glazed_terracotta", 1)))
-            .specialty("minecraft:yellow_glazed_terracotta")
-            .register();
+            .specialty("minecraft:yellow_glazed_terracotta"));
 
-        theme("savanna_herder")
+        consumer.accept(theme("savanna_herder")
             .biome("minecraft:savanna")
             .sell("minecraft:leather")
             .sellPick(tagRef(RRItemTags.CANDIDATE_BIOME_SAVANNA_LEATHER_FIBER), 2)
@@ -315,12 +320,11 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 refs("minecraft:iron_sword", "minecraft:iron_axe", "minecraft:shears"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
                 ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
-            .specialty("minecraft:rabbit_hide")
-            .register();
+            .specialty("minecraft:rabbit_hide"));
 
         // ==================== 针叶林群系 ====================
 
-        theme("taiga_lumber")
+        consumer.accept(theme("taiga_lumber")
             .biome("minecraft:taiga")
             .sell("minecraft:spruce_log", "minecraft:charcoal")
             .sellPick(tagRef(RRItemTags.CANDIDATE_BIOME_TAIGA_WOOD), 3)
@@ -347,10 +351,9 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 refs(priceTagRef(RRItemTags.POOL_MINERAL), "minecraft:iron_axe"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
                 ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
-            .specialty("minecraft:spruce_boat")
-            .register();
+            .specialty("minecraft:spruce_boat"));
 
-        theme("taiga_berries")
+        consumer.accept(theme("taiga_berries")
             .biome("minecraft:taiga")
             .sellPick("taiga_berries/produce", 3,
                 tagRef(RRItemTags.CANDIDATE_BIOME_TAIGA_FOOD),
@@ -378,10 +381,9 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 refs("minecraft:iron_ingot", "minecraft:iron_hoe"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
                 ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
-            .specialty("minecraft:glow_berries")
-            .register();
+            .specialty("minecraft:glow_berries"));
 
-        theme("taiga_fur")
+        consumer.accept(theme("taiga_fur")
             .biome("minecraft:taiga")
             .sell("minecraft:leather")
             .sellPick(tagRef(RRItemTags.CANDIDATE_BIOME_TAIGA_LEATHER_FIBER), 2)
@@ -409,12 +411,11 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 refs("minecraft:iron_sword", "minecraft:iron_axe", "minecraft:shears"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
                 ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
-            .specialty("minecraft:campfire")
-            .register();
+            .specialty("minecraft:campfire"));
 
         // ==================== 积雪平原群系 ====================
 
-        theme("snowy_iceworks")
+        consumer.accept(theme("snowy_iceworks")
             .biome("minecraft:snowy_plains")
             .sell("minecraft:ice")
             .sellPick(tagRef(RRItemTags.CANDIDATE_BIOME_SNOWY_ICE_SNOW), 2)
@@ -437,10 +438,9 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 in("minecraft:packed_ice", 2),
                 in("minecraft:cooked_beef", 1)),
                 outputs(out("minecraft:blue_ice", 1)))
-            .specialty("minecraft:blue_ice")
-            .register();
+            .specialty("minecraft:blue_ice"));
 
-        theme("snowy_waystation")
+        consumer.accept(theme("snowy_waystation")
             .biome("minecraft:snowy_plains")
             .sellPick("snowy_waystation/supplies", 4,
                 tagRef(RRItemTags.CANDIDATE_BIOME_SNOWY_FOOD),
@@ -473,10 +473,9 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 refs(priceTagRef(RRItemTags.POOL_MINERAL)),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
                 ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
-            .specialty("minecraft:campfire")
-            .register();
+            .specialty("minecraft:campfire"));
 
-        theme("snowy_hunter")
+        consumer.accept(theme("snowy_hunter")
             .biome("minecraft:snowy_plains")
             .sellPick("snowy_hunter/game_goods", 3,
                 tagRef(RRItemTags.CANDIDATE_BIOME_SNOWY_LEATHER_FIBER),
@@ -504,17 +503,16 @@ public class ThemeDataProvider extends JsonCodecProvider<ThemeTemplate> {
                 refs("minecraft:iron_sword", "minecraft:iron_axe"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
                 ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
-            .specialty("minecraft:bone_block")
-            .register();
+            .specialty("minecraft:bone_block"));
     }
 
     /**
      * 创建主题构建器
      */
-    private ThemeBuilder theme(String name) {
+    private static ThemeBuilder theme(String name) {
         return ThemeBuilder.create(name)
             .withCurrency()
-            .registrar(this::unconditional);
+            .registrar((id, template) -> {});
     }
 
     private static String tagRef(TagKey<Item> tag) {

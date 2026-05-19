@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 村庄方块外观风格。
@@ -59,5 +60,20 @@ public enum VillageStyle implements StringRepresentable {
         }
 
         return style;
+    }
+
+    public static Optional<VillageStyle> tryFromBiome(ResourceLocation biomeId) {
+        if (biomeId == null) {
+            RuralRoutes.LOGGER.warn("Biome was null when resolving village style for optional lookup");
+            return Optional.empty();
+        }
+
+        VillageStyle style = BY_BIOME.get(biomeId);
+        if (style == null) {
+            RuralRoutes.LOGGER.warn("Unsupported biome {} for village style progress tracking, skipping style progress", biomeId);
+            return Optional.empty();
+        }
+
+        return Optional.of(style);
     }
 }

@@ -1,14 +1,17 @@
 package github.mczme.ruralroutes.block;
 
+import github.mczme.ruralroutes.advancement.trigger.OpenTradeStationTrigger.TradeStationEvent;
 import github.mczme.ruralroutes.blockentity.DisplayCaseBlockEntity;
 import github.mczme.ruralroutes.client.ClientGuiHooks;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.register.RRBlockEntities;
+import github.mczme.ruralroutes.register.RRCriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
@@ -120,6 +123,10 @@ public class DisplayCaseBlock extends BaseEntityBlock {
                         Component.translatable("block.ruralroutes.display_case.mismatch"),
                         true);
                     return InteractionResult.FAIL;
+                }
+
+                if (player instanceof ServerPlayer serverPlayer) {
+                    RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(serverPlayer, TradeStationEvent.OPEN_DISPLAY_CASE);
                 }
 
                 return InteractionResult.CONSUME;

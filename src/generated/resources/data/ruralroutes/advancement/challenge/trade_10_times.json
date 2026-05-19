@@ -1,0 +1,30 @@
+{
+  "parent": "ruralroutes:main/first_trade",
+  "criteria": {
+    "trade_10_times": {
+      "conditions": {
+        "event": "trade_10_times"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.challenge.trade_10_times.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "count": 1,
+      "id": "minecraft:written_book"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.challenge.trade_10_times.title"
+    }
+  },
+  "requirements": [
+    [
+      "trade_10_times"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

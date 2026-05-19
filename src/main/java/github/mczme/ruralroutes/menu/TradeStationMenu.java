@@ -1,5 +1,7 @@
 package github.mczme.ruralroutes.menu;
 
+import github.mczme.ruralroutes.advancement.RRPlayerProgressState;
+import github.mczme.ruralroutes.advancement.trigger.OpenTradeStationTrigger.TradeStationEvent;
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
 import github.mczme.ruralroutes.core.cycle.CycleManager;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
@@ -26,6 +28,8 @@ import github.mczme.ruralroutes.network.packet.TradeSlotSyncPayload;
 import github.mczme.ruralroutes.register.RRItemTags;
 import github.mczme.ruralroutes.register.RRItems;
 import github.mczme.ruralroutes.register.RRMenuTypes;
+import github.mczme.ruralroutes.register.RRAttachments;
+import github.mczme.ruralroutes.register.RRCriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -43,8 +47,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 贸易站 GUI 菜单
@@ -678,7 +684,29 @@ public class TradeStationMenu extends AbstractContainerMenu {
             blockPos
         );
 
+        boolean completedFixedTrade = pendingSlots.stream()
+            .anyMatch(slot -> slot.getTradeType() == TradeContractType.FIXED);
+        boolean purchasedSpecialty = pendingSlots.stream()
+            .anyMatch(slot -> slot.isBuy()
+                && slot.getItemId() != null
+                && nodeData.specialties().contains(slot.getItemId()));
+        Set<String> purchasedSpecialtyIds = pendingSlots.stream()
+            .filter(TradeSlot::isBuy)
+            .map(TradeSlot::getItemId)
+            .filter(itemId -> itemId != null && nodeData.specialties().contains(itemId))
+            .map(ResourceLocation::toString)
+            .collect(java.util.stream.Collectors.toSet());
+
         if (result.isSuccess()) {
+            RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(serverPlayer, TradeStationEvent.FIRST_TRADE);
+            if (completedFixedTrade) {
+                RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(serverPlayer, TradeStationEvent.FIXED_TRADE);
+            }
+            if (purchasedSpecialty) {
+                RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(serverPlayer, TradeStationEvent.BUY_SPECIALTY);
+            }
+            updatePlayerProgress(serverPlayer, result.totalValueExchanged(), purchasedSpecialtyIds);
+
             // 交易成功：��空暂存区，刷新库存显示
             pendingSlots.clear();
             isBuyTrade = true;
@@ -796,6 +824,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
         syncCoinExchangeStateToClient(serverPlayer);
 
         if (executedTrades > 0) {
+            RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(serverPlayer, TradeStationEvent.COIN_EXCHANGE);
             sendTradeFeedback(serverPlayer,
                 "gui.ruralroutes.trade_station.coin_exchange.success",
                 TradeFeedbackPayload.FeedbackType.SUCCESS);
@@ -808,6 +837,33 @@ public class TradeStationMenu extends AbstractContainerMenu {
 
     private void sendTradeFeedback(ServerPlayer player, String translationKey, TradeFeedbackPayload.FeedbackType feedbackType) {
         PacketDistributor.sendToPlayer(player, new TradeFeedbackPayload(containerId, translationKey, feedbackType));
+    }
+
+    private void updatePlayerProgress(ServerPlayer player, int totalValueExchanged, Set<String> purchasedSpecialtyIds) {
+        RRPlayerProgressState state = player.getData(RRAttachments.PLAYER_PROGRESS.get());
+
+        int newTradeCount = state.successfulTradeCount() + 1;
+        if (newTradeCount >= 10) {
+            RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(player, TradeStationEvent.TRADE_10_TIMES);
+        }
+        if (newTradeCount >= 100) {
+            RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(player, TradeStationEvent.TRADE_100_TIMES);
+        }
+
+        Set<String> specialties = new HashSet<>(state.purchasedSpecialties());
+        specialties.addAll(purchasedSpecialtyIds);
+        if (specialties.size() >= 3) {
+            RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(player, TradeStationEvent.COLLECTOR);
+        }
+
+        if (Math.abs(totalValueExchanged) >= 300) {
+            RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(player, TradeStationEvent.BIG_SPENDER);
+        }
+
+        player.setData(
+            RRAttachments.PLAYER_PROGRESS.get(),
+            state.withSuccessfulTradeCount(newTradeCount).withPurchasedSpecialties(specialties)
+        );
     }
 
     public void syncCoinExchangeStateToClient(ServerPlayer player) {

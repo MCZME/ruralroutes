@@ -12,6 +12,7 @@ import github.mczme.ruralroutes.core.market.MarketEventRuleCatalog;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.core.theme.ThemePriceModifierResolver;
 import github.mczme.ruralroutes.core.util.TagLookupCache;
+import github.mczme.ruralroutes.data.RRAdvancementProvider;
 import github.mczme.ruralroutes.data.MarketRuleDataProvider;
 import github.mczme.ruralroutes.data.RRBlockTagsProvider;
 import github.mczme.ruralroutes.data.RRItemTagsProvider;
@@ -27,6 +28,7 @@ import github.mczme.ruralroutes.register.RRDataComponents;
 import github.mczme.ruralroutes.register.RRDataMaps;
 import github.mczme.ruralroutes.register.RRItems;
 import github.mczme.ruralroutes.register.RRMenuTypes;
+import github.mczme.ruralroutes.register.RRCriteriaTriggers;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -58,6 +60,7 @@ public class RuralRoutes {
         RRMenuTypes.register(modEventBus);
         RRAttachments.register(modEventBus);
         RRDataComponents.register(modEventBus);
+        RRCriteriaTriggers.register(modEventBus);
 
         modEventBus.addListener(this::gatherData);
         modEventBus.addListener(RRDataMaps::register);
@@ -107,6 +110,7 @@ public class RuralRoutes {
         generator.addProvider(event.includeServer(), new ValueDataProvider(output, lookupProvider));
         generator.addProvider(event.includeServer(), new ThemeDataProvider(output, lookupProvider, existingFileHelper));
         generator.addProvider(event.includeServer(), new MarketRuleDataProvider(output, lookupProvider, existingFileHelper));
+        generator.addProvider(event.includeServer(), new RRAdvancementProvider(output, lookupProvider, existingFileHelper));
 
         // 客户端数据 - 语言文件
         generator.addProvider(event.includeClient(), new RREnUsLanguageProvider(output));

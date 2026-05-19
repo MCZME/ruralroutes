@@ -1,0 +1,71 @@
+{
+  "parent": "ruralroutes:root",
+  "criteria": {
+    "style_desert": {
+      "conditions": {
+        "event": "discover_village_style",
+        "village_style": "desert"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "style_plains": {
+      "conditions": {
+        "event": "discover_village_style",
+        "village_style": "plains"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "style_savanna": {
+      "conditions": {
+        "event": "discover_village_style",
+        "village_style": "savanna"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "style_snowy": {
+      "conditions": {
+        "event": "discover_village_style",
+        "village_style": "snowy"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    },
+    "style_taiga": {
+      "conditions": {
+        "event": "discover_village_style",
+        "village_style": "taiga"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.travel.enter_different_village_styles.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "count": 1,
+      "id": "minecraft:compass"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.travel.enter_different_village_styles.title"
+    }
+  },
+  "requirements": [
+    [
+      "style_plains"
+    ],
+    [
+      "style_desert"
+    ],
+    [
+      "style_savanna"
+    ],
+    [
+      "style_taiga"
+    ],
+    [
+      "style_snowy"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,5 +1,6 @@
 package github.mczme.ruralroutes.block;
 
+import github.mczme.ruralroutes.advancement.trigger.OpenTradeStationTrigger.TradeStationEvent;
 import github.mczme.ruralroutes.blockentity.RumorBoardBlockEntity;
 import github.mczme.ruralroutes.core.cycle.CycleManager;
 import github.mczme.ruralroutes.core.market.MarketState;
@@ -8,6 +9,7 @@ import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.network.packet.OpenRumorBoardPayload;
 import github.mczme.ruralroutes.register.RRBlockEntities;
+import github.mczme.ruralroutes.register.RRCriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import com.mojang.serialization.MapCodec;
@@ -123,6 +125,7 @@ public class RumorBoardBlock extends BaseEntityBlock {
             if (player instanceof ServerPlayer serverPlayer) {
                 CycleManager cycleManager = CycleManager.get(serverPlayer.serverLevel());
                 MarketState marketState = cycleManager.getOrInitMarketState();
+                RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(serverPlayer, TradeStationEvent.OPEN_RUMOR_BOARD);
                 PacketDistributor.sendToPlayer(serverPlayer,
                     new OpenRumorBoardPayload(pos, marketState));
             }

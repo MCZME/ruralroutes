@@ -1,0 +1,30 @@
+{
+  "parent": "ruralroutes:currency/get_gold_coin",
+  "criteria": {
+    "big_spender": {
+      "conditions": {
+        "event": "big_spender"
+      },
+      "trigger": "ruralroutes:open_trade_station"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.ruralroutes.currency.big_spender.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "count": 1,
+      "id": "minecraft:gold_block"
+    },
+    "title": {
+      "translate": "advancements.ruralroutes.currency.big_spender.title"
+    }
+  },
+  "requirements": [
+    [
+      "big_spender"
+    ]
+  ],
+  "sends_telemetry_event": true
+}
