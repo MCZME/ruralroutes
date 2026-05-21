@@ -120,7 +120,6 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
             buyItems.addAll(profile.buyItems());
             profile.themeSpecialties().ifPresent(specialties::addAll);
             profile.tradeContracts().ifPresent(tradeContracts::addAll);
-            profile.priceModifiers().ifPresent(priceModifiers::putAll);
             if (profile.stock().isPresent()) {
                 profile.stock().get().targets().ifPresent(stockTargets::putAll);
             }
@@ -135,11 +134,15 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
             stockTargets.putAll(themeStock.targets().get());
         }
 
-        Optional<ThemeTemplate.StockConfig> resolvedStock = Optional.ofNullable(themeStock)
-            .map(stock -> new ThemeTemplate.StockConfig(
-                stock.defaultRange(),
+        Optional<ThemeTemplate.StockConfig> resolvedStock;
+        if (themeStock == null && stockTargets.isEmpty()) {
+            resolvedStock = Optional.empty();
+        } else {
+            resolvedStock = Optional.of(new ThemeTemplate.StockConfig(
+                themeStock != null ? themeStock.defaultRange() : Optional.empty(),
                 stockTargets.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(stockTargets))
             ));
+        }
 
         return new ResolvedTheme(
             template.name(),

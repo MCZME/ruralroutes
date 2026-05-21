@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -19,17 +18,15 @@ public record TradeProfile(
     List<ThemeTemplate.ItemReference> buyItems,
     Optional<List<ResourceLocation>> themeSpecialties,
     Optional<ThemeTemplate.StockConfig> stock,
-    Optional<Map<String, ThemeTemplate.PriceModifier>> priceModifiers,
     Optional<List<ThemeTemplate.TradeContractEntry>> tradeContracts
 ) {
     public static final Codec<TradeProfile> CODEC = RecordCodecBuilder.create(
         instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("name").forGetter(TradeProfile::name),
-            ThemeTemplate.ItemReference.CODEC.listOf().fieldOf("sell_items").forGetter(TradeProfile::sellItems),
-            ThemeTemplate.ItemReference.CODEC.listOf().fieldOf("buy_items").forGetter(TradeProfile::buyItems),
+            ThemeTemplate.ItemReference.CODEC.listOf().optionalFieldOf("sell_items", List.of()).forGetter(TradeProfile::sellItems),
+            ThemeTemplate.ItemReference.CODEC.listOf().optionalFieldOf("buy_items", List.of()).forGetter(TradeProfile::buyItems),
             ResourceLocation.CODEC.listOf().optionalFieldOf("theme_specialties").forGetter(TradeProfile::themeSpecialties),
             ThemeTemplate.StockConfig.CODEC.optionalFieldOf("stock").forGetter(TradeProfile::stock),
-            Codec.unboundedMap(Codec.STRING, ThemeTemplate.PriceModifier.CODEC).optionalFieldOf("price_modifiers").forGetter(TradeProfile::priceModifiers),
             ThemeTemplate.TradeContractEntry.CODEC.listOf().optionalFieldOf("trade_contracts").forGetter(TradeProfile::tradeContracts)
         ).apply(instance, TradeProfile::new)
     );
@@ -39,8 +36,10 @@ public record TradeProfile(
         sellItems = List.copyOf(Objects.requireNonNull(sellItems, "sellItems"));
         buyItems = List.copyOf(Objects.requireNonNull(buyItems, "buyItems"));
         themeSpecialties = themeSpecialties.map(List::copyOf);
-        priceModifiers = priceModifiers.map(Map::copyOf);
         tradeContracts = tradeContracts.map(List::copyOf);
+        if (stock.flatMap(ThemeTemplate.StockConfig::defaultRange).isPresent()) {
+            throw new IllegalArgumentException("TradeProfile stock.default is not allowed; use ThemeTemplate stock.default");
+        }
     }
 
 }

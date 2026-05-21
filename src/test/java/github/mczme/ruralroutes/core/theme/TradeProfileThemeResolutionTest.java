@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TradeProfileThemeResolutionTest {
@@ -22,8 +23,7 @@ class TradeProfileThemeResolutionTest {
             List.of(ThemeTemplate.ItemReference.single("minecraft:apple")),
             List.of(),
             List.of(ResourceLocation.fromNamespaceAndPath("minecraft", "bread")),
-            stockConfig(1, 2, Map.of("minecraft:apple", stockRangeValue(3, 4))),
-            Map.of("minecraft:apple", new ThemeTemplate.PriceModifier(1.1f, 1.2f)),
+            targetsOnlyStockConfig(Map.of("minecraft:apple", stockRangeValue(3, 4))),
             List.of(new ThemeTemplate.FixedTradeEntry(List.of(), List.of())),
             null
         );
@@ -32,8 +32,7 @@ class TradeProfileThemeResolutionTest {
             List.of(ThemeTemplate.ItemReference.single("minecraft:carrot")),
             List.of(ThemeTemplate.ItemReference.single("minecraft:potato")),
             List.of(ResourceLocation.fromNamespaceAndPath("minecraft", "wheat")),
-            stockConfig(5, 6, Map.of("minecraft:carrot", stockRangeValue(7, 8))),
-            Map.of("minecraft:carrot", new ThemeTemplate.PriceModifier(1.3f, 1.4f)),
+            targetsOnlyStockConfig(Map.of("minecraft:carrot", stockRangeValue(7, 8))),
             List.of(new ThemeTemplate.CurrencyBasketEntry(TradeSide.SELL_TO_PLAYER, List.of("*"), List.of("#ruralroutes:currency"), ThemeTemplate.CompositionStrategy.LARGEST_FIRST)),
             null
         );
@@ -80,8 +79,10 @@ class TradeProfileThemeResolutionTest {
             ),
             resolved.themeSpecialties().orElseThrow()
         );
-        assertTrue(resolved.priceModifiers().orElseThrow().containsKey("minecraft:apple"));
-        assertTrue(resolved.priceModifiers().orElseThrow().containsKey("minecraft:carrot"));
+        assertEquals(
+            Map.of("minecraft:melon", new ThemeTemplate.PriceModifier(1.5f, 1.6f)),
+            resolved.priceModifiers().orElseThrow()
+        );
         assertTrue(resolved.stock().isPresent());
         assertEquals(9, resolved.stock().orElseThrow().defaultRange().orElseThrow().min());
     }
@@ -93,8 +94,7 @@ class TradeProfileThemeResolutionTest {
             List.of(),
             List.of(),
             List.of(),
-            stockConfig(1, 2, Map.of("minecraft:apple", stockRangeValue(3, 4))),
-            Map.of(),
+            targetsOnlyStockConfig(Map.of("minecraft:apple", stockRangeValue(3, 4))),
             List.of(),
             null
         );
@@ -122,14 +122,13 @@ class TradeProfileThemeResolutionTest {
     }
 
     @Test
-    void themeDefaultStockDoesNotFallBackToProfileDefault() throws Exception {
+    void profileStockTargetsAreKeptWithoutThemeStockBlock() throws Exception {
         TradeProfile profile = profile(
             "ruralroutes:profile",
             List.of(),
             List.of(),
             List.of(),
-            stockConfig(1, 2, Map.of()),
-            Map.of(),
+            targetsOnlyStockConfig(Map.of("minecraft:apple", stockRangeValue(3, 4))),
             List.of(),
             null
         );
@@ -150,7 +149,21 @@ class TradeProfileThemeResolutionTest {
         method.setAccessible(true);
         ResolvedTheme resolved = (ResolvedTheme) method.invoke(ThemeManager.INSTANCE, theme, Map.of(profile.name(), profile));
 
-        assertFalse(resolved.stock().isPresent());
+        assertTrue(resolved.stock().isPresent());
+        assertTrue(resolved.stock().orElseThrow().defaultRange().isEmpty());
+        assertEquals(3, resolved.stock().orElseThrow().targets().orElseThrow().get("minecraft:apple").min());
+    }
+
+    @Test
+    void tradeProfileRejectsDefaultStockRange() {
+        assertThrows(IllegalArgumentException.class, () -> new TradeProfile(
+            ResourceLocation.parse("ruralroutes:profile"),
+            List.of(),
+            List.of(),
+            Optional.empty(),
+            Optional.of(stockConfig(1, 2, Map.of())),
+            Optional.empty()
+        ));
     }
 
     private static TradeProfile profile(
@@ -159,7 +172,6 @@ class TradeProfileThemeResolutionTest {
         List<ThemeTemplate.ItemReference> buyItems,
         List<ResourceLocation> specialties,
         ThemeTemplate.StockConfig stock,
-        Map<String, ThemeTemplate.PriceModifier> priceModifiers,
         List<ThemeTemplate.TradeContractEntry> tradeContracts,
         List<ResourceLocation> ignoredThemeProfiles
     ) {
@@ -169,7 +181,6 @@ class TradeProfileThemeResolutionTest {
             buyItems,
             Optional.of(specialties),
             Optional.ofNullable(stock),
-            priceModifiers.isEmpty() ? Optional.empty() : Optional.of(priceModifiers),
             tradeContracts.isEmpty() ? Optional.empty() : Optional.of(tradeContracts)
         );
     }
@@ -200,6 +211,10 @@ class TradeProfileThemeResolutionTest {
 
     private static ThemeTemplate.StockConfig stockConfig(int min, int max, Map<String, ThemeTemplate.StockRange> targets) {
         return new ThemeTemplate.StockConfig(Optional.of(new ThemeTemplate.StockRange(min, max)), Optional.of(targets));
+    }
+
+    private static ThemeTemplate.StockConfig targetsOnlyStockConfig(Map<String, ThemeTemplate.StockRange> targets) {
+        return new ThemeTemplate.StockConfig(Optional.empty(), Optional.of(targets));
     }
 
     private static ThemeTemplate.StockRange stockRangeValue(int min, int max) {

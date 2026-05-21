@@ -22,8 +22,8 @@ public class ThemeTemplate {
         instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("name").forGetter(ThemeTemplate::name),
             ResourceLocation.CODEC.fieldOf("biome").forGetter(ThemeTemplate::biome),
-            ItemReference.CODEC.listOf().fieldOf("sell_items").forGetter(ThemeTemplate::sellItems),
-            ItemReference.CODEC.listOf().fieldOf("buy_items").forGetter(ThemeTemplate::buyItems),
+            ItemReference.CODEC.listOf().optionalFieldOf("sell_items", List.of()).forGetter(ThemeTemplate::sellItems),
+            ItemReference.CODEC.listOf().optionalFieldOf("buy_items", List.of()).forGetter(ThemeTemplate::buyItems),
             ResourceLocation.CODEC.listOf().optionalFieldOf("theme_specialties").forGetter(ThemeTemplate::themeSpecialties),
             StockConfig.CODEC.optionalFieldOf("stock").forGetter(ThemeTemplate::stock),
             Codec.unboundedMap(Codec.STRING, PriceModifier.CODEC).optionalFieldOf("price_modifiers").forGetter(ThemeTemplate::priceModifiers),
