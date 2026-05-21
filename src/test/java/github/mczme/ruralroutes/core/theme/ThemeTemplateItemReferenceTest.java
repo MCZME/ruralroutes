@@ -3,6 +3,7 @@ package github.mczme.ruralroutes.core.theme;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,9 +42,27 @@ class ThemeTemplateItemReferenceTest {
     }
 
     @Test
+    void componentItemKeepsObjectShorthandOnlyWhenNeeded() {
+        ThemeTemplate.ItemReference reference = ThemeTemplate.ItemReference.single(
+            "minecraft:book",
+            Map.of("minecraft:custom_name", "{\"text\":\"Catalog\"}")
+        );
+
+        assertTrue(reference.isSingle());
+        assertFalse(reference.canUseStringShorthand());
+        assertEquals("minecraft:book", reference.itemId());
+        assertTrue(reference.components().isPresent());
+        assertEquals(
+            Map.of("minecraft:custom_name", "{\"text\":\"Catalog\"}"),
+            reference.itemEntries().get(0).components().orElseThrow()
+        );
+    }
+
+    @Test
     void constructorRejectsMissingOrConflictingDefinitions() {
         // 这里把几种非法输入一次性卡死，避免数据包在运行期才暴露结构错误。
         assertThrows(IllegalArgumentException.class, () -> new ThemeTemplate.ItemReference(
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
@@ -52,7 +71,8 @@ class ThemeTemplateItemReferenceTest {
 
         assertThrows(IllegalArgumentException.class, () -> new ThemeTemplate.ItemReference(
                 Optional.of("minecraft:bread"),
-                Optional.of(List.of("minecraft:apple")),
+                Optional.of(List.of(ThemeTemplate.ItemEntry.fromString("minecraft:apple"))),
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty()
         ));
@@ -60,6 +80,7 @@ class ThemeTemplateItemReferenceTest {
         assertThrows(IllegalArgumentException.class, () -> new ThemeTemplate.ItemReference(
                 Optional.empty(),
                 Optional.of(List.of()),
+                Optional.empty(),
                 Optional.empty(),
                 Optional.empty()
         ));

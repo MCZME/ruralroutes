@@ -16,7 +16,7 @@ public record TradeProfile(
     ResourceLocation name,
     List<ThemeTemplate.ItemReference> sellItems,
     List<ThemeTemplate.ItemReference> buyItems,
-    Optional<List<ResourceLocation>> themeSpecialties,
+    Optional<List<ThemeTemplate.ItemReference>> themeSpecialties,
     Optional<ThemeTemplate.StockConfig> stock,
     Optional<List<ThemeTemplate.TradeContractEntry>> tradeContracts
 ) {
@@ -25,7 +25,7 @@ public record TradeProfile(
             ResourceLocation.CODEC.fieldOf("name").forGetter(TradeProfile::name),
             ThemeTemplate.ItemReference.CODEC.listOf().optionalFieldOf("sell_items", List.of()).forGetter(TradeProfile::sellItems),
             ThemeTemplate.ItemReference.CODEC.listOf().optionalFieldOf("buy_items", List.of()).forGetter(TradeProfile::buyItems),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("theme_specialties").forGetter(TradeProfile::themeSpecialties),
+            ThemeTemplate.ItemReference.CODEC.listOf().optionalFieldOf("theme_specialties").forGetter(TradeProfile::themeSpecialties),
             ThemeTemplate.StockConfig.CODEC.optionalFieldOf("stock").forGetter(TradeProfile::stock),
             ThemeTemplate.TradeContractEntry.CODEC.listOf().optionalFieldOf("trade_contracts").forGetter(TradeProfile::tradeContracts)
         ).apply(instance, TradeProfile::new)

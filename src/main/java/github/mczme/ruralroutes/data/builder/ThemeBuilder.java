@@ -23,8 +23,9 @@ public class ThemeBuilder {
     private String biome;
     private final List<ThemeTemplate.ItemReference> sellItems = new ArrayList<>();
     private final List<ThemeTemplate.ItemReference> buyItems = new ArrayList<>();
-    private final List<ResourceLocation> specialties = new ArrayList<>();
+    private final List<ThemeTemplate.ItemReference> specialties = new ArrayList<>();
     private ThemeTemplate.StockRange defaultStock;
+    private final Map<String, ThemeTemplate.StockTarget> stockTargets = new LinkedHashMap<>();
     private final Map<String, ThemeTemplate.StockRange> stockSpecific = new LinkedHashMap<>();
     private final Map<String, ThemeTemplate.PriceModifier> priceModifiers = new LinkedHashMap<>();
     private final List<ThemeTemplate.TradeContractEntry> tradeContracts = new ArrayList<>();
@@ -74,6 +75,14 @@ public class ThemeBuilder {
     }
 
     /**
+     * 添加带组件的出售物品。
+     */
+    public ThemeBuilder sell(String item, Map<String, String> components) {
+        sellItems.add(ThemeTemplate.ItemReference.single(normalizeRef(item), components));
+        return this;
+    }
+
+    /**
      * 添加出售候选，并在展开后随机抽取指定数量。
      * 适合标签引用；精确物品引用即使设置 pick 也只会得到单个物品。
      */
@@ -110,6 +119,14 @@ public class ThemeBuilder {
     }
 
     /**
+     * 添加带组件的收购物品。
+     */
+    public ThemeBuilder buy(String item, Map<String, String> components) {
+        buyItems.add(ThemeTemplate.ItemReference.single(normalizeRef(item), components));
+        return this;
+    }
+
+    /**
      * 添加收购候选，并在展开后随机抽取指定数量。
      */
     public ThemeBuilder buyPick(String item, int pick) {
@@ -139,8 +156,16 @@ public class ThemeBuilder {
      */
     public ThemeBuilder specialty(String... items) {
         for (String item : items) {
-            specialties.add(ResourceLocation.parse(item));
+            specialties.add(ThemeTemplate.ItemReference.single(normalizeRef(item)));
         }
+        return this;
+    }
+
+    /**
+     * 添加带组件的主题特产。
+     */
+    public ThemeBuilder specialty(String item, Map<String, String> components) {
+        specialties.add(ThemeTemplate.ItemReference.single(normalizeRef(item), components));
         return this;
     }
 
@@ -157,6 +182,25 @@ public class ThemeBuilder {
      */
     public ThemeBuilder stockSpecific(String key, int min, int max) {
         stockSpecific.put(key, new ThemeTemplate.StockRange(min, max));
+        return this;
+    }
+
+    /**
+     * 设置目标库存的共享范围。
+     */
+    public ThemeBuilder stockTarget(String key, int min, int max) {
+        stockTargets.put(key, ThemeTemplate.StockTarget.shared(new ThemeTemplate.StockRange(min, max)));
+        return this;
+    }
+
+    /**
+     * 设置目标库存的分向范围。
+     */
+    public ThemeBuilder stockTarget(String key, int sellMin, int sellMax, int buyMin, int buyMax) {
+        stockTargets.put(key, ThemeTemplate.StockTarget.directional(
+            new ThemeTemplate.StockRange(sellMin, sellMax),
+            new ThemeTemplate.StockRange(buyMin, buyMax)
+        ));
         return this;
     }
 
@@ -214,10 +258,12 @@ public class ThemeBuilder {
             List.copyOf(finalSellItems),
             List.copyOf(finalBuyItems),
             specialties.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(specialties)),
-            defaultStock == null && stockSpecific.isEmpty()
+            defaultStock == null && stockTargets.isEmpty() && stockSpecific.isEmpty()
                 ? Optional.empty()
                 : Optional.of(new ThemeTemplate.StockConfig(
                     Optional.ofNullable(defaultStock),
+                    stockTargets.isEmpty() ? Optional.empty()
+                        : Optional.of(Collections.unmodifiableMap(new LinkedHashMap<>(stockTargets))),
                     stockSpecific.isEmpty() ? Optional.empty()
                         : Optional.of(Collections.unmodifiableMap(new LinkedHashMap<>(stockSpecific)))
                 )),

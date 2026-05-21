@@ -17,7 +17,7 @@ public final class ResolvedTheme extends ThemeTemplate {
         ResourceLocation biome,
         List<ItemReference> sellItems,
         List<ItemReference> buyItems,
-        Optional<List<ResourceLocation>> themeSpecialties,
+        Optional<List<ItemReference>> themeSpecialties,
         Optional<StockConfig> stock,
         Optional<Map<String, PriceModifier>> priceModifiers,
         Optional<List<TradeContractEntry>> tradeContracts,
@@ -31,7 +31,7 @@ public final class ResolvedTheme extends ThemeTemplate {
         ResourceLocation biome,
         List<ItemReference> sellItems,
         List<ItemReference> buyItems,
-        Optional<List<ResourceLocation>> themeSpecialties,
+        Optional<List<ItemReference>> themeSpecialties,
         Optional<StockConfig> stock,
         Optional<Map<String, PriceModifier>> priceModifiers,
         Optional<List<TradeContractEntry>> tradeContracts

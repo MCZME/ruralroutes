@@ -104,10 +104,11 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
     private ResolvedTheme resolveTheme(ThemeTemplate template, Map<ResourceLocation, TradeProfile> profileMap) {
         List<ThemeTemplate.ItemReference> sellItems = new ArrayList<>();
         List<ThemeTemplate.ItemReference> buyItems = new ArrayList<>();
-        List<ResourceLocation> specialties = new ArrayList<>();
+        List<ThemeTemplate.ItemReference> specialties = new ArrayList<>();
         List<ThemeTemplate.TradeContractEntry> tradeContracts = new ArrayList<>();
         Map<String, ThemeTemplate.PriceModifier> priceModifiers = new LinkedHashMap<>();
         ThemeTemplate.StockConfig themeStock = template.stock().orElse(null);
+        Map<String, ThemeTemplate.StockTarget> targetEntries = new LinkedHashMap<>();
         Map<String, ThemeTemplate.StockRange> stockTargets = new LinkedHashMap<>();
 
         for (ResourceLocation profileId : template.tradeProfiles().orElse(List.of())) {
@@ -121,25 +122,31 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
             profile.themeSpecialties().ifPresent(specialties::addAll);
             profile.tradeContracts().ifPresent(tradeContracts::addAll);
             if (profile.stock().isPresent()) {
-                profile.stock().get().targets().ifPresent(stockTargets::putAll);
+                ThemeTemplate.StockConfig profileStock = profile.stock().get();
+                profileStock.targetEntries().ifPresent(targetEntries::putAll);
+                profileStock.targets().ifPresent(stockTargets::putAll);
+                profileStock.specific().ifPresent(stockTargets::putAll);
             }
         }
 
         sellItems.addAll(template.sellItems());
         buyItems.addAll(template.buyItems());
-        template.themeSpecialties().ifPresent(specialties::addAll);
+        template.themeSpecialtyItems().ifPresent(specialties::addAll);
         template.tradeContracts().ifPresent(tradeContracts::addAll);
         template.priceModifiers().ifPresent(priceModifiers::putAll);
-        if (themeStock != null && themeStock.targets().isPresent()) {
-            stockTargets.putAll(themeStock.targets().get());
-        }
+        template.stock().ifPresent(stock -> {
+            stock.targetEntries().ifPresent(targetEntries::putAll);
+            stock.targets().ifPresent(stockTargets::putAll);
+            stock.specific().ifPresent(stockTargets::putAll);
+        });
 
         Optional<ThemeTemplate.StockConfig> resolvedStock;
-        if (themeStock == null && stockTargets.isEmpty()) {
+        if (themeStock == null && stockTargets.isEmpty() && targetEntries.isEmpty()) {
             resolvedStock = Optional.empty();
         } else {
             resolvedStock = Optional.of(new ThemeTemplate.StockConfig(
                 themeStock != null ? themeStock.defaultRange() : Optional.empty(),
+                targetEntries.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(targetEntries)),
                 stockTargets.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(stockTargets))
             ));
         }
@@ -149,7 +156,7 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
             template.biome(),
             List.copyOf(sellItems),
             List.copyOf(buyItems),
-            Optional.of(List.copyOf(specialties)),
+            specialties.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(specialties)),
             resolvedStock,
             priceModifiers.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(priceModifiers)),
             tradeContracts.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(tradeContracts))

@@ -24,7 +24,7 @@ public class ThemeTemplate {
             ResourceLocation.CODEC.fieldOf("biome").forGetter(ThemeTemplate::biome),
             ItemReference.CODEC.listOf().optionalFieldOf("sell_items", List.of()).forGetter(ThemeTemplate::sellItems),
             ItemReference.CODEC.listOf().optionalFieldOf("buy_items", List.of()).forGetter(ThemeTemplate::buyItems),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("theme_specialties").forGetter(ThemeTemplate::themeSpecialties),
+            ItemReference.CODEC.listOf().optionalFieldOf("theme_specialties").forGetter(ThemeTemplate::themeSpecialtyItems),
             StockConfig.CODEC.optionalFieldOf("stock").forGetter(ThemeTemplate::stock),
             Codec.unboundedMap(Codec.STRING, PriceModifier.CODEC).optionalFieldOf("price_modifiers").forGetter(ThemeTemplate::priceModifiers),
             TradeContractEntry.CODEC.listOf().optionalFieldOf("trade_contracts").forGetter(ThemeTemplate::tradeContracts),
@@ -36,7 +36,7 @@ public class ThemeTemplate {
     private final ResourceLocation biome;
     private final List<ItemReference> sellItems;
     private final List<ItemReference> buyItems;
-    private final Optional<List<ResourceLocation>> themeSpecialties;
+    private final Optional<List<ItemReference>> themeSpecialtyItems;
     private final Optional<StockConfig> stock;
     private final Optional<Map<String, PriceModifier>> priceModifiers;
     private final Optional<List<TradeContractEntry>> tradeContracts;
@@ -47,12 +47,12 @@ public class ThemeTemplate {
         ResourceLocation biome,
         List<ItemReference> sellItems,
         List<ItemReference> buyItems,
-        Optional<List<ResourceLocation>> themeSpecialties,
+        Optional<List<ItemReference>> themeSpecialtyItems,
         Optional<StockConfig> stock,
         Optional<Map<String, PriceModifier>> priceModifiers,
         Optional<List<TradeContractEntry>> tradeContracts
     ) {
-        this(name, biome, sellItems, buyItems, themeSpecialties, stock, priceModifiers, tradeContracts, Optional.empty());
+        this(name, biome, sellItems, buyItems, themeSpecialtyItems, stock, priceModifiers, tradeContracts, Optional.empty());
     }
 
     public ThemeTemplate(
@@ -60,7 +60,7 @@ public class ThemeTemplate {
         ResourceLocation biome,
         List<ItemReference> sellItems,
         List<ItemReference> buyItems,
-        Optional<List<ResourceLocation>> themeSpecialties,
+        Optional<List<ItemReference>> themeSpecialtyItems,
         Optional<StockConfig> stock,
         Optional<Map<String, PriceModifier>> priceModifiers,
         Optional<List<TradeContractEntry>> tradeContracts,
@@ -70,11 +70,11 @@ public class ThemeTemplate {
         this.biome = Objects.requireNonNull(biome, "biome");
         this.sellItems = List.copyOf(Objects.requireNonNull(sellItems, "sellItems"));
         this.buyItems = List.copyOf(Objects.requireNonNull(buyItems, "buyItems"));
-        this.themeSpecialties = normalizeResourceListOptional(themeSpecialties);
+        this.themeSpecialtyItems = themeSpecialtyItems.map(List::copyOf);
         this.stock = Objects.requireNonNull(stock, "stock");
-        this.priceModifiers = priceModifiers.map(map -> Map.copyOf(map));
+        this.priceModifiers = priceModifiers.map(Map::copyOf);
         this.tradeContracts = tradeContracts.map(List::copyOf);
-        this.tradeProfiles = normalizeResourceListOptional(tradeProfiles);
+        this.tradeProfiles = tradeProfiles.map(List::copyOf);
     }
 
     public ResourceLocation name() {
@@ -93,8 +93,16 @@ public class ThemeTemplate {
         return buyItems;
     }
 
+    public Optional<List<ItemReference>> themeSpecialtyItems() {
+        return themeSpecialtyItems;
+    }
+
     public Optional<List<ResourceLocation>> themeSpecialties() {
-        return themeSpecialties;
+        return themeSpecialtyItems.map(items -> items.stream()
+            .filter(ItemReference::isExactItem)
+            .map(ItemReference::itemId)
+            .map(ResourceLocation::parse)
+            .toList());
     }
 
     public Optional<StockConfig> stock() {
@@ -113,27 +121,22 @@ public class ThemeTemplate {
         return tradeProfiles;
     }
 
-    private static Optional<List<ResourceLocation>> normalizeResourceListOptional(Optional<List<ResourceLocation>> value) {
-        return value.map(List::copyOf);
-    }
-
     /**
-     * 物品引用，支持标签或精确物品。
+     * 物品引用，支持标签、精确物品，以及带组件的精确物品。
      * 可使用纯字符串、单引用对象，或混合候选组对象。
      */
     public record ItemReference(
-        Optional<String> id,           // 单引用，如 "#ruralroutes:pool/crop" 或 "minecraft:bread"
-        Optional<List<String>> items,  // 混合候选组，可同时包含标签与精确物品
-        Optional<Integer> pick,        // 展开候选后随机抽取的数量；缺省表示全部纳入
-        Optional<String> key           // 可选来源键，供库存等后续逻辑稳定匹配
+        Optional<String> id,
+        Optional<List<ItemEntry>> items,
+        Optional<Integer> pick,
+        Optional<String> key,
+        Optional<Map<String, String>> components
     ) {
         public ItemReference {
             id = id.map(String::strip).filter(str -> !str.isEmpty());
-            items = items.map(list -> List.copyOf(list.stream()
-                .map(String::strip)
-                .filter(str -> !str.isEmpty())
-                .toList()));
+            items = items.map(list -> List.copyOf(list.stream().map(Objects::requireNonNull).toList()));
             key = key.map(String::strip).filter(str -> !str.isEmpty());
+            components = components.map(Map::copyOf);
 
             boolean hasId = id.isPresent();
             boolean hasItems = items.isPresent();
@@ -143,56 +146,84 @@ public class ThemeTemplate {
             if (items.isPresent() && items.get().isEmpty()) {
                 throw new IllegalArgumentException("ItemReference items cannot be empty");
             }
+            if (components.isPresent() && id.isEmpty()) {
+                throw new IllegalArgumentException("ItemReference components require a single item id");
+            }
         }
+
+        private static final Codec<ItemEntry> ITEM_ENTRY_CODEC = Codec.either(Codec.STRING, ItemEntry.OBJECT_CODEC)
+            .xmap(
+                either -> either.map(ItemEntry::fromString, entry -> entry),
+                entry -> entry.canUseStringShorthand()
+                    ? Either.left(entry.ref())
+                    : Either.right(entry)
+            );
 
         private static final Codec<ItemReference> OBJECT_CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
                 Codec.STRING.optionalFieldOf("id").forGetter(ItemReference::id),
-                Codec.STRING.listOf().optionalFieldOf("items").forGetter(ItemReference::items),
+                ITEM_ENTRY_CODEC.listOf().optionalFieldOf("items").forGetter(ItemReference::items),
                 Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("pick").forGetter(ItemReference::pick),
-                Codec.STRING.optionalFieldOf("key").forGetter(ItemReference::key)
+                Codec.STRING.optionalFieldOf("key").forGetter(ItemReference::key),
+                Codec.unboundedMap(Codec.STRING, Codec.STRING).optionalFieldOf("components").forGetter(ItemReference::components)
             ).apply(instance, ItemReference::new)
         );
 
         public static final Codec<ItemReference> CODEC = Codec.either(Codec.STRING, OBJECT_CODEC)
             .xmap(
-                either -> either.map(
-                    ItemReference::single,
-                    ref -> ref
-                ),
+                either -> either.map(ItemReference::single, ref -> ref),
                 ref -> ref.canUseStringShorthand()
                     ? Either.left(ref.id().orElseThrow())
                     : Either.right(ref)
             );
 
         public static ItemReference single(String id) {
-            return new ItemReference(Optional.of(id), Optional.empty(), Optional.empty(), Optional.empty());
+            return new ItemReference(Optional.of(id), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
         }
 
         public static ItemReference single(String id, Integer pick) {
-            return new ItemReference(Optional.of(id), Optional.empty(), Optional.ofNullable(pick), Optional.empty());
+            return new ItemReference(Optional.of(id), Optional.empty(), Optional.ofNullable(pick), Optional.empty(), Optional.empty());
+        }
+
+        public static ItemReference single(String id, Map<String, String> components) {
+            return new ItemReference(Optional.of(id), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(components));
+        }
+
+        public static ItemReference single(String id, Integer pick, Map<String, String> components) {
+            return new ItemReference(Optional.of(id), Optional.empty(), Optional.ofNullable(pick), Optional.empty(), Optional.of(components));
         }
 
         public static ItemReference group(List<String> refs, Integer pick, String key) {
-            return new ItemReference(Optional.empty(), Optional.of(refs), Optional.ofNullable(pick), Optional.ofNullable(key));
+            return new ItemReference(
+                Optional.empty(),
+                Optional.of(refs.stream().map(ItemEntry::fromString).toList()),
+                Optional.ofNullable(pick),
+                Optional.ofNullable(key),
+                Optional.empty()
+            );
         }
 
-        /** 是否为单引用 */
+        public static ItemReference groupEntries(List<ItemEntry> refs, Integer pick, String key) {
+            return new ItemReference(Optional.empty(), Optional.of(refs), Optional.ofNullable(pick), Optional.ofNullable(key), Optional.empty());
+        }
+
         public boolean isSingle() {
             return id.isPresent();
         }
 
-        /** 是否为候选组 */
         public boolean isGroup() {
             return items.isPresent();
         }
 
-        /** 获取展开前的原始引用列表 */
         public List<String> refs() {
-            return items.orElseGet(() -> List.of(id.orElseThrow()));
+            return items.map(list -> list.stream().map(ItemEntry::ref).toList())
+                .orElseGet(() -> List.of(id.orElseThrow()));
         }
 
-        /** 获取运行时使用的稳定来源键 */
+        public List<ItemEntry> itemEntries() {
+            return items.orElseGet(() -> List.of(new ItemEntry(Optional.of(id.orElseThrow()), components)));
+        }
+
         public String sourceKey() {
             if (key.isPresent()) {
                 return key.get();
@@ -203,69 +234,195 @@ public class ThemeTemplate {
             return "group:" + String.join("|", refs());
         }
 
-        /** 获取用于日志的简短描述 */
         public String debugLabel() {
             return isSingle() ? id.orElse("<unknown>") : refs().toString();
         }
 
-        /** 是否可序列化为字符串简写 */
         public boolean canUseStringShorthand() {
-            return id.isPresent() && items.isEmpty() && pick.isEmpty() && key.isEmpty();
+            return id.isPresent() && items.isEmpty() && pick.isEmpty() && key.isEmpty() && components.isEmpty();
         }
 
-        /** 是否为标签引用 */
         public boolean isTag() {
             return id.map(ref -> ref.startsWith("#")).orElse(false);
         }
 
-        /** 获取物品/标签 ID（不含 # 前缀） */
         public String itemId() {
             String ref = id.orElseThrow(() -> new IllegalStateException("Grouped ItemReference has no single item id"));
             return isTag() ? ref.substring(1) : ref;
         }
 
-        /** 是否在展开候选后进行抽样 */
         public boolean hasPickLimit() {
             return pick.isPresent();
+        }
+
+        public boolean isExactItem() {
+            return id.isPresent() && !isTag();
         }
     }
 
     /**
-     * 库存配置
+     * 候选条目中的单个物品定义。
+     * 保留字符串简写，必要时可携带组件信息。
+     */
+    public record ItemEntry(
+        Optional<String> id,
+        Optional<Map<String, String>> components
+    ) {
+        public ItemEntry {
+            id = id.map(String::strip).filter(str -> !str.isEmpty());
+            components = components.map(Map::copyOf);
+            if (id.isEmpty()) {
+                throw new IllegalArgumentException("ItemEntry requires an id");
+            }
+        }
+
+        private static final Codec<ItemEntry> OBJECT_CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                Codec.STRING.optionalFieldOf("id").forGetter(ItemEntry::id),
+                Codec.unboundedMap(Codec.STRING, Codec.STRING).optionalFieldOf("components").forGetter(ItemEntry::components)
+            ).apply(instance, ItemEntry::new)
+        );
+
+        public static final Codec<ItemEntry> CODEC = Codec.either(Codec.STRING, OBJECT_CODEC)
+            .xmap(
+                either -> either.map(ItemEntry::fromString, entry -> entry),
+                entry -> entry.canUseStringShorthand()
+                    ? Either.left(entry.ref())
+                    : Either.right(entry)
+            );
+
+        public static ItemEntry fromString(String id) {
+            return new ItemEntry(Optional.of(id), Optional.empty());
+        }
+
+        public boolean canUseStringShorthand() {
+            return components.isEmpty();
+        }
+
+        public boolean isTag() {
+            return id.map(ref -> ref.startsWith("#")).orElse(false);
+        }
+
+        public String ref() {
+            return id.orElseThrow();
+        }
+    }
+
+    /**
+     * 库存配置。
+     * targets 支持共享范围或按 sell/buy 分向范围；specific 保留旧的精确覆盖映射。
      */
     public record StockConfig(
         Optional<StockRange> defaultRange,
-        Optional<Map<String, StockRange>> targets
+        Optional<Map<String, StockTarget>> targetEntries,
+        Optional<Map<String, StockRange>> specific
     ) {
-        private static final Codec<StockConfigData> RAW_CODEC = RecordCodecBuilder.create(
+        public static final Codec<StockConfig> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-                StockRange.CODEC.optionalFieldOf("default").forGetter(StockConfigData::defaultRange),
-                Codec.unboundedMap(Codec.STRING, StockRange.CODEC).optionalFieldOf("targets").forGetter(StockConfigData::targets),
-                Codec.unboundedMap(Codec.STRING, StockRange.CODEC).optionalFieldOf("specific").forGetter(StockConfigData::specific)
-            ).apply(instance, StockConfigData::new)
+                StockRange.CODEC.optionalFieldOf("default").forGetter(StockConfig::defaultRange),
+                Codec.unboundedMap(Codec.STRING, StockTarget.CODEC).optionalFieldOf("targets").forGetter(StockConfig::targetEntries),
+                Codec.unboundedMap(Codec.STRING, StockRange.CODEC).optionalFieldOf("specific").forGetter(StockConfig::specific)
+            ).apply(instance, (defaultRange, targets, specific) -> new StockConfig(
+                defaultRange,
+                targets,
+                specific.isPresent() ? specific : targets.map(StockConfig::projectSharedTargets)
+            ))
         );
 
-        public static final Codec<StockConfig> CODEC = RAW_CODEC.xmap(
-            raw -> new StockConfig(
-                raw.defaultRange(),
-                raw.targets().isPresent() ? raw.targets() : raw.specific()
-            ),
-            config -> new StockConfigData(config.defaultRange(), config.targets(), Optional.empty())
-        );
+        public StockConfig {
+            defaultRange = Objects.requireNonNull(defaultRange, "defaultRange");
+            targetEntries = targetEntries.map(Map::copyOf);
+            specific = specific.map(Map::copyOf);
+        }
 
-        public Optional<Map<String, StockRange>> specific() {
-            return targets;
+        public StockConfig(Optional<StockRange> defaultRange, Optional<Map<String, StockRange>> targets) {
+            this(defaultRange, targets.map(StockConfig::toTargetEntries), targets);
         }
 
         public Optional<Map<String, StockRange>> targets() {
-            return targets;
+            return targetEntries.map(StockConfig::projectSharedTargets);
         }
 
-        private record StockConfigData(
-            Optional<StockRange> defaultRange,
-            Optional<Map<String, StockRange>> targets,
-            Optional<Map<String, StockRange>> specific
-        ) {}
+        public Optional<Map<String, StockTarget>> targetEntries() {
+            return targetEntries;
+        }
+
+        public Optional<Map<String, StockRange>> specific() {
+            return specific;
+        }
+
+        private static Map<String, StockRange> projectSharedTargets(Map<String, StockTarget> targets) {
+            return targets.entrySet().stream()
+                .collect(java.util.stream.Collectors.toUnmodifiableMap(
+                    Map.Entry::getKey,
+                    entry -> entry.getValue().toLegacyRange()
+                ));
+        }
+
+        private static Map<String, StockTarget> toTargetEntries(Map<String, StockRange> targets) {
+            return targets.entrySet().stream()
+                .collect(java.util.stream.Collectors.toUnmodifiableMap(
+                    Map.Entry::getKey,
+                    entry -> StockTarget.shared(entry.getValue())
+                ));
+        }
+    }
+
+    /**
+     * 目标库存表达。
+     * 可使用共享范围，或按出售/收购方向分别声明。
+     */
+    public record StockTarget(
+        Optional<StockRange> shared,
+        Optional<StockRange> sell,
+        Optional<StockRange> buy
+    ) {
+        private static final Codec<StockTarget> OBJECT_CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                StockRange.CODEC.optionalFieldOf("shared").forGetter(StockTarget::shared),
+                StockRange.CODEC.optionalFieldOf("sell").forGetter(StockTarget::sell),
+                StockRange.CODEC.optionalFieldOf("buy").forGetter(StockTarget::buy)
+            ).apply(instance, StockTarget::new)
+        );
+
+        public static final Codec<StockTarget> CODEC = Codec.either(StockRange.CODEC, OBJECT_CODEC)
+            .xmap(
+                either -> either.map(StockTarget::shared, target -> target),
+                target -> target.canEncodeAsSharedRange()
+                    ? Either.left(target.shared().orElseThrow())
+                    : Either.right(target)
+            );
+
+        public StockTarget {
+            shared = Objects.requireNonNull(shared, "shared");
+            sell = Objects.requireNonNull(sell, "sell");
+            buy = Objects.requireNonNull(buy, "buy");
+            if (shared.isEmpty() && sell.isEmpty() && buy.isEmpty()) {
+                throw new IllegalArgumentException("StockTarget must define shared, sell, or buy");
+            }
+        }
+
+        public static StockTarget shared(StockRange range) {
+            return new StockTarget(Optional.of(range), Optional.empty(), Optional.empty());
+        }
+
+        public static StockTarget directional(StockRange sell, StockRange buy) {
+            return new StockTarget(Optional.empty(), Optional.of(sell), Optional.of(buy));
+        }
+
+        public boolean canEncodeAsSharedRange() {
+            return shared.isPresent() && sell.isEmpty() && buy.isEmpty();
+        }
+
+        public StockRange toLegacyRange() {
+            if (shared.isPresent()) {
+                return shared.get();
+            }
+            if (sell.isPresent()) {
+                return sell.get();
+            }
+            return buy.orElseThrow(() -> new IllegalStateException("StockTarget has no readable range"));
+        }
     }
 
     /**
