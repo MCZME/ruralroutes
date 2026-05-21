@@ -9,22 +9,15 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
- * 主题模板数据
- * 定义村庄的出售/收购物品、特产、库存和价格修正
+ * 主题模板原始数据。
+ * 主题可直接定义交易内容，也可引用一个或多个 TradeProfile 进行组合。
  */
-public record ThemeTemplate(
-    ResourceLocation name,
-    ResourceLocation biome,
-    List<ItemReference> sellItems,
-    List<ItemReference> buyItems,
-    Optional<List<ResourceLocation>> themeSpecialties,
-    Optional<StockConfig> stock,
-    Optional<Map<String, PriceModifier>> priceModifiers,
-    Optional<List<TradeContractEntry>> tradeContracts
-) {
+public class ThemeTemplate {
+
     public static final Codec<ThemeTemplate> CODEC = RecordCodecBuilder.create(
         instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("name").forGetter(ThemeTemplate::name),
@@ -34,9 +27,95 @@ public record ThemeTemplate(
             ResourceLocation.CODEC.listOf().optionalFieldOf("theme_specialties").forGetter(ThemeTemplate::themeSpecialties),
             StockConfig.CODEC.optionalFieldOf("stock").forGetter(ThemeTemplate::stock),
             Codec.unboundedMap(Codec.STRING, PriceModifier.CODEC).optionalFieldOf("price_modifiers").forGetter(ThemeTemplate::priceModifiers),
-            TradeContractEntry.CODEC.listOf().optionalFieldOf("trade_contracts").forGetter(ThemeTemplate::tradeContracts)
+            TradeContractEntry.CODEC.listOf().optionalFieldOf("trade_contracts").forGetter(ThemeTemplate::tradeContracts),
+            ResourceLocation.CODEC.listOf().optionalFieldOf("trade_profiles").forGetter(ThemeTemplate::tradeProfiles)
         ).apply(instance, ThemeTemplate::new)
     );
+
+    private final ResourceLocation name;
+    private final ResourceLocation biome;
+    private final List<ItemReference> sellItems;
+    private final List<ItemReference> buyItems;
+    private final Optional<List<ResourceLocation>> themeSpecialties;
+    private final Optional<StockConfig> stock;
+    private final Optional<Map<String, PriceModifier>> priceModifiers;
+    private final Optional<List<TradeContractEntry>> tradeContracts;
+    private final Optional<List<ResourceLocation>> tradeProfiles;
+
+    public ThemeTemplate(
+        ResourceLocation name,
+        ResourceLocation biome,
+        List<ItemReference> sellItems,
+        List<ItemReference> buyItems,
+        Optional<List<ResourceLocation>> themeSpecialties,
+        Optional<StockConfig> stock,
+        Optional<Map<String, PriceModifier>> priceModifiers,
+        Optional<List<TradeContractEntry>> tradeContracts
+    ) {
+        this(name, biome, sellItems, buyItems, themeSpecialties, stock, priceModifiers, tradeContracts, Optional.empty());
+    }
+
+    public ThemeTemplate(
+        ResourceLocation name,
+        ResourceLocation biome,
+        List<ItemReference> sellItems,
+        List<ItemReference> buyItems,
+        Optional<List<ResourceLocation>> themeSpecialties,
+        Optional<StockConfig> stock,
+        Optional<Map<String, PriceModifier>> priceModifiers,
+        Optional<List<TradeContractEntry>> tradeContracts,
+        Optional<List<ResourceLocation>> tradeProfiles
+    ) {
+        this.name = Objects.requireNonNull(name, "name");
+        this.biome = Objects.requireNonNull(biome, "biome");
+        this.sellItems = List.copyOf(Objects.requireNonNull(sellItems, "sellItems"));
+        this.buyItems = List.copyOf(Objects.requireNonNull(buyItems, "buyItems"));
+        this.themeSpecialties = normalizeResourceListOptional(themeSpecialties);
+        this.stock = Objects.requireNonNull(stock, "stock");
+        this.priceModifiers = priceModifiers.map(map -> Map.copyOf(map));
+        this.tradeContracts = tradeContracts.map(List::copyOf);
+        this.tradeProfiles = normalizeResourceListOptional(tradeProfiles);
+    }
+
+    public ResourceLocation name() {
+        return name;
+    }
+
+    public ResourceLocation biome() {
+        return biome;
+    }
+
+    public List<ItemReference> sellItems() {
+        return sellItems;
+    }
+
+    public List<ItemReference> buyItems() {
+        return buyItems;
+    }
+
+    public Optional<List<ResourceLocation>> themeSpecialties() {
+        return themeSpecialties;
+    }
+
+    public Optional<StockConfig> stock() {
+        return stock;
+    }
+
+    public Optional<Map<String, PriceModifier>> priceModifiers() {
+        return priceModifiers;
+    }
+
+    public Optional<List<TradeContractEntry>> tradeContracts() {
+        return tradeContracts;
+    }
+
+    public Optional<List<ResourceLocation>> tradeProfiles() {
+        return tradeProfiles;
+    }
+
+    private static Optional<List<ResourceLocation>> normalizeResourceListOptional(Optional<List<ResourceLocation>> value) {
+        return value.map(List::copyOf);
+    }
 
     /**
      * 物品引用，支持标签或精确物品。
@@ -156,14 +235,37 @@ public record ThemeTemplate(
      */
     public record StockConfig(
         Optional<StockRange> defaultRange,
-        Optional<Map<String, StockRange>> specific
+        Optional<Map<String, StockRange>> targets
     ) {
-        public static final Codec<StockConfig> CODEC = RecordCodecBuilder.create(
+        private static final Codec<StockConfigData> RAW_CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
-                StockRange.CODEC.optionalFieldOf("default").forGetter(StockConfig::defaultRange),
-                Codec.unboundedMap(Codec.STRING, StockRange.CODEC).optionalFieldOf("specific").forGetter(StockConfig::specific)
-            ).apply(instance, StockConfig::new)
+                StockRange.CODEC.optionalFieldOf("default").forGetter(StockConfigData::defaultRange),
+                Codec.unboundedMap(Codec.STRING, StockRange.CODEC).optionalFieldOf("targets").forGetter(StockConfigData::targets),
+                Codec.unboundedMap(Codec.STRING, StockRange.CODEC).optionalFieldOf("specific").forGetter(StockConfigData::specific)
+            ).apply(instance, StockConfigData::new)
         );
+
+        public static final Codec<StockConfig> CODEC = RAW_CODEC.xmap(
+            raw -> new StockConfig(
+                raw.defaultRange(),
+                raw.targets().isPresent() ? raw.targets() : raw.specific()
+            ),
+            config -> new StockConfigData(config.defaultRange(), config.targets(), Optional.empty())
+        );
+
+        public Optional<Map<String, StockRange>> specific() {
+            return targets;
+        }
+
+        public Optional<Map<String, StockRange>> targets() {
+            return targets;
+        }
+
+        private record StockConfigData(
+            Optional<StockRange> defaultRange,
+            Optional<Map<String, StockRange>> targets,
+            Optional<Map<String, StockRange>> specific
+        ) {}
     }
 
     /**
