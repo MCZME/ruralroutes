@@ -7,6 +7,7 @@ import github.mczme.ruralroutes.advancement.trigger.OpenTradeStationTrigger.Trad
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.node.StockEntry;
+import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
@@ -218,8 +219,8 @@ public class TradeStationBlock extends BaseEntityBlock {
      * 前 N 个展示柜分配特产，多余的从库存随机选取
      */
     private void assignDisplayItems(List<DisplayCaseBlockEntity> displayCases, CommercialNodeData nodeData) {
-        List<ResourceLocation> specialties = nodeData.specialtyIds();
-        Map<ResourceLocation, StockEntry> stocks = nodeData.stocks();
+        List<CommercialNodeData.NodeTradeEntry> specialties = nodeData.specialties();
+        Map<TradeItemKey, StockEntry> stocks = nodeData.stocks();
         Random random = new Random();
 
         int specialtyCount = specialties.size();
@@ -230,8 +231,8 @@ public class TradeStationBlock extends BaseEntityBlock {
 
             if (i < specialtyCount) {
                 // 分配特产
-                ResourceLocation specialtyId = specialties.get(i);
-                displayItem = createItemStack(specialtyId);
+                CommercialNodeData.NodeTradeEntry specialty = specialties.get(i);
+                displayItem = specialty.displayStackOrDefault();
             } else {
                 // 从库存随机选取有库存的物品
                 displayItem = getRandomItemFromStocks(stocks, random);
@@ -255,10 +256,10 @@ public class TradeStationBlock extends BaseEntityBlock {
     /**
      * 从库存中随机选取一个有库存的物品
      */
-    private ItemStack getRandomItemFromStocks(Map<ResourceLocation, StockEntry> stocks, Random random) {
-        List<ResourceLocation> availableItems = new ArrayList<>();
+    private ItemStack getRandomItemFromStocks(Map<TradeItemKey, StockEntry> stocks, Random random) {
+        List<TradeItemKey> availableItems = new ArrayList<>();
 
-        for (Map.Entry<ResourceLocation, StockEntry> entry : stocks.entrySet()) {
+        for (Map.Entry<TradeItemKey, StockEntry> entry : stocks.entrySet()) {
             if (entry.getValue().current() > 0) {
                 availableItems.add(entry.getKey());
             }
@@ -268,8 +269,8 @@ public class TradeStationBlock extends BaseEntityBlock {
             return ItemStack.EMPTY;
         }
 
-        ResourceLocation randomId = availableItems.get(random.nextInt(availableItems.size()));
-        return createItemStack(randomId);
+        TradeItemKey randomId = availableItems.get(random.nextInt(availableItems.size()));
+        return randomId.asItemStack();
     }
 
     /**

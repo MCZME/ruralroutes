@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.trade.TradeSide;
 import net.minecraft.resources.ResourceLocation;
@@ -27,7 +28,7 @@ public class ThemeBuilder {
     private ThemeTemplate.StockRange defaultStock;
     private final Map<String, ThemeTemplate.StockTarget> stockTargets = new LinkedHashMap<>();
     private final Map<String, ThemeTemplate.StockRange> stockSpecific = new LinkedHashMap<>();
-    private final Map<String, ThemeTemplate.PriceModifier> priceModifiers = new LinkedHashMap<>();
+    private final List<ThemeTemplate.PriceModifier> priceModifiers = new ArrayList<>();
     private final List<ThemeTemplate.TradeContractEntry> tradeContracts = new ArrayList<>();
     private boolean withCurrency = false;
 
@@ -208,7 +209,7 @@ public class ThemeBuilder {
      * 添加价格修正
      */
     public ThemeBuilder priceModifier(String key, float sell, float buy) {
-        priceModifiers.put(key, new ThemeTemplate.PriceModifier(sell, buy));
+        priceModifiers.add(ThemeTemplate.PriceModifier.of(TradeTargetRef.fromString(key), sell, buy));
         return this;
     }
 
@@ -268,7 +269,7 @@ public class ThemeBuilder {
                         : Optional.of(Collections.unmodifiableMap(new LinkedHashMap<>(stockSpecific)))
                 )),
             priceModifiers.isEmpty() ? Optional.empty()
-                : Optional.of(Collections.unmodifiableMap(new LinkedHashMap<>(priceModifiers))),
+                : Optional.of(List.copyOf(priceModifiers)),
             tradeContracts.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(tradeContracts))
         );
     }

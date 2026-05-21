@@ -3,7 +3,6 @@ package github.mczme.ruralroutes.core.theme;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -19,7 +18,7 @@ public final class ResolvedTheme extends ThemeTemplate {
         List<ItemReference> buyItems,
         Optional<List<ItemReference>> themeSpecialties,
         Optional<StockConfig> stock,
-        Optional<Map<String, PriceModifier>> priceModifiers,
+        Optional<List<PriceModifier>> priceModifiers,
         Optional<List<TradeContractEntry>> tradeContracts,
         Optional<List<ResourceLocation>> tradeProfiles
     ) {
@@ -33,7 +32,7 @@ public final class ResolvedTheme extends ThemeTemplate {
         List<ItemReference> buyItems,
         Optional<List<ItemReference>> themeSpecialties,
         Optional<StockConfig> stock,
-        Optional<Map<String, PriceModifier>> priceModifiers,
+        Optional<List<PriceModifier>> priceModifiers,
         Optional<List<TradeContractEntry>> tradeContracts
     ) {
         this(name, biome, sellItems, buyItems, themeSpecialties, stock, priceModifiers, tradeContracts, Optional.empty());

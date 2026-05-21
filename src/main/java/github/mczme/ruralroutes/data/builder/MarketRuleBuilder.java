@@ -5,6 +5,7 @@ import github.mczme.ruralroutes.core.market.MarketEventRule;
 import github.mczme.ruralroutes.core.market.MarketEventScopeRule;
 import github.mczme.ruralroutes.core.market.MarketStockModifier;
 import github.mczme.ruralroutes.core.rumor.RumorFamily;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class MarketRuleBuilder {
     private final String id;
     private final BiConsumer<ResourceLocation, MarketEventRule> registrar;
     private String nameKey;
-    private String targetRef;
+    private TradeTargetRef targetRef;
     private final List<MarketEventScopeRule> scopes = new ArrayList<>();
     private float delta;
     private MarketStockModifier stock;
@@ -57,6 +58,14 @@ public class MarketRuleBuilder {
      * 设置目标引用
      */
     public MarketRuleBuilder targetRef(String ref) {
+        this.targetRef = TradeTargetRef.fromString(ref);
+        return this;
+    }
+
+    /**
+     * 设置目标引用
+     */
+    public MarketRuleBuilder targetRef(TradeTargetRef ref) {
         this.targetRef = ref;
         return this;
     }

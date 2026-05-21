@@ -3,6 +3,7 @@ package github.mczme.ruralroutes.core.theme;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 import github.mczme.ruralroutes.core.trade.TradeSide;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -44,7 +45,7 @@ class TradeProfileThemeResolutionTest {
             List.of(ThemeTemplate.ItemReference.single("minecraft:pumpkin")),
             List.of(ThemeTemplate.ItemReference.single("minecraft:beetroot")),
             stockConfig(9, 10, Map.of("minecraft:melon", stockRangeValue(11, 12))),
-            Map.of("minecraft:melon", new ThemeTemplate.PriceModifier(1.5f, 1.6f)),
+            List.of(ThemeTemplate.PriceModifier.of(TradeTargetRef.item("minecraft:melon"), 1.5f, 1.6f)),
             List.of(new ThemeTemplate.FixedTradeEntry(List.of(), List.of())),
             List.of(
                 ResourceLocation.fromNamespaceAndPath("ruralroutes", "first"),
@@ -80,7 +81,7 @@ class TradeProfileThemeResolutionTest {
             resolved.themeSpecialties().orElseThrow()
         );
         assertEquals(
-            Map.of("minecraft:melon", new ThemeTemplate.PriceModifier(1.5f, 1.6f)),
+            List.of(ThemeTemplate.PriceModifier.of(TradeTargetRef.item("minecraft:melon"), 1.5f, 1.6f)),
             resolved.priceModifiers().orElseThrow()
         );
         assertTrue(resolved.stock().isPresent());
@@ -107,7 +108,7 @@ class TradeProfileThemeResolutionTest {
             List.of(),
             List.of(),
             stockConfig(9, 10, Map.of("minecraft:apple", stockRangeValue(11, 12), "minecraft:carrot", stockRangeValue(13, 14))),
-            Map.of(),
+            List.of(),
             List.of(),
             List.of(ResourceLocation.fromNamespaceAndPath("ruralroutes", "profile"))
         );
@@ -141,7 +142,7 @@ class TradeProfileThemeResolutionTest {
             List.of(),
             List.of(),
             null,
-            Map.of(),
+            List.of(),
             List.of(),
             List.of(ResourceLocation.fromNamespaceAndPath("ruralroutes", "profile"))
         );
@@ -193,7 +194,7 @@ class TradeProfileThemeResolutionTest {
         List<ThemeTemplate.ItemReference> buyItems,
         List<ThemeTemplate.ItemReference> specialties,
         ThemeTemplate.StockConfig stock,
-        Map<String, ThemeTemplate.PriceModifier> priceModifiers,
+        List<ThemeTemplate.PriceModifier> priceModifiers,
         List<ThemeTemplate.TradeContractEntry> tradeContracts,
         List<ResourceLocation> tradeProfiles
     ) {
@@ -204,7 +205,7 @@ class TradeProfileThemeResolutionTest {
             buyItems,
             Optional.of(specialties),
             Optional.ofNullable(stock),
-            priceModifiers.isEmpty() ? Optional.empty() : Optional.of(priceModifiers),
+            priceModifiers.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(priceModifiers)),
             tradeContracts.isEmpty() ? Optional.empty() : Optional.of(tradeContracts),
             Optional.of(tradeProfiles)
         );

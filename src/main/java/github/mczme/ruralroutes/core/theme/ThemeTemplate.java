@@ -4,7 +4,9 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import github.mczme.ruralroutes.core.trade.TradeSide;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -18,6 +20,20 @@ import java.util.Optional;
  */
 public class ThemeTemplate {
 
+    private static final Codec<List<PriceModifier>> PRICE_MODIFIERS_CODEC = Codec.either(
+        PriceModifier.CODEC.listOf(),
+        Codec.unboundedMap(Codec.STRING, LegacyPriceModifier.CODEC)
+    ).xmap(
+        either -> either.map(list -> list, map -> map.entrySet().stream()
+            .map(entry -> PriceModifier.of(
+                TradeTargetRef.fromString(entry.getKey()),
+                entry.getValue().sell(),
+                entry.getValue().buy()
+            ))
+            .toList()),
+        list -> Either.left(list)
+    );
+
     public static final Codec<ThemeTemplate> CODEC = RecordCodecBuilder.create(
         instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("name").forGetter(ThemeTemplate::name),
@@ -26,7 +42,7 @@ public class ThemeTemplate {
             ItemReference.CODEC.listOf().optionalFieldOf("buy_items", List.of()).forGetter(ThemeTemplate::buyItems),
             ItemReference.CODEC.listOf().optionalFieldOf("theme_specialties").forGetter(ThemeTemplate::themeSpecialtyItems),
             StockConfig.CODEC.optionalFieldOf("stock").forGetter(ThemeTemplate::stock),
-            Codec.unboundedMap(Codec.STRING, PriceModifier.CODEC).optionalFieldOf("price_modifiers").forGetter(ThemeTemplate::priceModifiers),
+            PRICE_MODIFIERS_CODEC.optionalFieldOf("price_modifiers").forGetter(ThemeTemplate::priceModifiers),
             TradeContractEntry.CODEC.listOf().optionalFieldOf("trade_contracts").forGetter(ThemeTemplate::tradeContracts),
             ResourceLocation.CODEC.listOf().optionalFieldOf("trade_profiles").forGetter(ThemeTemplate::tradeProfiles)
         ).apply(instance, ThemeTemplate::new)
@@ -38,7 +54,7 @@ public class ThemeTemplate {
     private final List<ItemReference> buyItems;
     private final Optional<List<ItemReference>> themeSpecialtyItems;
     private final Optional<StockConfig> stock;
-    private final Optional<Map<String, PriceModifier>> priceModifiers;
+    private final Optional<List<PriceModifier>> priceModifiers;
     private final Optional<List<TradeContractEntry>> tradeContracts;
     private final Optional<List<ResourceLocation>> tradeProfiles;
 
@@ -49,7 +65,7 @@ public class ThemeTemplate {
         List<ItemReference> buyItems,
         Optional<List<ItemReference>> themeSpecialtyItems,
         Optional<StockConfig> stock,
-        Optional<Map<String, PriceModifier>> priceModifiers,
+        Optional<List<PriceModifier>> priceModifiers,
         Optional<List<TradeContractEntry>> tradeContracts
     ) {
         this(name, biome, sellItems, buyItems, themeSpecialtyItems, stock, priceModifiers, tradeContracts, Optional.empty());
@@ -62,7 +78,7 @@ public class ThemeTemplate {
         List<ItemReference> buyItems,
         Optional<List<ItemReference>> themeSpecialtyItems,
         Optional<StockConfig> stock,
-        Optional<Map<String, PriceModifier>> priceModifiers,
+        Optional<List<PriceModifier>> priceModifiers,
         Optional<List<TradeContractEntry>> tradeContracts,
         Optional<List<ResourceLocation>> tradeProfiles
     ) {
@@ -72,7 +88,7 @@ public class ThemeTemplate {
         this.buyItems = List.copyOf(Objects.requireNonNull(buyItems, "buyItems"));
         this.themeSpecialtyItems = themeSpecialtyItems.map(List::copyOf);
         this.stock = Objects.requireNonNull(stock, "stock");
-        this.priceModifiers = priceModifiers.map(Map::copyOf);
+        this.priceModifiers = priceModifiers.map(List::copyOf);
         this.tradeContracts = tradeContracts.map(List::copyOf);
         this.tradeProfiles = tradeProfiles.map(List::copyOf);
     }
@@ -109,7 +125,7 @@ public class ThemeTemplate {
         return stock;
     }
 
-    public Optional<Map<String, PriceModifier>> priceModifiers() {
+    public Optional<List<PriceModifier>> priceModifiers() {
         return priceModifiers;
     }
 
@@ -351,6 +367,98 @@ public class ThemeTemplate {
             return specific;
         }
 
+        /**
+         * 按统一目标键解析库存范围。
+         * 先走已有字符串 key，再保留旧的 tag/legacy 兼容分支。
+         */
+        public Optional<StockTarget> resolveTarget(TradeTargetRef targetRef) {
+            if (targetRef == null) {
+                return Optional.empty();
+            }
+            if (targetEntries.isEmpty()) {
+                return Optional.empty();
+            }
+
+            Map<String, StockTarget> targets = targetEntries.get();
+            String itemKey = targetRef.isItem() ? targetRef.itemId().orElseThrow() : null;
+            String tagKey = targetRef.isTag() ? "#" + targetRef.tagId().orElseThrow() : null;
+            String sourceKey = targetRef.isSourceKey() ? targetRef.sourceKey().orElseThrow() : null;
+
+            StockTarget target = null;
+            if (itemKey != null) {
+                target = targets.get(itemKey);
+            }
+            if (target == null && sourceKey != null) {
+                target = targets.get(sourceKey);
+            }
+            if (target == null && tagKey != null) {
+                target = targets.get(tagKey);
+            }
+            if (target == null && targetRef.isTag()) {
+                target = targets.get(targetRef.tagId().orElseThrow());
+            }
+            return Optional.ofNullable(target);
+        }
+
+        public Optional<StockTarget> resolveTarget(String rawRef, ResourceLocation itemId) {
+            return resolveTarget(toTradeTargetRef(rawRef, itemId));
+        }
+
+        public Optional<StockRange> resolveSpecific(TradeTargetRef targetRef) {
+            if (targetRef == null || specific.isEmpty()) {
+                return Optional.empty();
+            }
+
+            Map<String, StockRange> map = specific.get();
+            String canonical = targetRef.asString();
+            if (map.containsKey(canonical)) {
+                return Optional.of(map.get(canonical));
+            }
+            if (targetRef.isItem()) {
+                String itemKey = targetRef.itemId().orElseThrow();
+                if (map.containsKey(itemKey)) {
+                    return Optional.of(map.get(itemKey));
+                }
+            }
+            if (targetRef.isSourceKey()) {
+                String key = targetRef.sourceKey().orElseThrow();
+                if (map.containsKey(key)) {
+                    return Optional.of(map.get(key));
+                }
+            }
+            if (targetRef.isTag()) {
+                String tagKey = targetRef.tagId().orElseThrow();
+                if (map.containsKey(tagKey)) {
+                    return Optional.of(map.get(tagKey));
+                }
+                if (map.containsKey("#" + tagKey)) {
+                    return Optional.of(map.get("#" + tagKey));
+                }
+            }
+            return Optional.empty();
+        }
+
+        public Optional<StockRange> resolveSpecific(String rawRef, ResourceLocation itemId) {
+            return resolveSpecific(toTradeTargetRef(rawRef, itemId));
+        }
+
+        private static TradeTargetRef toTradeTargetRef(String rawRef, ResourceLocation itemId) {
+            if (rawRef == null || rawRef.isBlank()) {
+                return TradeTargetRef.item(itemId.toString());
+            }
+            if (rawRef.startsWith("#")) {
+                return TradeTargetRef.tag(rawRef.substring(1));
+            }
+            if (rawRef.startsWith("@")) {
+                return TradeTargetRef.sourceKey(rawRef.substring(1));
+            }
+            ResourceLocation parsed = ResourceLocation.tryParse(rawRef);
+            if (parsed != null && BuiltInRegistries.ITEM.getOptional(parsed).isPresent()) {
+                return TradeTargetRef.item(parsed.toString());
+            }
+            return TradeTargetRef.sourceKey(rawRef);
+        }
+
         private static Map<String, StockRange> projectSharedTargets(Map<String, StockTarget> targets) {
             return targets.entrySet().stream()
                 .collect(java.util.stream.Collectors.toUnmodifiableMap(
@@ -444,14 +552,38 @@ public class ThemeTemplate {
      * 价格修正系数
      */
     public record PriceModifier(
+        TradeTargetRef targetRef,
         float sell,
         float buy
     ) {
         public static final Codec<PriceModifier> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
+                TradeTargetRef.CODEC.fieldOf("target").forGetter(PriceModifier::targetRef),
                 Codec.FLOAT.fieldOf("sell").forGetter(PriceModifier::sell),
                 Codec.FLOAT.fieldOf("buy").forGetter(PriceModifier::buy)
             ).apply(instance, PriceModifier::new)
+        );
+
+        public static PriceModifier of(TradeTargetRef targetRef, float sell, float buy) {
+            return new PriceModifier(targetRef, sell, buy);
+        }
+    }
+
+    /**
+     * 旧版 price_modifiers 的兼容结构。
+     *
+     * 历史数据使用 target -> {sell, buy} 的对象映射；新模型改为有序数组后，
+     * 这里保留只读解码，避免既有 generated 资源失效。
+     */
+    public record LegacyPriceModifier(
+        float sell,
+        float buy
+    ) {
+        public static final Codec<LegacyPriceModifier> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                Codec.FLOAT.fieldOf("sell").forGetter(LegacyPriceModifier::sell),
+                Codec.FLOAT.fieldOf("buy").forGetter(LegacyPriceModifier::buy)
+            ).apply(instance, LegacyPriceModifier::new)
         );
     }
 

@@ -4,6 +4,7 @@ import github.mczme.ruralroutes.core.market.MarketEventRule;
 import github.mczme.ruralroutes.core.market.MarketEventScopeRule;
 import github.mczme.ruralroutes.core.market.MarketScopeType;
 import github.mczme.ruralroutes.core.rumor.RumorFamily;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import github.mczme.ruralroutes.data.builder.MarketRuleBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;

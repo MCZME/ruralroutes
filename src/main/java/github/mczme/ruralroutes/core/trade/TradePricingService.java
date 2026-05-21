@@ -6,6 +6,7 @@ import github.mczme.ruralroutes.core.market.MarketPriceAdjustment;
 import github.mczme.ruralroutes.core.market.MarketState;
 import github.mczme.ruralroutes.core.market.MarketStateResolver;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
+import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import github.mczme.ruralroutes.core.theme.ThemePriceModifierResolver;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
@@ -13,6 +14,8 @@ import github.mczme.ruralroutes.core.value.ValueTableManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Optional;
 
 /**
  * 统一贸易定价服务
@@ -37,6 +40,15 @@ public final class TradePricingService {
             CommercialNodeData nodeData,
             ItemStack stack,
             TradeSide side) {
+        return calculate(level, nodeData, stack, side, Optional.empty());
+    }
+
+    public static TradePrice calculate(
+            ServerLevel level,
+            CommercialNodeData nodeData,
+            ItemStack stack,
+            TradeSide side,
+            Optional<String> sourceKey) {
 
         if (stack.isEmpty()) {
             return new TradePrice(0, 1.0f, MarketPriceAdjustment.NONE, 0);
@@ -49,10 +61,10 @@ public final class TradePricingService {
         }
 
         // 2. 获取主题修正
-        float themeModifier = resolveThemeModifier(nodeData, stack, side);
+        float themeModifier = resolveThemeModifier(nodeData, stack, side, sourceKey);
 
         // 3. 获取市场调整
-        MarketPriceAdjustment marketAdj = resolveMarketAdjustment(level, nodeData, stack);
+        MarketPriceAdjustment marketAdj = resolveMarketAdjustment(level, nodeData, stack, sourceKey);
 
         // 4. 计算最终价格
         // 公式: round(baseValue * themeModifier * marketFactor)
@@ -80,6 +92,15 @@ public final class TradePricingService {
         return calculate(level, nodeData, stack, side).finalPrice();
     }
 
+    public static int calculateFinalPrice(
+            ServerLevel level,
+            CommercialNodeData nodeData,
+            ItemStack stack,
+            TradeSide side,
+            Optional<String> sourceKey) {
+        return calculate(level, nodeData, stack, side, sourceKey).finalPrice();
+    }
+
     // ===== 内部辅助方法 =====
 
     /**
@@ -88,7 +109,8 @@ public final class TradePricingService {
     private static float resolveThemeModifier(
             CommercialNodeData nodeData,
             ItemStack stack,
-            TradeSide side) {
+            TradeSide side,
+            Optional<String> sourceKey) {
 
         ResourceLocation themeName = nodeData.themeName();
         if (themeName == null) {
@@ -100,8 +122,9 @@ public final class TradePricingService {
             return 1.0f;
         }
 
+        TradeItemKey itemKey = TradeItemKey.from(stack);
         ThemeTemplate.PriceModifier modifier =
-            ThemePriceModifierResolver.resolve(template, stack);
+            ThemePriceModifierResolver.resolve(template, itemKey, sourceKey);
 
         return switch (side) {
             case SELL_TO_PLAYER -> modifier.sell();
@@ -115,7 +138,8 @@ public final class TradePricingService {
     private static MarketPriceAdjustment resolveMarketAdjustment(
             ServerLevel level,
             CommercialNodeData nodeData,
-            ItemStack stack) {
+            ItemStack stack,
+            Optional<String> sourceKey) {
 
         // 获取当前周期市场状态
         CycleManager cycleManager = CycleManager.get(level);
@@ -129,7 +153,7 @@ public final class TradePricingService {
         MarketContext context = buildMarketContext(nodeData);
 
         // 解析价格调整
-        return MarketStateResolver.resolvePriceAdjustment(marketState, context, stack);
+        return MarketStateResolver.resolvePriceAdjustment(marketState, context, TradeItemKey.from(stack), sourceKey);
     }
 
     /**

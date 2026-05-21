@@ -2,6 +2,7 @@ package github.mczme.ruralroutes.core.market;
 
 import github.mczme.ruralroutes.Config;
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.core.theme.ResolvedTheme;
 import net.minecraft.resources.ResourceLocation;
@@ -153,9 +154,9 @@ public final class MarketStateGenerator {
     /**
      * 构建事件唯一键
      */
-    private static String buildEventKey(ResourceLocation ruleId, String targetRef,
+    private static String buildEventKey(ResourceLocation ruleId, TradeTargetRef targetRef,
                                          MarketScopeType scopeType, ResourceLocation scopeTarget) {
-        return ruleId + "|" + targetRef + "|" + scopeType + "|" +
+        return ruleId + "|" + targetRef.canonicalKey() + "|" + scopeType + "|" +
                 (scopeTarget == null ? "" : scopeTarget);
     }
 

@@ -2,6 +2,7 @@ package github.mczme.ruralroutes.core.market;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import github.mczme.ruralroutes.core.rumor.RumorFamily;
 import net.minecraft.resources.ResourceLocation;
 
@@ -15,7 +16,7 @@ import java.util.Optional;
  */
 public record MarketEvent(
         ResourceLocation ruleId,
-        String targetRef,
+        TradeTargetRef targetRef,
         MarketScopeType scopeType,
         Optional<ResourceLocation> scopeTarget,
         float delta,
@@ -26,7 +27,7 @@ public record MarketEvent(
     public static final Codec<MarketEvent> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
                     ResourceLocation.CODEC.fieldOf("rule_id").forGetter(MarketEvent::ruleId),
-                    Codec.STRING.fieldOf("target_ref").forGetter(MarketEvent::targetRef),
+                    TradeTargetRef.CODEC.fieldOf("target_ref").forGetter(MarketEvent::targetRef),
                     MarketScopeType.CODEC.fieldOf("scope_type").forGetter(MarketEvent::scopeType),
                     ResourceLocation.CODEC.optionalFieldOf("scope_target").forGetter(MarketEvent::scopeTarget),
                     Codec.FLOAT.fieldOf("delta").forGetter(MarketEvent::delta),
@@ -41,7 +42,7 @@ public record MarketEvent(
      * @return 如果 targetRef 以 # 开头则返回 true
      */
     public boolean isTargetTag() {
-        return targetRef.startsWith("#");
+        return targetRef.isTag();
     }
 
     /**
@@ -49,7 +50,7 @@ public record MarketEvent(
      * @return 标签或物品 ID
      */
     public String getTargetId() {
-        return isTargetTag() ? targetRef.substring(1) : targetRef;
+        return targetRef.asString();
     }
 
 }

@@ -13,6 +13,7 @@ import github.mczme.ruralroutes.core.trade.TradeContractType;
 import github.mczme.ruralroutes.core.trade.TradePricingService;
 import github.mczme.ruralroutes.core.trade.TradeResult;
 import github.mczme.ruralroutes.core.trade.TradeSide;
+import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import github.mczme.ruralroutes.core.trade.CurrencyBasketComposer;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
@@ -134,7 +135,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
 
         List<CommercialNodeData.NodeTradeEntry> sellItems = nodeData.sellItems();
         List<CommercialNodeData.NodeTradeEntry> buyItems = nodeData.buyItems();
-        Map<ResourceLocation, StockEntry> stocks = nodeData.stocks();
+        Map<TradeItemKey, StockEntry> stocks = nodeData.stocks();
 
         // 获取主题模板
         ThemeTemplate theme = ThemeManager.INSTANCE.getTheme(nodeData.themeName());
@@ -161,7 +162,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
                 continue;
             }
 
-            StockEntry entry = stocks.get(itemId);
+            StockEntry entry = stocks.get(entryData.tradeItemKey());
             int stockCount = entry != null ? entry.current() : 0;
 
             int col = sellSlotIndex / 2;
@@ -173,18 +174,18 @@ public class TradeStationMenu extends AbstractContainerMenu {
             slot.setItemId(itemId);
             slot.setDisplayStack(displayStack);
             slot.setBaseStock(stockCount);
-            slot.setPrice(calculateSellPrice(itemId));
+            slot.setPrice(calculateSellPrice(itemId, entryData.sourceKey(), displayStack));
             slot.setIsBuy(true); // 此槽位用于玩家购买
 
             // 查找匹配的契约
-            TradeContractMatch match = findMatchingContract(theme, itemId, TradeSide.SELL_TO_PLAYER);
+            TradeContractMatch match = findMatchingContract(theme, entryData, TradeSide.SELL_TO_PLAYER);
             if (match != null) {
                 slot.setTradeType(match.tradeType);
                 slot.setPriceStacks(match.priceStacks);
                 slot.setInputStacks(match.inputStacks);
             } else {
                 // 默认货币篮
-                List<ItemStack> priceStacks = calculatePriceStacks(itemId, TradeSide.SELL_TO_PLAYER);
+                List<ItemStack> priceStacks = calculatePriceStacks(itemId, entryData.sourceKey(), displayStack, TradeSide.SELL_TO_PLAYER);
                 slot.setPriceStacks(priceStacks);
                 slot.setTradeType(TradeContractType.CURRENCY_BASKET_DYNAMIC);
             }
@@ -208,7 +209,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
                 continue;
             }
 
-            StockEntry entry = stocks.get(itemId);
+            StockEntry entry = stocks.get(entryData.tradeItemKey());
             int currentStock = entry != null ? entry.current() : 0;
             int maxStock = entry != null ? entry.max() : 0;
 
@@ -222,18 +223,18 @@ public class TradeStationMenu extends AbstractContainerMenu {
             slot.setDisplayStack(displayStack);
             slot.setBaseStock(currentStock);  // 已收购数量
             slot.setMaxStock(maxStock);       // 收购上限
-            slot.setPrice(calculateBuyPrice(itemId));
+            slot.setPrice(calculateBuyPrice(itemId, entryData.sourceKey(), displayStack));
             slot.setIsBuy(false); // 此槽位用于玩家出售
 
             // 查找匹配的契约
-            TradeContractMatch match = findMatchingContract(theme, itemId, TradeSide.BUY_FROM_PLAYER);
+            TradeContractMatch match = findMatchingContract(theme, entryData, TradeSide.BUY_FROM_PLAYER);
             if (match != null) {
                 slot.setTradeType(match.tradeType);
                 slot.setPriceStacks(match.priceStacks);
                 slot.setInputStacks(match.inputStacks);
             } else {
                 // 默认货币篮
-                List<ItemStack> priceStacks = calculatePriceStacks(itemId, TradeSide.BUY_FROM_PLAYER);
+                List<ItemStack> priceStacks = calculatePriceStacks(itemId, entryData.sourceKey(), displayStack, TradeSide.BUY_FROM_PLAYER);
                 slot.setPriceStacks(priceStacks);
                 slot.setTradeType(TradeContractType.CURRENCY_BASKET_DYNAMIC);
             }
@@ -266,13 +267,14 @@ public class TradeStationMenu extends AbstractContainerMenu {
      * @param side 交易方向
      * @return 匹配结果，如果没有匹配则返回 null
      */
-    private TradeContractMatch findMatchingContract(ThemeTemplate theme, ResourceLocation itemId, TradeSide side) {
+    private TradeContractMatch findMatchingContract(ThemeTemplate theme, CommercialNodeData.NodeTradeEntry entryData, TradeSide side) {
         if (theme == null || theme.tradeContracts().isEmpty()) {
             return null;
         }
 
+        ResourceLocation itemId = entryData.itemId();
         String itemIdStr = itemId.toString();
-        ItemStack contractStack = createItemStack(itemId);
+        ItemStack contractStack = entryData.displayStackOrDefault();
 
         for (ThemeTemplate.TradeContractEntry entry : theme.tradeContracts().get()) {
             if (entry instanceof ThemeTemplate.FixedTradeEntry fixedEntry) {
@@ -294,7 +296,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
                 if (basketEntry.side() == side) {
                     for (String itemPattern : basketEntry.items()) {
                         if (itemPattern.equals("*") || TagLookupCache.matchesItem(contractStack, itemPattern)) {
-                            int price = calculatePriceForContract(itemId, side);
+                            int price = calculatePriceForContract(itemId, entryData.sourceKey(), contractStack, side);
                             List<ItemStack> priceStacks = CurrencyBasketComposer.compose(
                                 price,
                                 basketEntry.acceptedCurrencies(),
@@ -314,11 +316,11 @@ public class TradeStationMenu extends AbstractContainerMenu {
     /**
      * 计算契约价格（用于货币篮）
      */
-    private int calculatePriceForContract(ResourceLocation itemId, TradeSide side) {
+    private int calculatePriceForContract(ResourceLocation itemId, String sourceKey, ItemStack displayStack, TradeSide side) {
         if (side == TradeSide.SELL_TO_PLAYER) {
-            return calculateSellPrice(itemId);
+            return calculateSellPrice(itemId, sourceKey, displayStack);
         } else {
-            return calculateBuyPrice(itemId);
+            return calculateBuyPrice(itemId, sourceKey, displayStack);
         }
     }
 
@@ -390,12 +392,12 @@ public class TradeStationMenu extends AbstractContainerMenu {
      * 计算出售价格（村庄卖给玩家）
      * 使用统一定价服务
      */
-    public int calculateSellPrice(ResourceLocation itemId) {
+    public int calculateSellPrice(ResourceLocation itemId, String sourceKey, ItemStack displayStack) {
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return 0;
         }
 
-        ItemStack stack = createItemStack(itemId);
+        ItemStack stack = displayStack != null && !displayStack.isEmpty() ? displayStack.copy() : createItemStack(itemId);
         CommercialNodeData nodeData = CommercialNodeManager.getNodeData(player.level(), blockPos);
         if (nodeData == null) {
             return 0;
@@ -405,7 +407,8 @@ public class TradeStationMenu extends AbstractContainerMenu {
             serverPlayer.serverLevel(),
             nodeData,
             stack,
-            TradeSide.SELL_TO_PLAYER
+            TradeSide.SELL_TO_PLAYER,
+            java.util.Optional.ofNullable(sourceKey)
         );
     }
 
@@ -413,12 +416,12 @@ public class TradeStationMenu extends AbstractContainerMenu {
      * 计算收购价格（玩家卖给村庄）
      * 使用统一定价服务
      */
-    public int calculateBuyPrice(ResourceLocation itemId) {
+    public int calculateBuyPrice(ResourceLocation itemId, String sourceKey, ItemStack displayStack) {
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return 0;
         }
 
-        ItemStack stack = createItemStack(itemId);
+        ItemStack stack = displayStack != null && !displayStack.isEmpty() ? displayStack.copy() : createItemStack(itemId);
         CommercialNodeData nodeData = CommercialNodeManager.getNodeData(player.level(), blockPos);
         if (nodeData == null) {
             return 0;
@@ -428,7 +431,8 @@ public class TradeStationMenu extends AbstractContainerMenu {
             serverPlayer.serverLevel(),
             nodeData,
             stack,
-            TradeSide.BUY_FROM_PLAYER
+            TradeSide.BUY_FROM_PLAYER,
+            java.util.Optional.ofNullable(sourceKey)
         );
     }
 
@@ -436,12 +440,12 @@ public class TradeStationMenu extends AbstractContainerMenu {
      * 计算货币篮报价（使用默认配置）
      * 仅在 findMatchingContract 未找到匹配时调用
      */
-    public List<ItemStack> calculatePriceStacks(ResourceLocation itemId, TradeSide side) {
+    public List<ItemStack> calculatePriceStacks(ResourceLocation itemId, String sourceKey, ItemStack displayStack, TradeSide side) {
         if (!(player instanceof ServerPlayer serverPlayer)) {
             return List.of();
         }
 
-        ItemStack stack = createItemStack(itemId);
+        ItemStack stack = displayStack != null && !displayStack.isEmpty() ? displayStack.copy() : createItemStack(itemId);
         CommercialNodeData nodeData = CommercialNodeManager.getNodeData(player.level(), blockPos);
         if (nodeData == null) {
             return List.of();
@@ -451,7 +455,8 @@ public class TradeStationMenu extends AbstractContainerMenu {
             serverPlayer.serverLevel(),
             nodeData,
             stack,
-            side
+            side,
+            java.util.Optional.ofNullable(sourceKey)
         );
 
         // 使用默认货币篮配置：仅基础货币
@@ -917,7 +922,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
 
     private int getVillageCurrencyStock(CommercialNodeData nodeData, Item item) {
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
-        StockEntry stockEntry = nodeData.stocks().get(itemId);
+        StockEntry stockEntry = nodeData.stocks().get(TradeItemKey.of(itemId));
         return stockEntry != null ? stockEntry.current() : 0;
     }
 
@@ -935,19 +940,21 @@ public class TradeStationMenu extends AbstractContainerMenu {
      * 从更新后的节点数据更新槽位库存
      */
     private void updateSlotsFromNodeData(CommercialNodeData nodeData) {
-        Map<ResourceLocation, StockEntry> stocks = nodeData.stocks();
+        Map<TradeItemKey, StockEntry> stocks = nodeData.stocks();
 
-        for (TradeSlot slot : sellSlots) {
-            ResourceLocation itemId = slot.getItemId();
-            StockEntry entry = stocks.get(itemId);
+        for (int i = 0; i < sellSlots.size() && i < nodeData.sellItems().size(); i++) {
+            TradeSlot slot = sellSlots.get(i);
+            CommercialNodeData.NodeTradeEntry entryData = nodeData.sellItems().get(i);
+            StockEntry entry = stocks.get(entryData.tradeItemKey());
             if (entry != null) {
                 slot.setBaseStock(entry.current());
             }
         }
 
-        for (TradeSlot slot : buySlots) {
-            ResourceLocation itemId = slot.getItemId();
-            StockEntry entry = stocks.get(itemId);
+        for (int i = 0; i < buySlots.size() && i < nodeData.buyItems().size(); i++) {
+            TradeSlot slot = buySlots.get(i);
+            CommercialNodeData.NodeTradeEntry entryData = nodeData.buyItems().get(i);
+            StockEntry entry = stocks.get(entryData.tradeItemKey());
             if (entry != null) {
                 slot.setBaseStock(entry.current());
             }

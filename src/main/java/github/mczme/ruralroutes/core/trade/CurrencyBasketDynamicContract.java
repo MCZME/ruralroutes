@@ -21,6 +21,7 @@ public record CurrencyBasketDynamicContract(
     TradeSide side,
     ItemStack targetItem,
     int targetCount,
+    java.util.Optional<String> sourceKey,
     List<String> acceptedCurrencies,
     CompositionStrategy composition
 ) implements TradeContract {
@@ -61,7 +62,7 @@ public record CurrencyBasketDynamicContract(
     @Override
     public TradeResult execute(ServerLevel level, CommercialNodeData nodeData,
                                        ServerPlayer player, List<ItemStack> inputList) {
-        int unitPrice = TradePricingService.calculateFinalPrice(level, nodeData, targetItem, side);
+        int unitPrice = TradePricingService.calculateFinalPrice(level, nodeData, targetItem, side, sourceKey);
         int totalPrice = unitPrice * targetCount;
 
         TradePaymentPlan plan = generatePaymentPlan(totalPrice);
@@ -118,8 +119,7 @@ public record CurrencyBasketDynamicContract(
 
     private boolean validateVillageCanPay(CommercialNodeData nodeData, TradePaymentPlan plan) {
         for (ItemStack required : plan.villageInputs()) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(required.getItem());
-            StockEntry entry = nodeData.getStock(itemId);
+            StockEntry entry = nodeData.getStock(required);
             if (entry == null || entry.current() < required.getCount()) {
                 return false;
             }

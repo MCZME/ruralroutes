@@ -1,8 +1,8 @@
 package github.mczme.ruralroutes.core.theme;
 
 import github.mczme.ruralroutes.RuralRoutes;
-import github.mczme.ruralroutes.core.util.TagLookupCache;
-import net.minecraft.resources.ResourceLocation;
+import github.mczme.ruralroutes.core.trade.TradeItemKey;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Map;
@@ -21,7 +21,7 @@ public final class ThemePriceModifierResolver {
 
     /** 默认修正值 */
     private static final ThemeTemplate.PriceModifier DEFAULT_MODIFIER =
-        new ThemeTemplate.PriceModifier(1.0f, 1.0f);
+        ThemeTemplate.PriceModifier.of(TradeTargetRef.item("minecraft:air"), 1.0f, 1.0f);
 
     /** 缓存 key: themeId.toString() + "|" + itemId.toString() */
     private static final Map<String, ThemeTemplate.PriceModifier> CACHE =
@@ -43,26 +43,35 @@ public final class ThemePriceModifierResolver {
     public static ThemeTemplate.PriceModifier resolve(
             ThemeTemplate template,
             ItemStack stack) {
+        return resolve(template, stack, Optional.empty());
+    }
 
+    public static ThemeTemplate.PriceModifier resolve(
+            ThemeTemplate template,
+            ItemStack stack,
+            Optional<String> sourceKey) {
         if (stack.isEmpty()) {
             return DEFAULT_MODIFIER;
         }
 
-        ResourceLocation themeId = template.name();
-        ResourceLocation itemId = stack.getItemHolder()
-            .unwrapKey()
-            .map(key -> key.location())
-            .orElse(null);
+        TradeItemKey itemKey = TradeItemKey.from(stack);
+        // 构建缓存 key
+        String cacheKey = template.name() + "|" + itemKey.canonicalKey() + "|" + sourceKey.orElse("");
 
-        if (itemId == null) {
+        // 尝试从缓存获取
+        return CACHE.computeIfAbsent(cacheKey, k -> doResolve(template, stack, itemKey, sourceKey));
+    }
+
+    public static ThemeTemplate.PriceModifier resolve(
+            ThemeTemplate template,
+            TradeItemKey itemKey,
+            Optional<String> sourceKey) {
+        if (itemKey == null) {
             return DEFAULT_MODIFIER;
         }
 
-        // 构建缓存 key
-        String cacheKey = themeId.toString() + "|" + itemId.toString();
-
-        // 尝试从缓存获取
-        return CACHE.computeIfAbsent(cacheKey, k -> doResolve(template, stack, itemId));
+        String cacheKey = template.name() + "|" + itemKey.canonicalKey() + "|" + sourceKey.orElse("");
+        return CACHE.computeIfAbsent(cacheKey, k -> doResolve(template, itemKey, sourceKey));
     }
 
     /**
@@ -71,35 +80,51 @@ public final class ThemePriceModifierResolver {
     private static ThemeTemplate.PriceModifier doResolve(
             ThemeTemplate template,
             ItemStack stack,
-            ResourceLocation itemId) {
+            TradeItemKey itemKey,
+            Optional<String> sourceKey) {
 
-        Optional<Map<String, ThemeTemplate.PriceModifier>> modifiersOpt = template.priceModifiers();
+        Optional<java.util.List<ThemeTemplate.PriceModifier>> modifiersOpt = template.priceModifiers();
         if (modifiersOpt.isEmpty()) {
             return DEFAULT_MODIFIER;
         }
 
-        Map<String, ThemeTemplate.PriceModifier> modifiers = modifiersOpt.get();
-        String itemIdStr = itemId.toString();
-
-        // 1. 尝试精确匹配
-        ThemeTemplate.PriceModifier exactMatch = modifiers.get(itemIdStr);
-        if (exactMatch != null) {
-            RuralRoutes.LOGGER.debug("Exact price modifier match: {} -> {}", itemIdStr, exactMatch);
-            return exactMatch;
-        }
-
-        // 2. 遍历标签匹配（使用第一个匹配项）
-        // 规则声明顺序有业务意义：首个命中后即停止继续匹配
-        for (Map.Entry<String, ThemeTemplate.PriceModifier> entry : modifiers.entrySet()) {
-            String ref = entry.getKey();
-            if (ref.startsWith("#") && TagLookupCache.matchesItem(stack, ref)) {
-                RuralRoutes.LOGGER.debug("Tag price modifier match: {} -> {}", ref, entry.getValue());
-                return entry.getValue();
+        ThemeTemplate.PriceModifier best = null;
+        int bestScore = -1;
+        for (ThemeTemplate.PriceModifier modifier : modifiersOpt.get()) {
+            int score = modifier.targetRef().matchSpecificity(stack, sourceKey, itemKey);
+            if (score > bestScore) {
+                bestScore = score;
+                best = modifier;
             }
         }
 
-        // 3. 无匹配，返回默认
+        if (best != null) {
+            RuralRoutes.LOGGER.debug("Price modifier match: {} -> {}", best.targetRef().asString(), best);
+            return best;
+        }
         return DEFAULT_MODIFIER;
+    }
+
+    private static ThemeTemplate.PriceModifier doResolve(
+            ThemeTemplate template,
+            TradeItemKey itemKey,
+            Optional<String> sourceKey) {
+        Optional<java.util.List<ThemeTemplate.PriceModifier>> modifiersOpt = template.priceModifiers();
+        if (modifiersOpt.isEmpty()) {
+            return DEFAULT_MODIFIER;
+        }
+
+        ThemeTemplate.PriceModifier best = null;
+        int bestScore = -1;
+        for (ThemeTemplate.PriceModifier modifier : modifiersOpt.get()) {
+            int score = modifier.targetRef().matchSpecificity(null, sourceKey, itemKey);
+            if (score > bestScore) {
+                bestScore = score;
+                best = modifier;
+            }
+        }
+
+        return best != null ? best : DEFAULT_MODIFIER;
     }
 
     /**

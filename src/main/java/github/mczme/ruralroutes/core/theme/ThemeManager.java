@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -106,7 +107,7 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
         List<ThemeTemplate.ItemReference> buyItems = new ArrayList<>();
         List<ThemeTemplate.ItemReference> specialties = new ArrayList<>();
         List<ThemeTemplate.TradeContractEntry> tradeContracts = new ArrayList<>();
-        Map<String, ThemeTemplate.PriceModifier> priceModifiers = new LinkedHashMap<>();
+        List<ThemeTemplate.PriceModifier> priceModifiers = new ArrayList<>();
         ThemeTemplate.StockConfig themeStock = template.stock().orElse(null);
         Map<String, ThemeTemplate.StockTarget> targetEntries = new LinkedHashMap<>();
         Map<String, ThemeTemplate.StockRange> stockTargets = new LinkedHashMap<>();
@@ -133,7 +134,7 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
         buyItems.addAll(template.buyItems());
         template.themeSpecialtyItems().ifPresent(specialties::addAll);
         template.tradeContracts().ifPresent(tradeContracts::addAll);
-        template.priceModifiers().ifPresent(priceModifiers::putAll);
+        template.priceModifiers().ifPresent(priceModifiers::addAll);
         template.stock().ifPresent(stock -> {
             stock.targetEntries().ifPresent(targetEntries::putAll);
             stock.targets().ifPresent(stockTargets::putAll);
@@ -158,7 +159,7 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
             List.copyOf(buyItems),
             specialties.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(specialties)),
             resolvedStock,
-            priceModifiers.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(priceModifiers)),
+            priceModifiers.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(priceModifiers)),
             tradeContracts.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(tradeContracts))
         );
     }

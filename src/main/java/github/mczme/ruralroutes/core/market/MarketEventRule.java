@@ -2,6 +2,7 @@ package github.mczme.ruralroutes.core.market;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import github.mczme.ruralroutes.core.rumor.RumorFamily;
 import net.minecraft.resources.ResourceLocation;
 
@@ -17,7 +18,7 @@ import java.util.Optional;
 public record MarketEventRule(
         ResourceLocation id,
         String nameKey,
-        String targetRef,
+        TradeTargetRef targetRef,
         List<MarketEventScopeRule> scopes,
         float delta,
         Optional<MarketStockModifier> stock,
@@ -29,7 +30,7 @@ public record MarketEventRule(
             instance -> instance.group(
                     ResourceLocation.CODEC.fieldOf("id").forGetter(MarketEventRule::id),
                     Codec.STRING.fieldOf("name_key").forGetter(MarketEventRule::nameKey),
-                    Codec.STRING.fieldOf("target_ref").forGetter(MarketEventRule::targetRef),
+                    TradeTargetRef.CODEC.fieldOf("target_ref").forGetter(MarketEventRule::targetRef),
                     MarketEventScopeRule.CODEC.listOf().fieldOf("scopes").forGetter(MarketEventRule::scopes),
                     Codec.FLOAT.fieldOf("delta").forGetter(MarketEventRule::delta),
                     MarketStockModifier.CODEC.optionalFieldOf("stock").forGetter(MarketEventRule::stock),
@@ -50,20 +51,20 @@ public record MarketEventRule(
      * 判断目标引用是否表示标签
      */
     public boolean isTargetTag() {
-        return targetRef.startsWith("#");
+        return targetRef.isTag();
     }
 
     /**
      * 获取实际的目标 ID（去除 # 前缀）
      */
     public String getTargetId() {
-        return isTargetTag() ? targetRef.substring(1) : targetRef;
+        return targetRef.asString();
     }
 
     /**
      * 创建简单规则（单一全局作用域）
      */
-    public static MarketEventRule simple(ResourceLocation id, String nameKey, String targetRef,
+    public static MarketEventRule simple(ResourceLocation id, String nameKey, TradeTargetRef targetRef,
                                          float delta, RumorFamily rumorFamily) {
         return new MarketEventRule(
                 id, nameKey, targetRef,
@@ -79,7 +80,7 @@ public record MarketEventRule(
     /**
      * 创建带权重的规则
      */
-    public static MarketEventRule weighted(ResourceLocation id, String nameKey, String targetRef,
+    public static MarketEventRule weighted(ResourceLocation id, String nameKey, TradeTargetRef targetRef,
                                            float delta, int weight, List<MarketEventScopeRule> scopes,
                                            RumorFamily rumorFamily) {
         return new MarketEventRule(

@@ -123,8 +123,7 @@ public record CoinExchangeContract(
             return TradeResult.fail(TradeResult.Reason.INVALID_INPUT);
         }
 
-        ResourceLocation outputId = BuiltInRegistries.ITEM.getKey(exchangeType.outputItem);
-        StockEntry outputStock = nodeData.getStock(outputId);
+        StockEntry outputStock = nodeData.getStock(new ItemStack(exchangeType.outputItem));
 
         if (outputStock == null || outputStock.current() < outputCount) {
             return TradeResult.fail(TradeResult.Reason.VILLAGE_INSUFFICIENT);

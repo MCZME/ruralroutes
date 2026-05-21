@@ -4,6 +4,7 @@ import github.mczme.ruralroutes.core.cycle.CycleManager;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.node.StockEntry;
+import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -79,23 +80,29 @@ public final class TradeContractExecutor {
             TradeResult result,
             net.minecraft.core.BlockPos blockPos) {
 
-        Map<ResourceLocation, StockEntry> stocks = new HashMap<>(nodeData.stocks());
+        Map<TradeItemKey, StockEntry> stocks = new HashMap<>(nodeData.stocks());
 
         // 玩家消耗的物品加入村庄库存
         for (ItemStack item : result.consumed()) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item.getItem());
-            StockEntry current = stocks.get(itemId);
+            TradeItemKey itemKey = TradeItemKey.from(item);
+            StockEntry current = stocks.get(itemKey);
+            if (current == null && itemKey.hasComponents()) {
+                current = stocks.get(TradeItemKey.of(itemKey.itemId()));
+            }
             if (current != null) {
-                stocks.put(itemId, current.increase(item.getCount()));
+                stocks.put(itemKey, current.increase(item.getCount()));
             }
         }
 
         // 玩家获得的物品从村庄库存扣除
         for (ItemStack item : result.outputs()) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item.getItem());
-            StockEntry current = stocks.get(itemId);
+            TradeItemKey itemKey = TradeItemKey.from(item);
+            StockEntry current = stocks.get(itemKey);
+            if (current == null && itemKey.hasComponents()) {
+                current = stocks.get(TradeItemKey.of(itemKey.itemId()));
+            }
             if (current != null) {
-                stocks.put(itemId, current.decrease(item.getCount()));
+                stocks.put(itemKey, current.decrease(item.getCount()));
             }
         }
 
@@ -312,8 +319,7 @@ public final class TradeContractExecutor {
     private List<ItemStack> validateVillageInventory(CommercialNodeData nodeData, TradePaymentPlan plan) {
         List<ItemStack> shortfall = new ArrayList<>();
         for (ItemStack required : plan.villageInputs()) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(required.getItem());
-            StockEntry entry = nodeData.getStock(itemId);
+            StockEntry entry = nodeData.getStock(required);
             if (entry == null || entry.current() < required.getCount()) {
                 shortfall.add(new ItemStack(required.getItem(), required.getCount() - (entry != null ? entry.current() : 0)));
             }
@@ -351,23 +357,29 @@ public final class TradeContractExecutor {
             TradePaymentPlan plan,
             net.minecraft.core.BlockPos blockPos) {
 
-        Map<ResourceLocation, StockEntry> stocks = new HashMap<>(nodeData.stocks());
+        Map<TradeItemKey, StockEntry> stocks = new HashMap<>(nodeData.stocks());
 
         // 村庄输入：扣除库存（村庄卖出的商品 + 村庄支付的货币）
         for (ItemStack item : plan.villageInputs()) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item.getItem());
-            StockEntry current = stocks.get(itemId);
+            TradeItemKey itemKey = TradeItemKey.from(item);
+            StockEntry current = stocks.get(itemKey);
+            if (current == null && itemKey.hasComponents()) {
+                current = stocks.get(TradeItemKey.of(itemKey.itemId()));
+            }
             if (current != null) {
-                stocks.put(itemId, current.decrease(item.getCount()));
+                stocks.put(itemKey, current.decrease(item.getCount()));
             }
         }
 
         // 村庄输出：增加库存（村庄买入的商品 + 村庄收到的货币）
         for (ItemStack item : plan.villageOutputs()) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item.getItem());
-            StockEntry current = stocks.get(itemId);
+            TradeItemKey itemKey = TradeItemKey.from(item);
+            StockEntry current = stocks.get(itemKey);
+            if (current == null && itemKey.hasComponents()) {
+                current = stocks.get(TradeItemKey.of(itemKey.itemId()));
+            }
             if (current != null) {
-                stocks.put(itemId, current.increase(item.getCount()));
+                stocks.put(itemKey, current.increase(item.getCount()));
             }
         }
 

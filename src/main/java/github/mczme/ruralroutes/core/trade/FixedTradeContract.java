@@ -56,8 +56,7 @@ public record FixedTradeContract(
     public TradeResult execute(ServerLevel level, CommercialNodeData nodeData,
                                        ServerPlayer player, List<ItemStack> inputList) {
         for (ItemStack output : this.outputs) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(output.getItem());
-            StockEntry entry = nodeData.getStock(itemId);
+            StockEntry entry = nodeData.getStock(output);
             if (entry == null || entry.current() < output.getCount()) {
                 return TradeResult.fail(TradeResult.Reason.VILLAGE_INSUFFICIENT);
             }
