@@ -218,7 +218,7 @@ public class TradeStationBlock extends BaseEntityBlock {
      * 前 N 个展示柜分配特产，多余的从库存随机选取
      */
     private void assignDisplayItems(List<DisplayCaseBlockEntity> displayCases, CommercialNodeData nodeData) {
-        List<ResourceLocation> specialties = nodeData.specialties();
+        List<ResourceLocation> specialties = nodeData.specialtyIds();
         Map<ResourceLocation, StockEntry> stocks = nodeData.stocks();
         Random random = new Random();
 
@@ -281,9 +281,9 @@ public class TradeStationBlock extends BaseEntityBlock {
         if (player instanceof ServerPlayer serverPlayer) {
             // 获取商业节点数据，提取槽位数量（过滤货币物品）
             CommercialNodeData nodeData = CommercialNodeManager.getNodeData(serverPlayer.level(), pos);
-            final int sellSlotCount = nodeData != null ? TradeStationMenu.countNonCurrencyItems(nodeData.sellItems())
+            final int sellSlotCount = nodeData != null ? TradeStationMenu.countNonCurrencyItems(nodeData.sellItemIds())
                     : 0;
-            final int buySlotCount = nodeData != null ? TradeStationMenu.countNonCurrencyItems(nodeData.buyItems()) : 0;
+            final int buySlotCount = nodeData != null ? TradeStationMenu.countNonCurrencyItems(nodeData.buyItemIds()) : 0;
 
             // 使用 openMenu 的返回值获取创建的 Menu
             player.openMenu(new MenuProvider() {

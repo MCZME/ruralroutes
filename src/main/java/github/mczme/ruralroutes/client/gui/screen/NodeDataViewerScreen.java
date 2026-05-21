@@ -224,21 +224,22 @@ public class NodeDataViewerScreen extends Screen {
     }
 
     private int renderItemPanel(GuiGraphics guiGraphics, int x, int y, int width, Component title,
-            List<ResourceLocation> itemIds, boolean showStock) {
-        int height = getListPanelHeight(itemIds.size());
+            List<CommercialNodeData.NodeTradeEntry> itemEntries, boolean showStock) {
+        int height = getListPanelHeight(itemEntries.size());
         renderCardFrame(guiGraphics, x, y, width, height, title);
 
         int rowX = x + PANEL_INNER_PADDING;
         int rowY = y + PANEL_HEADER_HEIGHT + PANEL_INNER_PADDING;
         int rowWidth = width - PANEL_INNER_PADDING * 2;
 
-        if (itemIds.isEmpty()) {
+        if (itemEntries.isEmpty()) {
             renderEmptyRow(guiGraphics, rowX, rowY, rowWidth, Component.translatable("gui.ruralroutes.node_data_viewer.empty_list"));
             return y + height;
         }
 
-        for (ResourceLocation itemId : itemIds) {
-            ItemStack stack = createItemStack(itemId);
+        for (CommercialNodeData.NodeTradeEntry entry : itemEntries) {
+            ResourceLocation itemId = entry.itemId();
+            ItemStack stack = entry.displayStackOrDefault();
             renderItemRow(guiGraphics, rowX, rowY, rowWidth,
                 getItemName(itemId, stack).getString(), itemId.toString(), stack, null, showStock);
             rowY += ITEM_ROW_HEIGHT + ITEM_ROW_GAP;

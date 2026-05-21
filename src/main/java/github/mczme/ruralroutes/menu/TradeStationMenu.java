@@ -132,16 +132,16 @@ public class TradeStationMenu extends AbstractContainerMenu {
         buySlots.clear();
         slots.removeIf(slot -> slot instanceof TradeSlot);
 
-        List<ResourceLocation> sellItems = nodeData.sellItems();
-        List<ResourceLocation> buyItems = nodeData.buyItems();
+        List<CommercialNodeData.NodeTradeEntry> sellItems = nodeData.sellItems();
+        List<CommercialNodeData.NodeTradeEntry> buyItems = nodeData.buyItems();
         Map<ResourceLocation, StockEntry> stocks = nodeData.stocks();
 
         // 获取主题模板
         ThemeTemplate theme = ThemeManager.INSTANCE.getTheme(nodeData.themeName());
 
         // 计算过滤货币后的实际槽位数量
-        int sellSlotCount = countNonCurrencyItems(sellItems);
-        int buySlotCount = countNonCurrencyItems(buyItems);
+        int sellSlotCount = countNonCurrencyItems(toItemIds(sellItems));
+        int buySlotCount = countNonCurrencyItems(toItemIds(buyItems));
 
         // 创建容器
         this.sellContainer = new TradeDisplayContainer(Math.max(1, sellSlotCount));
@@ -152,8 +152,9 @@ public class TradeStationMenu extends AbstractContainerMenu {
         int sellStartY = 22;
         int sellSlotIndex = 0;
         for (int i = 0; i < sellItems.size(); i++) {
-            ResourceLocation itemId = sellItems.get(i);
-            ItemStack displayStack = createItemStack(itemId);
+            CommercialNodeData.NodeTradeEntry entryData = sellItems.get(i);
+            ResourceLocation itemId = entryData.itemId();
+            ItemStack displayStack = entryData.displayStackOrDefault();
 
             // 跳过货币物品
             if (isCurrencyItem(displayStack)) {
@@ -198,8 +199,9 @@ public class TradeStationMenu extends AbstractContainerMenu {
         int buyStartY = 62;
         int buySlotIndex = 0;
         for (int i = 0; i < buyItems.size(); i++) {
-            ResourceLocation itemId = buyItems.get(i);
-            ItemStack displayStack = createItemStack(itemId);
+            CommercialNodeData.NodeTradeEntry entryData = buyItems.get(i);
+            ResourceLocation itemId = entryData.itemId();
+            ItemStack displayStack = entryData.displayStackOrDefault();
 
             // 跳过货币物品
             if (isCurrencyItem(displayStack)) {
@@ -339,6 +341,14 @@ public class TradeStationMenu extends AbstractContainerMenu {
             }
         }
         return count;
+    }
+
+    private static List<ResourceLocation> toItemIds(List<CommercialNodeData.NodeTradeEntry> entries) {
+        List<ResourceLocation> itemIds = new ArrayList<>(entries.size());
+        for (CommercialNodeData.NodeTradeEntry entry : entries) {
+            itemIds.add(entry.itemId());
+        }
+        return itemIds;
     }
 
     /**
@@ -689,11 +699,11 @@ public class TradeStationMenu extends AbstractContainerMenu {
         boolean purchasedSpecialty = pendingSlots.stream()
             .anyMatch(slot -> slot.isBuy()
                 && slot.getItemId() != null
-                && nodeData.specialties().contains(slot.getItemId()));
+                && nodeData.specialtyIds().contains(slot.getItemId()));
         Set<String> purchasedSpecialtyIds = pendingSlots.stream()
             .filter(TradeSlot::isBuy)
             .map(TradeSlot::getItemId)
-            .filter(itemId -> itemId != null && nodeData.specialties().contains(itemId))
+            .filter(itemId -> itemId != null && nodeData.specialtyIds().contains(itemId))
             .map(ResourceLocation::toString)
             .collect(java.util.stream.Collectors.toSet());
 
