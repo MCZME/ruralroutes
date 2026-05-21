@@ -1,7 +1,7 @@
 package github.mczme.ruralroutes.client.gui.screen;
 
 import github.mczme.ruralroutes.core.theme.ThemeManager;
-import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.theme.ResolvedTheme;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.item.ConfigToolItem;
 import github.mczme.ruralroutes.menu.ConfigToolMenu;
@@ -470,7 +470,7 @@ public class ConfigToolScreen extends AbstractContainerScreen<ConfigToolMenu> {
         List<Component> tooltip = new ArrayList<>();
         tooltip.add(Component.literal(hoveredTheme.toString()));
 
-        ThemeTemplate template = ThemeManager.INSTANCE.getTheme(hoveredTheme);
+        ResolvedTheme template = ThemeManager.INSTANCE.getTheme(hoveredTheme);
         if (template != null) {
             tooltip.add(Component.translatable("gui.ruralroutes.config_tool.theme_biome", template.biome().toString()));
         }

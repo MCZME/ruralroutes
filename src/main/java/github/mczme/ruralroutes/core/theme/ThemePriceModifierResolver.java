@@ -41,13 +41,13 @@ public final class ThemePriceModifierResolver {
      * @return 价格修正（永不为 null）
      */
     public static ThemeTemplate.PriceModifier resolve(
-            ThemeTemplate template,
+            ResolvedTheme template,
             ItemStack stack) {
         return resolve(template, stack, Optional.empty());
     }
 
     public static ThemeTemplate.PriceModifier resolve(
-            ThemeTemplate template,
+            ResolvedTheme template,
             ItemStack stack,
             Optional<String> sourceKey) {
         if (stack.isEmpty()) {
@@ -63,7 +63,7 @@ public final class ThemePriceModifierResolver {
     }
 
     public static ThemeTemplate.PriceModifier resolve(
-            ThemeTemplate template,
+            ResolvedTheme template,
             TradeItemKey itemKey,
             Optional<String> sourceKey) {
         if (itemKey == null) {
@@ -78,7 +78,7 @@ public final class ThemePriceModifierResolver {
      * 实际解析逻辑（无缓存）
      */
     private static ThemeTemplate.PriceModifier doResolve(
-            ThemeTemplate template,
+            ResolvedTheme template,
             ItemStack stack,
             TradeItemKey itemKey,
             Optional<String> sourceKey) {
@@ -106,7 +106,7 @@ public final class ThemePriceModifierResolver {
     }
 
     private static ThemeTemplate.PriceModifier doResolve(
-            ThemeTemplate template,
+            ResolvedTheme template,
             TradeItemKey itemKey,
             Optional<String> sourceKey) {
         Optional<java.util.List<ThemeTemplate.PriceModifier>> modifiersOpt = template.priceModifiers();

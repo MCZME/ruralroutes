@@ -7,9 +7,10 @@ import github.mczme.ruralroutes.core.market.MarketState;
 import github.mczme.ruralroutes.core.market.MarketStateResolver;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.trade.TradeItemKey;
+import github.mczme.ruralroutes.core.theme.ResolvedTheme;
 import github.mczme.ruralroutes.core.theme.ThemePriceModifierResolver;
-import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
+import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.value.ValueTableManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -117,7 +118,7 @@ public final class TradePricingService {
             return 1.0f;
         }
 
-        ThemeTemplate template = ThemeManager.INSTANCE.getTheme(themeName);
+        ResolvedTheme template = ThemeManager.INSTANCE.getTheme(themeName);
         if (template == null) {
             return 1.0f;
         }
@@ -165,7 +166,7 @@ public final class TradePricingService {
 
         // 从主题获取 biome
         if (themeName != null) {
-            ThemeTemplate template = ThemeManager.INSTANCE.getTheme(themeName);
+            ResolvedTheme template = ThemeManager.INSTANCE.getTheme(themeName);
             if (template != null) {
                 biomeId = template.biome();
             }

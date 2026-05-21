@@ -15,8 +15,9 @@ import github.mczme.ruralroutes.core.trade.TradeResult;
 import github.mczme.ruralroutes.core.trade.TradeSide;
 import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import github.mczme.ruralroutes.core.trade.CurrencyBasketComposer;
-import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
+import github.mczme.ruralroutes.core.theme.ResolvedTheme;
+import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.util.TagLookupCache;
 import github.mczme.ruralroutes.menu.container.TradeDisplayContainer;
 import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
@@ -138,7 +139,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
         Map<TradeItemKey, StockEntry> stocks = nodeData.stocks();
 
         // 获取主题模板
-        ThemeTemplate theme = ThemeManager.INSTANCE.getTheme(nodeData.themeName());
+        ResolvedTheme theme = ThemeManager.INSTANCE.getTheme(nodeData.themeName());
 
         // 计算过滤货币后的实际槽位数量
         int sellSlotCount = countNonCurrencyItems(toItemIds(sellItems));
@@ -267,7 +268,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
      * @param side 交易方向
      * @return 匹配结果，如果没有匹配则返回 null
      */
-    private TradeContractMatch findMatchingContract(ThemeTemplate theme, CommercialNodeData.NodeTradeEntry entryData, TradeSide side) {
+    private TradeContractMatch findMatchingContract(ResolvedTheme theme, CommercialNodeData.NodeTradeEntry entryData, TradeSide side) {
         if (theme == null || theme.tradeContracts().isEmpty()) {
             return null;
         }

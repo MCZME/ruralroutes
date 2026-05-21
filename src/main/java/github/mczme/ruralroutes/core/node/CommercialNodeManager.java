@@ -7,6 +7,7 @@ import github.mczme.ruralroutes.core.market.MarketContext;
 import github.mczme.ruralroutes.core.market.MarketState;
 import github.mczme.ruralroutes.core.market.MarketStockAdjustment;
 import github.mczme.ruralroutes.core.market.MarketStateResolver;
+import github.mczme.ruralroutes.core.theme.ResolvedTheme;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.trade.TradeItemKey;
@@ -119,7 +120,7 @@ public class CommercialNodeManager {
      * @return 创建的商业节点数据，创建失败返回 null
      */
     public static CommercialNodeData createNodeData(Level level, BlockPos pos, ResourceLocation themeName) {
-        ThemeTemplate template = ThemeManager.INSTANCE.getTheme(themeName);
+        ResolvedTheme template = ThemeManager.INSTANCE.getTheme(themeName);
         if (template == null) {
             RuralRoutes.LOGGER.warn("Cannot create commercial node: theme {} not found", themeName);
             return null;
@@ -168,7 +169,7 @@ public class CommercialNodeManager {
      * @param template 主题模板
      * @return 特产ID列表（主题特产 + 随机特产）
      */
-    private static List<CommercialNodeData.NodeTradeEntry> generateSpecialties(ThemeTemplate template) {
+    private static List<CommercialNodeData.NodeTradeEntry> generateSpecialties(ResolvedTheme template) {
         List<CommercialNodeData.NodeTradeEntry> specialties = new ArrayList<>();
         Set<ResourceLocation> seen = new LinkedHashSet<>();
 
@@ -236,7 +237,7 @@ public class CommercialNodeManager {
      * 将特产加入库存（作为出售物品，初始满库存）
      */
     private static void addSpecialtiesToStocks(Map<TradeItemKey, StockEntry> stocks,
-            ThemeTemplate template, List<CommercialNodeData.NodeTradeEntry> specialties, MarketState marketState) {
+            ResolvedTheme template, List<CommercialNodeData.NodeTradeEntry> specialties, MarketState marketState) {
 
         // 默认库存范围
         int defaultMin = 8;
@@ -355,7 +356,7 @@ public class CommercialNodeManager {
      * 从主题模板初始化库存。
      * 仅为当前周期实际入选的物品建立库存条目。
      */
-    private static Map<TradeItemKey, StockEntry> initializeStocks(ThemeTemplate template,
+    private static Map<TradeItemKey, StockEntry> initializeStocks(ResolvedTheme template,
             List<SelectedTradeItem> selectedSellItems, List<SelectedTradeItem> selectedBuyItems,
             MarketState marketState) {
         Map<TradeItemKey, NodeStockPlan> plans = new HashMap<>();
@@ -402,7 +403,7 @@ public class CommercialNodeManager {
      * 处理单个物品的库存条目
      */
     private static void processStockEntry(Map<TradeItemKey, NodeStockPlan> plans,
-            ThemeTemplate template, MarketState marketState, MarketContext marketContext,
+            ResolvedTheme template, MarketState marketState, MarketContext marketContext,
             String itemRefId, ResourceLocation itemId, TradeItemKey stockKey,
             int defaultMin, int defaultMax, boolean isSellItem) {
 
@@ -428,7 +429,7 @@ public class CommercialNodeManager {
      * @param itemRefId 物品引用ID（可能带#前缀的标签ID或精确物品ID）
      * @param itemId 实际物品ID（不带#前缀）
      */
-    private static int getBaseStockMax(ThemeTemplate template, String itemRefId, ResourceLocation itemId,
+    private static int getBaseStockMax(ResolvedTheme template, String itemRefId, ResourceLocation itemId,
             int defaultMin, int defaultMax, boolean isSellItem) {
 
         if (template.stock().isPresent()) {
@@ -577,7 +578,7 @@ public class CommercialNodeManager {
     private static CommercialNodeData refreshNodeData(ServerLevel level, BlockPos pos,
             CommercialNodeData oldData, long currentTimestamp) {
 
-        ThemeTemplate template = ThemeManager.INSTANCE.getTheme(oldData.themeName());
+        ResolvedTheme template = ThemeManager.INSTANCE.getTheme(oldData.themeName());
         if (template == null) {
             RuralRoutes.LOGGER.warn("Cannot refresh node: theme {} not found", oldData.themeName());
             return oldData;

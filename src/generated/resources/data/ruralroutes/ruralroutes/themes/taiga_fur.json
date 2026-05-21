@@ -1,45 +1,22 @@
 {
   "biome": "minecraft:taiga",
-  "buy_items": [
-    "minecraft:iron_sword",
-    "minecraft:iron_axe",
-    {
-      "items": [
-        "minecraft:stone_axe",
-        "minecraft:shears",
-        "minecraft:charcoal"
-      ],
-      "key": "taiga_fur/tools",
-      "pick": 2
-    },
-    "#ruralroutes:currency"
-  ],
   "name": "ruralroutes:taiga_fur",
-  "price_modifiers": {
-    "#ruralroutes:candidate/biome/taiga/leather_fiber": {
+  "price_modifiers": [
+    {
       "buy": 0.76,
-      "sell": 0.82
+      "sell": 0.82,
+      "target": "#ruralroutes:candidate/biome/taiga/leather_fiber"
     },
-    "#ruralroutes:candidate/theme/taiga_fur/fur_goods": {
+    {
       "buy": 0.82,
-      "sell": 0.88
+      "sell": 0.88,
+      "target": "#ruralroutes:candidate/theme/taiga_fur/fur_goods"
     },
-    "minecraft:campfire": {
+    {
       "buy": 0.9,
-      "sell": 1.08
+      "sell": 1.08,
+      "target": "minecraft:campfire"
     }
-  },
-  "sell_items": [
-    "minecraft:leather",
-    {
-      "id": "#ruralroutes:candidate/biome/taiga/leather_fiber",
-      "pick": 2
-    },
-    {
-      "id": "#ruralroutes:candidate/theme/taiga_fur/fur_goods",
-      "pick": 2
-    },
-    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {
@@ -69,42 +46,7 @@
       }
     }
   },
-  "theme_specialties": [
-    "minecraft:campfire"
-  ],
-  "trade_contracts": [
-    {
-      "type": "fixed",
-      "inputs": [
-        {
-          "count": 1,
-          "item": "minecraft:leather"
-        },
-        {
-          "count": 1,
-          "item": "minecraft:charcoal"
-        }
-      ],
-      "outputs": [
-        {
-          "count": 1,
-          "item": "minecraft:campfire"
-        }
-      ]
-    },
-    {
-      "type": "currency_basket_dynamic",
-      "accepted_currencies": [
-        "ruralroutes:iron_coin",
-        "ruralroutes:copper_coin"
-      ],
-      "composition": "largest_first",
-      "items": [
-        "minecraft:iron_sword",
-        "minecraft:iron_axe",
-        "minecraft:shears"
-      ],
-      "side": "buy_from_player"
-    }
+  "trade_profiles": [
+    "ruralroutes:taiga_fur"
   ]
 }

@@ -16,7 +16,7 @@ import java.util.Optional;
 
 /**
  * 主题模板原始数据。
- * 主题可直接定义交易内容，也可引用一个或多个 TradeProfile 进行组合。
+ * 仅保留主题级字段；交易内容统一由一个或多个 TradeProfile 提供。
  */
 public class ThemeTemplate {
 
@@ -38,58 +38,29 @@ public class ThemeTemplate {
         instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("name").forGetter(ThemeTemplate::name),
             ResourceLocation.CODEC.fieldOf("biome").forGetter(ThemeTemplate::biome),
-            ItemReference.CODEC.listOf().optionalFieldOf("sell_items", List.of()).forGetter(ThemeTemplate::sellItems),
-            ItemReference.CODEC.listOf().optionalFieldOf("buy_items", List.of()).forGetter(ThemeTemplate::buyItems),
-            ItemReference.CODEC.listOf().optionalFieldOf("theme_specialties").forGetter(ThemeTemplate::themeSpecialtyItems),
             StockConfig.CODEC.optionalFieldOf("stock").forGetter(ThemeTemplate::stock),
             PRICE_MODIFIERS_CODEC.optionalFieldOf("price_modifiers").forGetter(ThemeTemplate::priceModifiers),
-            TradeContractEntry.CODEC.listOf().optionalFieldOf("trade_contracts").forGetter(ThemeTemplate::tradeContracts),
             ResourceLocation.CODEC.listOf().optionalFieldOf("trade_profiles").forGetter(ThemeTemplate::tradeProfiles)
         ).apply(instance, ThemeTemplate::new)
     );
 
     private final ResourceLocation name;
     private final ResourceLocation biome;
-    private final List<ItemReference> sellItems;
-    private final List<ItemReference> buyItems;
-    private final Optional<List<ItemReference>> themeSpecialtyItems;
     private final Optional<StockConfig> stock;
     private final Optional<List<PriceModifier>> priceModifiers;
-    private final Optional<List<TradeContractEntry>> tradeContracts;
     private final Optional<List<ResourceLocation>> tradeProfiles;
 
     public ThemeTemplate(
         ResourceLocation name,
         ResourceLocation biome,
-        List<ItemReference> sellItems,
-        List<ItemReference> buyItems,
-        Optional<List<ItemReference>> themeSpecialtyItems,
         Optional<StockConfig> stock,
         Optional<List<PriceModifier>> priceModifiers,
-        Optional<List<TradeContractEntry>> tradeContracts
-    ) {
-        this(name, biome, sellItems, buyItems, themeSpecialtyItems, stock, priceModifiers, tradeContracts, Optional.empty());
-    }
-
-    public ThemeTemplate(
-        ResourceLocation name,
-        ResourceLocation biome,
-        List<ItemReference> sellItems,
-        List<ItemReference> buyItems,
-        Optional<List<ItemReference>> themeSpecialtyItems,
-        Optional<StockConfig> stock,
-        Optional<List<PriceModifier>> priceModifiers,
-        Optional<List<TradeContractEntry>> tradeContracts,
         Optional<List<ResourceLocation>> tradeProfiles
     ) {
         this.name = Objects.requireNonNull(name, "name");
         this.biome = Objects.requireNonNull(biome, "biome");
-        this.sellItems = List.copyOf(Objects.requireNonNull(sellItems, "sellItems"));
-        this.buyItems = List.copyOf(Objects.requireNonNull(buyItems, "buyItems"));
-        this.themeSpecialtyItems = themeSpecialtyItems.map(List::copyOf);
         this.stock = Objects.requireNonNull(stock, "stock");
         this.priceModifiers = priceModifiers.map(List::copyOf);
-        this.tradeContracts = tradeContracts.map(List::copyOf);
         this.tradeProfiles = tradeProfiles.map(List::copyOf);
     }
 
@@ -101,36 +72,12 @@ public class ThemeTemplate {
         return biome;
     }
 
-    public List<ItemReference> sellItems() {
-        return sellItems;
-    }
-
-    public List<ItemReference> buyItems() {
-        return buyItems;
-    }
-
-    public Optional<List<ItemReference>> themeSpecialtyItems() {
-        return themeSpecialtyItems;
-    }
-
-    public Optional<List<ResourceLocation>> themeSpecialties() {
-        return themeSpecialtyItems.map(items -> items.stream()
-            .filter(ItemReference::isExactItem)
-            .map(ItemReference::itemId)
-            .map(ResourceLocation::parse)
-            .toList());
-    }
-
     public Optional<StockConfig> stock() {
         return stock;
     }
 
     public Optional<List<PriceModifier>> priceModifiers() {
         return priceModifiers;
-    }
-
-    public Optional<List<TradeContractEntry>> tradeContracts() {
-        return tradeContracts;
     }
 
     public Optional<List<ResourceLocation>> tradeProfiles() {

@@ -6,6 +6,7 @@ import com.mojang.serialization.JsonOps;
 import github.mczme.ruralroutes.core.market.MarketEventRule;
 import github.mczme.ruralroutes.core.market.MarketEventScopeRule;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.theme.TradeProfile;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
@@ -41,15 +42,28 @@ class GeneratedDataCodecTest {
 
     @Test
     void generatedThemesDecodeSuccessfully() throws IOException {
-        // 主题文件是库存、价格和候选抽样的共同入口，先校验结构完整性再谈更高层行为。
+        // 主题文件现在只承载主题级字段，因此至少要能解析并引用 profile。
         Path root = PROJECT_ROOT.resolve(Path.of("src", "generated", "resources", "data", "ruralroutes", "ruralroutes", "themes"));
         List<Path> files = jsonFiles(root);
 
         assertFalse(files.isEmpty(), "Expected generated theme files");
         assertAll(files.stream().map(file -> (Executable) () -> {
             ThemeTemplate theme = parseCodec(file, ThemeTemplate.CODEC);
-            assertFalse(theme.sellItems().isEmpty(), () -> "Theme must define sell items: " + file);
-            assertFalse(theme.buyItems().isEmpty(), () -> "Theme must define buy items: " + file);
+            assertTrue(theme.tradeProfiles().isPresent() && !theme.tradeProfiles().orElseThrow().isEmpty(),
+                () -> "Theme must reference trade profiles: " + file);
+        }));
+    }
+
+    @Test
+    void generatedTradeProfilesDecodeSuccessfully() throws IOException {
+        Path root = PROJECT_ROOT.resolve(Path.of("src", "generated", "resources", "data", "ruralroutes", "ruralroutes", "trade_profiles"));
+        List<Path> files = jsonFiles(root);
+
+        assertFalse(files.isEmpty(), "Expected generated trade profile files");
+        assertAll(files.stream().map(file -> (Executable) () -> {
+            TradeProfile profile = parseCodec(file, TradeProfile.CODEC);
+            assertTrue(!profile.sellItems().isEmpty() || !profile.buyItems().isEmpty(),
+                () -> "Trade profile must define at least one buy/sell item: " + file);
         }));
     }
 

@@ -1,6 +1,6 @@
 package github.mczme.ruralroutes.core.market;
 
-import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.theme.ResolvedTheme;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Optional;
@@ -35,7 +35,7 @@ public record MarketContext(
     /**
      * 从主题模板创建上下文
      */
-    public static MarketContext fromTheme(ThemeTemplate template) {
+    public static MarketContext fromTheme(ResolvedTheme template) {
         if (template == null) {
             return empty();
         }

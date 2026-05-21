@@ -1,0 +1,71 @@
+{
+  "buy_items": [
+    "minecraft:stone_axe",
+    "minecraft:iron_sword",
+    {
+      "items": [
+        "minecraft:iron_axe",
+        "minecraft:shears",
+        "minecraft:stone_sword"
+      ],
+      "key": "plains_pasture/tools",
+      "pick": 2
+    },
+    "#ruralroutes:currency"
+  ],
+  "name": "ruralroutes:plains_pasture",
+  "sell_items": [
+    "minecraft:leather",
+    {
+      "id": "#ruralroutes:candidate/biome/plains/leather_fiber",
+      "pick": 2
+    },
+    {
+      "id": "#ruralroutes:candidate/biome/plains/food",
+      "pick": 2
+    },
+    "#ruralroutes:currency"
+  ],
+  "theme_specialties": [
+    "minecraft:saddle"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 4,
+          "item": "minecraft:leather"
+        },
+        {
+          "count": 2,
+          "item": "minecraft:white_wool"
+        },
+        {
+          "count": 3,
+          "item": "minecraft:cooked_beef"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:saddle"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "minecraft:iron_sword",
+        "minecraft:iron_axe",
+        "minecraft:shears"
+      ],
+      "side": "buy_from_player"
+    }
+  ]
+}

@@ -9,7 +9,7 @@ import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.node.StockEntry;
 import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
-import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.theme.ResolvedTheme;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.menu.TradeStationMenu;
 import github.mczme.ruralroutes.register.RRBlockEntities;
@@ -312,7 +312,7 @@ public class TradeStationBlock extends BaseEntityBlock {
     }
 
     private void recordVillageDiscovery(ServerPlayer player, ResourceLocation themeName) {
-        ThemeTemplate theme = ThemeManager.INSTANCE.getTheme(themeName);
+        ResolvedTheme theme = ThemeManager.INSTANCE.getTheme(themeName);
         if (theme == null) {
             return;
         }

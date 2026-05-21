@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import github.mczme.ruralroutes.RuralRoutes;
-import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -130,10 +129,6 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
             }
         }
 
-        sellItems.addAll(template.sellItems());
-        buyItems.addAll(template.buyItems());
-        template.themeSpecialtyItems().ifPresent(specialties::addAll);
-        template.tradeContracts().ifPresent(tradeContracts::addAll);
         template.priceModifiers().ifPresent(priceModifiers::addAll);
         template.stock().ifPresent(stock -> {
             stock.targetEntries().ifPresent(targetEntries::putAll);
@@ -160,7 +155,8 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
             specialties.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(specialties)),
             resolvedStock,
             priceModifiers.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(priceModifiers)),
-            tradeContracts.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(tradeContracts))
+            tradeContracts.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(tradeContracts)),
+            template.tradeProfiles()
         );
     }
 

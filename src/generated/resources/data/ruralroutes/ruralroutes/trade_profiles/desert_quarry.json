@@ -1,0 +1,53 @@
+{
+  "buy_items": [
+    "minecraft:bread",
+    "minecraft:oak_log",
+    {
+      "items": [
+        "minecraft:charcoal",
+        "minecraft:stick",
+        "minecraft:cooked_beef"
+      ],
+      "key": "desert_quarry/supplies",
+      "pick": 2
+    },
+    "#ruralroutes:currency"
+  ],
+  "name": "ruralroutes:desert_quarry",
+  "sell_items": [
+    "minecraft:sandstone",
+    {
+      "id": "#ruralroutes:candidate/biome/desert/stone",
+      "pick": 3
+    },
+    {
+      "id": "#ruralroutes:candidate/theme/desert_quarry/stonework",
+      "pick": 2
+    },
+    "#ruralroutes:currency"
+  ],
+  "theme_specialties": [
+    "minecraft:chiseled_sandstone"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 2,
+          "item": "minecraft:red_sandstone"
+        },
+        {
+          "count": 1,
+          "item": "minecraft:stick"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:chiseled_sandstone"
+        }
+      ]
+    }
+  ]
+}

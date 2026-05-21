@@ -49,7 +49,7 @@ class TradeTargetRefCodecTest {
         ThemeTemplate.PriceModifier item = ThemeTemplate.PriceModifier.of(TradeTargetRef.item("minecraft:book"), 1.2f, 1.3f);
         ThemeTemplate.PriceModifier tag = ThemeTemplate.PriceModifier.of(TradeTargetRef.tag("minecraft:bookshelf"), 1.1f, 1.2f);
 
-        ThemeTemplate template = new ThemeTemplate(
+        ResolvedTheme template = new ResolvedTheme(
             ResourceLocation.parse("ruralroutes:test"),
             ResourceLocation.parse("minecraft:plains"),
             List.of(),
@@ -57,6 +57,7 @@ class TradeTargetRefCodecTest {
             Optional.empty(),
             Optional.empty(),
             Optional.of(List.of(exact, source, item, tag)),
+            Optional.empty(),
             Optional.empty()
         );
 

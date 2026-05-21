@@ -1,41 +1,22 @@
 {
   "biome": "minecraft:desert",
-  "buy_items": [
-    "minecraft:iron_ingot",
-    "minecraft:coal",
-    {
-      "items": [
-        "minecraft:raw_iron",
-        "minecraft:bone_meal",
-        "minecraft:bucket"
-      ],
-      "key": "desert_oasis/inputs",
-      "pick": 2
-    },
-    "#ruralroutes:currency"
-  ],
   "name": "ruralroutes:desert_oasis",
-  "price_modifiers": {
-    "#ruralroutes:candidate/biome/desert/crop": {
-      "buy": 0.78,
-      "sell": 0.84
-    },
-    "#ruralroutes:pool/mineral": {
-      "buy": 1.16,
-      "sell": 1.08
-    },
-    "minecraft:golden_carrot": {
-      "buy": 0.84,
-      "sell": 1.12
-    }
-  },
-  "sell_items": [
-    "minecraft:wheat",
+  "price_modifiers": [
     {
-      "id": "#ruralroutes:candidate/biome/desert/crop",
-      "pick": 3
+      "buy": 0.78,
+      "sell": 0.84,
+      "target": "#ruralroutes:candidate/biome/desert/crop"
     },
-    "#ruralroutes:currency"
+    {
+      "buy": 1.16,
+      "sell": 1.08,
+      "target": "#ruralroutes:pool/mineral"
+    },
+    {
+      "buy": 0.84,
+      "sell": 1.12,
+      "target": "minecraft:golden_carrot"
+    }
   ],
   "stock": {
     "default": {
@@ -61,45 +42,7 @@
       }
     }
   },
-  "theme_specialties": [
-    "minecraft:golden_carrot"
-  ],
-  "trade_contracts": [
-    {
-      "type": "fixed",
-      "inputs": [
-        {
-          "count": 4,
-          "item": "minecraft:melon"
-        },
-        {
-          "count": 6,
-          "item": "minecraft:wheat"
-        },
-        {
-          "count": 8,
-          "item": "minecraft:carrot"
-        }
-      ],
-      "outputs": [
-        {
-          "count": 1,
-          "item": "minecraft:golden_carrot"
-        }
-      ]
-    },
-    {
-      "type": "currency_basket_dynamic",
-      "accepted_currencies": [
-        "ruralroutes:iron_coin",
-        "ruralroutes:copper_coin"
-      ],
-      "composition": "largest_first",
-      "items": [
-        "#ruralroutes:pool/mineral",
-        "minecraft:bucket"
-      ],
-      "side": "buy_from_player"
-    }
+  "trade_profiles": [
+    "ruralroutes:desert_oasis"
   ]
 }

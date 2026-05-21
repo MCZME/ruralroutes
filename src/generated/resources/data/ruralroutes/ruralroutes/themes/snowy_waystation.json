@@ -1,55 +1,32 @@
 {
   "biome": "minecraft:snowy_plains",
-  "buy_items": [
-    "minecraft:iron_ingot",
-    "minecraft:gold_ingot",
-    {
-      "items": [
-        "minecraft:raw_iron",
-        "minecraft:coal",
-        "minecraft:charcoal"
-      ],
-      "key": "snowy_waystation/valuables",
-      "pick": 2
-    },
-    "#ruralroutes:currency"
-  ],
   "name": "ruralroutes:snowy_waystation",
-  "price_modifiers": {
-    "#ruralroutes:candidate/biome/snowy/food": {
-      "buy": 0.88,
-      "sell": 0.94
-    },
-    "#ruralroutes:candidate/theme/snowy_waystation/supplies": {
-      "buy": 0.9,
-      "sell": 0.96
-    },
-    "#ruralroutes:pool/mineral": {
-      "buy": 1.14,
-      "sell": 1.08
-    },
-    "#ruralroutes:pool/wood": {
-      "buy": 0.9,
-      "sell": 0.96
-    },
-    "minecraft:campfire": {
-      "buy": 0.9,
-      "sell": 1.08
-    }
-  },
-  "sell_items": [
+  "price_modifiers": [
     {
-      "items": [
-        "#ruralroutes:candidate/biome/snowy/food",
-        "minecraft:bread",
-        "minecraft:oak_log",
-        "minecraft:spruce_log",
-        "minecraft:charcoal"
-      ],
-      "key": "snowy_waystation/supplies",
-      "pick": 4
+      "buy": 0.9,
+      "sell": 0.96,
+      "target": "#ruralroutes:candidate/theme/snowy_waystation/supplies"
     },
-    "#ruralroutes:currency"
+    {
+      "buy": 0.88,
+      "sell": 0.94,
+      "target": "#ruralroutes:candidate/biome/snowy/food"
+    },
+    {
+      "buy": 0.9,
+      "sell": 0.96,
+      "target": "#ruralroutes:pool/wood"
+    },
+    {
+      "buy": 1.14,
+      "sell": 1.08,
+      "target": "#ruralroutes:pool/mineral"
+    },
+    {
+      "buy": 0.9,
+      "sell": 1.08,
+      "target": "minecraft:campfire"
+    }
   ],
   "stock": {
     "default": {
@@ -79,40 +56,7 @@
       }
     }
   },
-  "theme_specialties": [
-    "minecraft:campfire"
-  ],
-  "trade_contracts": [
-    {
-      "type": "fixed",
-      "inputs": [
-        {
-          "count": 1,
-          "item": "minecraft:bread"
-        },
-        {
-          "count": 1,
-          "item": "minecraft:spruce_log"
-        }
-      ],
-      "outputs": [
-        {
-          "count": 1,
-          "item": "minecraft:campfire"
-        }
-      ]
-    },
-    {
-      "type": "currency_basket_dynamic",
-      "accepted_currencies": [
-        "ruralroutes:iron_coin",
-        "ruralroutes:copper_coin"
-      ],
-      "composition": "largest_first",
-      "items": [
-        "#ruralroutes:pool/mineral"
-      ],
-      "side": "buy_from_player"
-    }
+  "trade_profiles": [
+    "ruralroutes:snowy_waystation"
   ]
 }

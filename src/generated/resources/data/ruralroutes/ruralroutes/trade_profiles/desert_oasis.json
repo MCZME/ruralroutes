@@ -1,0 +1,66 @@
+{
+  "buy_items": [
+    "minecraft:iron_ingot",
+    "minecraft:coal",
+    {
+      "items": [
+        "minecraft:raw_iron",
+        "minecraft:bone_meal",
+        "minecraft:bucket"
+      ],
+      "key": "desert_oasis/inputs",
+      "pick": 2
+    },
+    "#ruralroutes:currency"
+  ],
+  "name": "ruralroutes:desert_oasis",
+  "sell_items": [
+    "minecraft:wheat",
+    {
+      "id": "#ruralroutes:candidate/biome/desert/crop",
+      "pick": 3
+    },
+    "#ruralroutes:currency"
+  ],
+  "theme_specialties": [
+    "minecraft:golden_carrot"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 4,
+          "item": "minecraft:melon"
+        },
+        {
+          "count": 6,
+          "item": "minecraft:wheat"
+        },
+        {
+          "count": 8,
+          "item": "minecraft:carrot"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:golden_carrot"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "#ruralroutes:pool/mineral",
+        "minecraft:bucket"
+      ],
+      "side": "buy_from_player"
+    }
+  ]
+}

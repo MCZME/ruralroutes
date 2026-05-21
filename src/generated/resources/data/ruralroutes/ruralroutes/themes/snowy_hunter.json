@@ -1,45 +1,22 @@
 {
   "biome": "minecraft:snowy_plains",
-  "buy_items": [
-    "minecraft:iron_sword",
-    "minecraft:spruce_log",
-    {
-      "items": [
-        "minecraft:stone_axe",
-        "minecraft:iron_axe",
-        "minecraft:charcoal"
-      ],
-      "key": "snowy_hunter/tools",
-      "pick": 2
-    },
-    "#ruralroutes:currency"
-  ],
   "name": "ruralroutes:snowy_hunter",
-  "price_modifiers": {
-    "#ruralroutes:candidate/biome/snowy/leather_fiber": {
-      "buy": 0.74,
-      "sell": 0.8
-    },
-    "#ruralroutes:candidate/theme/snowy_hunter/hunter_goods": {
-      "buy": 0.8,
-      "sell": 0.86
-    },
-    "minecraft:bone_block": {
-      "buy": 0.88,
-      "sell": 1.08
-    }
-  },
-  "sell_items": [
+  "price_modifiers": [
     {
-      "items": [
-        "#ruralroutes:candidate/biome/snowy/leather_fiber",
-        "minecraft:beef",
-        "minecraft:rabbit"
-      ],
-      "key": "snowy_hunter/game_goods",
-      "pick": 3
+      "buy": 0.8,
+      "sell": 0.86,
+      "target": "#ruralroutes:candidate/theme/snowy_hunter/hunter_goods"
     },
-    "#ruralroutes:currency"
+    {
+      "buy": 0.74,
+      "sell": 0.8,
+      "target": "#ruralroutes:candidate/biome/snowy/leather_fiber"
+    },
+    {
+      "buy": 0.88,
+      "sell": 1.08,
+      "target": "minecraft:bone_block"
+    }
   ],
   "stock": {
     "default": {
@@ -69,37 +46,7 @@
       }
     }
   },
-  "theme_specialties": [
-    "minecraft:bone_block"
-  ],
-  "trade_contracts": [
-    {
-      "type": "fixed",
-      "inputs": [
-        {
-          "count": 3,
-          "item": "minecraft:bone"
-        }
-      ],
-      "outputs": [
-        {
-          "count": 1,
-          "item": "minecraft:bone_block"
-        }
-      ]
-    },
-    {
-      "type": "currency_basket_dynamic",
-      "accepted_currencies": [
-        "ruralroutes:iron_coin",
-        "ruralroutes:copper_coin"
-      ],
-      "composition": "largest_first",
-      "items": [
-        "minecraft:iron_sword",
-        "minecraft:iron_axe"
-      ],
-      "side": "buy_from_player"
-    }
+  "trade_profiles": [
+    "ruralroutes:snowy_hunter"
   ]
 }

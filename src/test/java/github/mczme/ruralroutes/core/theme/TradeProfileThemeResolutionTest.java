@@ -41,12 +41,8 @@ class TradeProfileThemeResolutionTest {
         ThemeTemplate theme = theme(
             "ruralroutes:test_theme",
             "minecraft:plains",
-            List.of(ThemeTemplate.ItemReference.single("minecraft:melon")),
-            List.of(ThemeTemplate.ItemReference.single("minecraft:pumpkin")),
-            List.of(ThemeTemplate.ItemReference.single("minecraft:beetroot")),
             stockConfig(9, 10, Map.of("minecraft:melon", stockRangeValue(11, 12))),
             List.of(ThemeTemplate.PriceModifier.of(TradeTargetRef.item("minecraft:melon"), 1.5f, 1.6f)),
-            List.of(new ThemeTemplate.FixedTradeEntry(List.of(), List.of())),
             List.of(
                 ResourceLocation.fromNamespaceAndPath("ruralroutes", "first"),
                 ResourceLocation.fromNamespaceAndPath("ruralroutes", "second")
@@ -60,23 +56,20 @@ class TradeProfileThemeResolutionTest {
         assertEquals(
             List.of(
                 ThemeTemplate.ItemReference.single("minecraft:apple"),
-                ThemeTemplate.ItemReference.single("minecraft:carrot"),
-                ThemeTemplate.ItemReference.single("minecraft:melon")
+                ThemeTemplate.ItemReference.single("minecraft:carrot")
             ),
             resolved.sellItems()
         );
         assertEquals(
             List.of(
-                ThemeTemplate.ItemReference.single("minecraft:potato"),
-                ThemeTemplate.ItemReference.single("minecraft:pumpkin")
+                ThemeTemplate.ItemReference.single("minecraft:potato")
             ),
             resolved.buyItems()
         );
         assertEquals(
             List.of(
                 ResourceLocation.fromNamespaceAndPath("minecraft", "bread"),
-                ResourceLocation.fromNamespaceAndPath("minecraft", "wheat"),
-                ResourceLocation.fromNamespaceAndPath("minecraft", "beetroot")
+                ResourceLocation.fromNamespaceAndPath("minecraft", "wheat")
             ),
             resolved.themeSpecialties().orElseThrow()
         );
@@ -104,11 +97,7 @@ class TradeProfileThemeResolutionTest {
         ThemeTemplate theme = theme(
             "ruralroutes:test_theme",
             "minecraft:plains",
-            List.of(),
-            List.of(),
-            List.of(),
             stockConfig(9, 10, Map.of("minecraft:apple", stockRangeValue(11, 12), "minecraft:carrot", stockRangeValue(13, 14))),
-            List.of(),
             List.of(),
             List.of(ResourceLocation.fromNamespaceAndPath("ruralroutes", "profile"))
         );
@@ -138,11 +127,7 @@ class TradeProfileThemeResolutionTest {
         ThemeTemplate theme = theme(
             "ruralroutes:test_theme",
             "minecraft:plains",
-            List.of(),
-            List.of(),
-            List.of(),
             null,
-            List.of(),
             List.of(),
             List.of(ResourceLocation.fromNamespaceAndPath("ruralroutes", "profile"))
         );
@@ -190,23 +175,15 @@ class TradeProfileThemeResolutionTest {
     private static ThemeTemplate theme(
         String name,
         String biome,
-        List<ThemeTemplate.ItemReference> sellItems,
-        List<ThemeTemplate.ItemReference> buyItems,
-        List<ThemeTemplate.ItemReference> specialties,
         ThemeTemplate.StockConfig stock,
         List<ThemeTemplate.PriceModifier> priceModifiers,
-        List<ThemeTemplate.TradeContractEntry> tradeContracts,
         List<ResourceLocation> tradeProfiles
     ) {
         return new ThemeTemplate(
             ResourceLocation.parse(name),
             ResourceLocation.parse(biome),
-            sellItems,
-            buyItems,
-            Optional.of(specialties),
             Optional.ofNullable(stock),
             priceModifiers.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(priceModifiers)),
-            tradeContracts.isEmpty() ? Optional.empty() : Optional.of(tradeContracts),
             Optional.of(tradeProfiles)
         );
     }

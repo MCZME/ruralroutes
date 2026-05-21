@@ -1,0 +1,53 @@
+{
+  "buy_items": [
+    "minecraft:bread",
+    "minecraft:cooked_beef",
+    {
+      "items": [
+        "minecraft:charcoal",
+        "minecraft:clay_ball",
+        "minecraft:acacia_log"
+      ],
+      "key": "savanna_terracotta/supplies",
+      "pick": 2
+    },
+    "#ruralroutes:currency"
+  ],
+  "name": "ruralroutes:savanna_terracotta",
+  "sell_items": [
+    "minecraft:terracotta",
+    {
+      "id": "#ruralroutes:candidate/biome/savanna/dye_decor",
+      "pick": 2
+    },
+    {
+      "id": "#ruralroutes:candidate/theme/savanna_terracotta/kiln_goods",
+      "pick": 2
+    },
+    "#ruralroutes:currency"
+  ],
+  "theme_specialties": [
+    "minecraft:yellow_glazed_terracotta"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 1,
+          "item": "minecraft:terracotta"
+        },
+        {
+          "count": 1,
+          "item": "minecraft:charcoal"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:yellow_glazed_terracotta"
+        }
+      ]
+    }
+  ]
+}
