@@ -1,11 +1,9 @@
 package github.mczme.ruralroutes.core.trade;
 
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
-import github.mczme.ruralroutes.core.node.StockEntry;
-import github.mczme.ruralroutes.core.theme.ThemeTemplate.CompositionStrategy;
-import net.minecraft.core.registries.BuiltInRegistries;
+import github.mczme.ruralroutes.core.node.NodeStockEntry;
+import github.mczme.ruralroutes.core.theme.CompositionStrategy;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -119,7 +117,7 @@ public record CurrencyBasketDynamicContract(
 
     private boolean validateVillageCanPay(CommercialNodeData nodeData, TradePaymentPlan plan) {
         for (ItemStack required : plan.villageInputs()) {
-            StockEntry entry = nodeData.getStock(required);
+            NodeStockEntry entry = nodeData.getStock(required);
             if (entry == null || entry.current() < required.getCount()) {
                 return false;
             }

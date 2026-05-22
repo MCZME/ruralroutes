@@ -2,16 +2,15 @@ package github.mczme.ruralroutes.client.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
-import github.mczme.ruralroutes.core.node.StockEntry;
+import github.mczme.ruralroutes.core.node.NodeTradeEntry;
+import github.mczme.ruralroutes.core.node.NodeStockEntry;
 import github.mczme.ruralroutes.network.packet.OpenNodeDataViewerPayload.TargetBlockType;
 import github.mczme.ruralroutes.network.packet.OpenNodeDataViewerPayload.ViewStatus;
 import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -225,7 +224,7 @@ public class NodeDataViewerScreen extends Screen {
     }
 
     private int renderItemPanel(GuiGraphics guiGraphics, int x, int y, int width, Component title,
-            List<CommercialNodeData.NodeTradeEntry> itemEntries, boolean showStock) {
+            List<NodeTradeEntry> itemEntries, boolean showStock) {
         int height = getListPanelHeight(itemEntries.size());
         renderCardFrame(guiGraphics, x, y, width, height, title);
 
@@ -238,7 +237,7 @@ public class NodeDataViewerScreen extends Screen {
             return y + height;
         }
 
-        for (CommercialNodeData.NodeTradeEntry entry : itemEntries) {
+        for (NodeTradeEntry entry : itemEntries) {
             ResourceLocation itemId = entry.itemId();
             ItemStack stack = entry.displayStackOrDefault();
             renderItemRow(guiGraphics, rowX, rowY, rowWidth,
@@ -250,7 +249,7 @@ public class NodeDataViewerScreen extends Screen {
     }
 
     private void renderStockPanel(GuiGraphics guiGraphics, int x, int y, int width) {
-        List<Map.Entry<TradeItemKey, StockEntry>> stocks = nodeData.stocks().entrySet().stream()
+        List<Map.Entry<TradeItemKey, NodeStockEntry>> stocks = nodeData.stocks().entrySet().stream()
             .sorted(Map.Entry.comparingByKey(Comparator.comparing(TradeItemKey::canonicalKey)))
             .toList();
 
@@ -267,7 +266,7 @@ public class NodeDataViewerScreen extends Screen {
             return;
         }
 
-        for (Map.Entry<TradeItemKey, StockEntry> stock : stocks) {
+        for (Map.Entry<TradeItemKey, NodeStockEntry> stock : stocks) {
             ItemStack stack = stock.getKey().asItemStack();
             String stockText = Component.translatable("gui.ruralroutes.node_data_viewer.stock_pair",
                 stock.getValue().current(), stock.getValue().max()).getString();
@@ -383,11 +382,6 @@ public class NodeDataViewerScreen extends Screen {
 
     private int getStockPanelHeight(int itemCount) {
         return getListPanelHeight(itemCount);
-    }
-
-    private ItemStack createItemStack(ResourceLocation itemId) {
-        Item item = BuiltInRegistries.ITEM.getOptional(itemId).orElse(null);
-        return item == null ? ItemStack.EMPTY : new ItemStack(item);
     }
 
     private Component getItemName(TradeItemKey itemKey, ItemStack stack) {

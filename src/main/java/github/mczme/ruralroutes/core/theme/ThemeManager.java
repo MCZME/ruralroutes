@@ -102,14 +102,14 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
     }
 
     private ResolvedTheme resolveTheme(ThemeTemplate template, Map<ResourceLocation, TradeProfile> profileMap) {
-        List<ThemeTemplate.ItemReference> sellItems = new ArrayList<>();
-        List<ThemeTemplate.ItemReference> buyItems = new ArrayList<>();
-        List<ThemeTemplate.ItemReference> specialties = new ArrayList<>();
-        List<ThemeTemplate.TradeContractEntry> tradeContracts = new ArrayList<>();
-        List<ThemeTemplate.PriceModifier> priceModifiers = new ArrayList<>();
-        ThemeTemplate.StockConfig themeStock = template.stock().orElse(null);
-        Map<String, ThemeTemplate.StockTarget> targetEntries = new LinkedHashMap<>();
-        Map<String, ThemeTemplate.StockRange> stockTargets = new LinkedHashMap<>();
+        List<ItemReference> sellItems = new ArrayList<>();
+        List<ItemReference> buyItems = new ArrayList<>();
+        List<ItemReference> specialties = new ArrayList<>();
+        List<TradeContractEntry> tradeContracts = new ArrayList<>();
+        List<PriceModifier> priceModifiers = new ArrayList<>();
+        StockConfig themeStock = template.stock().orElse(null);
+        Map<String, StockTarget> targetEntries = new LinkedHashMap<>();
+        Map<String, StockRange> stockTargets = new LinkedHashMap<>();
 
         for (ResourceLocation profileId : template.tradeProfiles().orElse(List.of())) {
             TradeProfile profile = profileMap.get(profileId);
@@ -122,7 +122,7 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
             profile.themeSpecialties().ifPresent(specialties::addAll);
             profile.tradeContracts().ifPresent(tradeContracts::addAll);
             if (profile.stock().isPresent()) {
-                ThemeTemplate.StockConfig profileStock = profile.stock().get();
+                StockConfig profileStock = profile.stock().get();
                 profileStock.targetEntries().ifPresent(targetEntries::putAll);
                 profileStock.targets().ifPresent(stockTargets::putAll);
                 profileStock.specific().ifPresent(stockTargets::putAll);
@@ -136,11 +136,11 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
             stock.specific().ifPresent(stockTargets::putAll);
         });
 
-        Optional<ThemeTemplate.StockConfig> resolvedStock;
+        Optional<StockConfig> resolvedStock;
         if (themeStock == null && stockTargets.isEmpty() && targetEntries.isEmpty()) {
             resolvedStock = Optional.empty();
         } else {
-            resolvedStock = Optional.of(new ThemeTemplate.StockConfig(
+            resolvedStock = Optional.of(new StockConfig(
                 themeStock != null ? themeStock.defaultRange() : Optional.empty(),
                 targetEntries.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(targetEntries)),
                 stockTargets.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(stockTargets))

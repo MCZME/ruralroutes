@@ -13,17 +13,17 @@ class ThemeStockTargetResolutionTest {
 
     @Test
     void resolvesTargetByItemSourceAndTag() {
-        ThemeTemplate.StockConfig config = new ThemeTemplate.StockConfig(
-            Optional.of(new ThemeTemplate.StockRange(8, 16)),
+        StockConfig config = new StockConfig(
+            Optional.of(new StockRange(8, 16)),
             Optional.of(Map.of(
-                "minecraft:book", ThemeTemplate.StockTarget.shared(new ThemeTemplate.StockRange(3, 5)),
-                "demo/key", ThemeTemplate.StockTarget.shared(new ThemeTemplate.StockRange(6, 7)),
-                "#ruralroutes:pool/book", ThemeTemplate.StockTarget.shared(new ThemeTemplate.StockRange(9, 11))
+                "minecraft:book", StockTarget.shared(new StockRange(3, 5)),
+                "demo/key", StockTarget.shared(new StockRange(6, 7)),
+                "#ruralroutes:pool/book", StockTarget.shared(new StockRange(9, 11))
             )),
             Optional.of(Map.of(
-                "minecraft:book", new ThemeTemplate.StockRange(12, 14),
-                "demo/key", new ThemeTemplate.StockRange(15, 16),
-                "#ruralroutes:pool/book", new ThemeTemplate.StockRange(17, 18)
+                "minecraft:book", new StockRange(12, 14),
+                "demo/key", new StockRange(15, 16),
+                "#ruralroutes:pool/book", new StockRange(17, 18)
             ))
         );
 

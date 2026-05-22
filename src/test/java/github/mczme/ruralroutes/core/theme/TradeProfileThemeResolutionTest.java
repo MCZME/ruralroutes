@@ -21,20 +21,20 @@ class TradeProfileThemeResolutionTest {
     void profilesAreMergedInDeclaredOrder() throws Exception {
         TradeProfile first = profile(
             "ruralroutes:first",
-            List.of(ThemeTemplate.ItemReference.single("minecraft:apple")),
+            List.of(ItemReference.single("minecraft:apple")),
             List.of(),
-            List.of(ThemeTemplate.ItemReference.single("minecraft:bread")),
-            targetsOnlyStockConfig(Map.of("minecraft:apple", ThemeTemplate.StockTarget.shared(stockRangeValue(3, 4)))),
-            List.of(new ThemeTemplate.FixedTradeEntry(List.of(), List.of())),
+            List.of(ItemReference.single("minecraft:bread")),
+            targetsOnlyStockConfig(Map.of("minecraft:apple", StockTarget.shared(stockRangeValue(3, 4)))),
+            List.of(new FixedTradeEntry(List.of(), List.of())),
             null
         );
         TradeProfile second = profile(
             "ruralroutes:second",
-            List.of(ThemeTemplate.ItemReference.single("minecraft:carrot")),
-            List.of(ThemeTemplate.ItemReference.single("minecraft:potato")),
-            List.of(ThemeTemplate.ItemReference.single("minecraft:wheat")),
-            targetsOnlyStockConfig(Map.of("minecraft:carrot", ThemeTemplate.StockTarget.shared(stockRangeValue(7, 8)))),
-            List.of(new ThemeTemplate.CurrencyBasketEntry(TradeSide.SELL_TO_PLAYER, List.of("*"), List.of("#ruralroutes:currency"), ThemeTemplate.CompositionStrategy.LARGEST_FIRST)),
+            List.of(ItemReference.single("minecraft:carrot")),
+            List.of(ItemReference.single("minecraft:potato")),
+            List.of(ItemReference.single("minecraft:wheat")),
+            targetsOnlyStockConfig(Map.of("minecraft:carrot", StockTarget.shared(stockRangeValue(7, 8)))),
+            List.of(new CurrencyBasketEntry(TradeSide.SELL_TO_PLAYER, List.of("*"), List.of("#ruralroutes:currency"), CompositionStrategy.LARGEST_FIRST)),
             null
         );
 
@@ -42,7 +42,7 @@ class TradeProfileThemeResolutionTest {
             "ruralroutes:test_theme",
             "minecraft:plains",
             stockConfig(9, 10, Map.of("minecraft:melon", stockRangeValue(11, 12))),
-            List.of(ThemeTemplate.PriceModifier.of(TradeTargetRef.item("minecraft:melon"), 1.5f, 1.6f)),
+            List.of(PriceModifier.of(TradeTargetRef.item("minecraft:melon"), 1.5f, 1.6f)),
             List.of(
                 ResourceLocation.fromNamespaceAndPath("ruralroutes", "first"),
                 ResourceLocation.fromNamespaceAndPath("ruralroutes", "second")
@@ -55,14 +55,14 @@ class TradeProfileThemeResolutionTest {
 
         assertEquals(
             List.of(
-                ThemeTemplate.ItemReference.single("minecraft:apple"),
-                ThemeTemplate.ItemReference.single("minecraft:carrot")
+                ItemReference.single("minecraft:apple"),
+                ItemReference.single("minecraft:carrot")
             ),
             resolved.sellItems()
         );
         assertEquals(
             List.of(
-                ThemeTemplate.ItemReference.single("minecraft:potato")
+                ItemReference.single("minecraft:potato")
             ),
             resolved.buyItems()
         );
@@ -74,7 +74,7 @@ class TradeProfileThemeResolutionTest {
             resolved.themeSpecialties().orElseThrow()
         );
         assertEquals(
-            List.of(ThemeTemplate.PriceModifier.of(TradeTargetRef.item("minecraft:melon"), 1.5f, 1.6f)),
+            List.of(PriceModifier.of(TradeTargetRef.item("minecraft:melon"), 1.5f, 1.6f)),
             resolved.priceModifiers().orElseThrow()
         );
         assertTrue(resolved.stock().isPresent());
@@ -89,7 +89,7 @@ class TradeProfileThemeResolutionTest {
             List.of(),
             List.of(),
             List.of(),
-            targetsOnlyStockConfig(Map.of("minecraft:apple", ThemeTemplate.StockTarget.shared(stockRangeValue(3, 4)))),
+            targetsOnlyStockConfig(Map.of("minecraft:apple", StockTarget.shared(stockRangeValue(3, 4)))),
             List.of(),
             null
         );
@@ -119,7 +119,7 @@ class TradeProfileThemeResolutionTest {
             List.of(),
             List.of(),
             List.of(),
-            targetsOnlyStockConfig(Map.of("minecraft:apple", ThemeTemplate.StockTarget.shared(stockRangeValue(3, 4)))),
+            targetsOnlyStockConfig(Map.of("minecraft:apple", StockTarget.shared(stockRangeValue(3, 4)))),
             List.of(),
             null
         );
@@ -155,11 +155,11 @@ class TradeProfileThemeResolutionTest {
 
     private static TradeProfile profile(
         String name,
-        List<ThemeTemplate.ItemReference> sellItems,
-        List<ThemeTemplate.ItemReference> buyItems,
-        List<ThemeTemplate.ItemReference> specialties,
-        ThemeTemplate.StockConfig stock,
-        List<ThemeTemplate.TradeContractEntry> tradeContracts,
+        List<ItemReference> sellItems,
+        List<ItemReference> buyItems,
+        List<ItemReference> specialties,
+        StockConfig stock,
+        List<TradeContractEntry> tradeContracts,
         List<ResourceLocation> ignoredThemeProfiles
     ) {
         return new TradeProfile(
@@ -175,8 +175,8 @@ class TradeProfileThemeResolutionTest {
     private static ThemeTemplate theme(
         String name,
         String biome,
-        ThemeTemplate.StockConfig stock,
-        List<ThemeTemplate.PriceModifier> priceModifiers,
+        StockConfig stock,
+        List<PriceModifier> priceModifiers,
         List<ResourceLocation> tradeProfiles
     ) {
         return new ThemeTemplate(
@@ -188,15 +188,15 @@ class TradeProfileThemeResolutionTest {
         );
     }
 
-    private static ThemeTemplate.StockConfig stockConfig(int min, int max, Map<String, ThemeTemplate.StockRange> specific) {
-        return new ThemeTemplate.StockConfig(Optional.of(new ThemeTemplate.StockRange(min, max)), Optional.empty(), Optional.of(specific));
+    private static StockConfig stockConfig(int min, int max, Map<String, StockRange> specific) {
+        return new StockConfig(Optional.of(new StockRange(min, max)), Optional.empty(), Optional.of(specific));
     }
 
-    private static ThemeTemplate.StockConfig targetsOnlyStockConfig(Map<String, ThemeTemplate.StockTarget> targets) {
-        return new ThemeTemplate.StockConfig(Optional.empty(), Optional.of(targets), Optional.empty());
+    private static StockConfig targetsOnlyStockConfig(Map<String, StockTarget> targets) {
+        return new StockConfig(Optional.empty(), Optional.of(targets), Optional.empty());
     }
 
-    private static ThemeTemplate.StockRange stockRangeValue(int min, int max) {
-        return new ThemeTemplate.StockRange(min, max);
+    private static StockRange stockRangeValue(int min, int max) {
+        return new StockRange(min, max);
     }
 }

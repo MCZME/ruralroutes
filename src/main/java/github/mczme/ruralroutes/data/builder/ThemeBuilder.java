@@ -1,6 +1,10 @@
 package github.mczme.ruralroutes.data.builder;
 
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.core.theme.PriceModifier;
+import github.mczme.ruralroutes.core.theme.StockConfig;
+import github.mczme.ruralroutes.core.theme.StockRange;
+import github.mczme.ruralroutes.core.theme.StockTarget;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import net.minecraft.resources.ResourceLocation;
 
@@ -20,10 +24,10 @@ public class ThemeBuilder {
     private final String name;
     private String biome;
     private final java.util.List<ResourceLocation> tradeProfiles = new java.util.ArrayList<>();
-    private ThemeTemplate.StockRange defaultStock;
-    private final Map<String, ThemeTemplate.StockTarget> stockTargets = new LinkedHashMap<>();
-    private final Map<String, ThemeTemplate.StockRange> stockSpecific = new LinkedHashMap<>();
-    private final java.util.List<ThemeTemplate.PriceModifier> priceModifiers = new java.util.ArrayList<>();
+    private StockRange defaultStock;
+    private final Map<String, StockTarget> stockTargets = new LinkedHashMap<>();
+    private final Map<String, StockRange> stockSpecific = new LinkedHashMap<>();
+    private final java.util.List<PriceModifier> priceModifiers = new java.util.ArrayList<>();
     private BiConsumer<ResourceLocation, ThemeTemplate> registrar;
 
     private ThemeBuilder(String name) {
@@ -55,30 +59,30 @@ public class ThemeBuilder {
     }
 
     public ThemeBuilder stock(int min, int max) {
-        this.defaultStock = new ThemeTemplate.StockRange(min, max);
+        this.defaultStock = new StockRange(min, max);
         return this;
     }
 
     public ThemeBuilder stockSpecific(String key, int min, int max) {
-        stockSpecific.put(key, new ThemeTemplate.StockRange(min, max));
+        stockSpecific.put(key, new StockRange(min, max));
         return this;
     }
 
     public ThemeBuilder stockTarget(String key, int min, int max) {
-        stockTargets.put(key, ThemeTemplate.StockTarget.shared(new ThemeTemplate.StockRange(min, max)));
+        stockTargets.put(key, StockTarget.shared(new StockRange(min, max)));
         return this;
     }
 
     public ThemeBuilder stockTarget(String key, int sellMin, int sellMax, int buyMin, int buyMax) {
-        stockTargets.put(key, ThemeTemplate.StockTarget.directional(
-            new ThemeTemplate.StockRange(sellMin, sellMax),
-            new ThemeTemplate.StockRange(buyMin, buyMax)
+        stockTargets.put(key, StockTarget.directional(
+            new StockRange(sellMin, sellMax),
+            new StockRange(buyMin, buyMax)
         ));
         return this;
     }
 
     public ThemeBuilder priceModifier(String key, float sell, float buy) {
-        priceModifiers.add(ThemeTemplate.PriceModifier.of(
+        priceModifiers.add(PriceModifier.of(
             github.mczme.ruralroutes.core.trade.TradeTargetRef.fromString(key),
             sell,
             buy
@@ -96,7 +100,7 @@ public class ThemeBuilder {
             ResourceLocation.parse(biome),
             defaultStock == null && stockTargets.isEmpty() && stockSpecific.isEmpty()
                 ? Optional.empty()
-                : Optional.of(new ThemeTemplate.StockConfig(
+                : Optional.of(new StockConfig(
                     Optional.ofNullable(defaultStock),
                     stockTargets.isEmpty() ? Optional.empty()
                         : Optional.of(Collections.unmodifiableMap(new LinkedHashMap<>(stockTargets))),

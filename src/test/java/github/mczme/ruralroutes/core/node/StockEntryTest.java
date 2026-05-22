@@ -1,5 +1,7 @@
 package github.mczme.ruralroutes.core.node;
 
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,8 +12,8 @@ class StockEntryTest {
 
     @Test
     void fullAndEmptyFactoriesReflectBoundaries() {
-        StockEntry full = StockEntry.full(12);
-        StockEntry empty = StockEntry.empty(12);
+        NodeStockEntry full = NodeStockEntry.full(new ItemStack(Items.APPLE), 12);
+        NodeStockEntry empty = NodeStockEntry.empty(new ItemStack(Items.APPLE), 12);
 
         assertEquals(12, full.current());
         assertEquals(12, full.max());
@@ -26,7 +28,7 @@ class StockEntryTest {
 
     @Test
     void increaseAndDecreaseClampToBounds() {
-        StockEntry base = new StockEntry(5, 10);
+        NodeStockEntry base = new NodeStockEntry(new ItemStack(Items.APPLE), 5, 10);
 
         assertEquals(0, base.decrease(99).current());
         assertEquals(10, base.increase(99).current());

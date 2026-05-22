@@ -3,11 +3,8 @@ package github.mczme.ruralroutes.core.trade;
 import github.mczme.ruralroutes.core.cycle.CycleManager;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
-import github.mczme.ruralroutes.core.node.StockEntry;
-import github.mczme.ruralroutes.core.trade.TradeItemKey;
+import github.mczme.ruralroutes.core.node.NodeStockEntry;
 import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
@@ -80,12 +77,12 @@ public final class TradeContractExecutor {
             TradeResult result,
             net.minecraft.core.BlockPos blockPos) {
 
-        Map<TradeItemKey, StockEntry> stocks = new HashMap<>(nodeData.stocks());
+        Map<TradeItemKey, NodeStockEntry> stocks = new HashMap<>(nodeData.stocks());
 
         // 玩家消耗的物品加入村庄库存
         for (ItemStack item : result.consumed()) {
             TradeItemKey itemKey = TradeItemKey.from(item);
-            StockEntry current = stocks.get(itemKey);
+            NodeStockEntry current = stocks.get(itemKey);
             if (current == null && itemKey.hasComponents()) {
                 current = stocks.get(TradeItemKey.of(itemKey.itemId()));
             }
@@ -97,7 +94,7 @@ public final class TradeContractExecutor {
         // 玩家获得的物品从村庄库存扣除
         for (ItemStack item : result.outputs()) {
             TradeItemKey itemKey = TradeItemKey.from(item);
-            StockEntry current = stocks.get(itemKey);
+            NodeStockEntry current = stocks.get(itemKey);
             if (current == null && itemKey.hasComponents()) {
                 current = stocks.get(TradeItemKey.of(itemKey.itemId()));
             }
@@ -319,7 +316,7 @@ public final class TradeContractExecutor {
     private List<ItemStack> validateVillageInventory(CommercialNodeData nodeData, TradePaymentPlan plan) {
         List<ItemStack> shortfall = new ArrayList<>();
         for (ItemStack required : plan.villageInputs()) {
-            StockEntry entry = nodeData.getStock(required);
+            NodeStockEntry entry = nodeData.getStock(required);
             if (entry == null || entry.current() < required.getCount()) {
                 shortfall.add(new ItemStack(required.getItem(), required.getCount() - (entry != null ? entry.current() : 0)));
             }
@@ -357,12 +354,12 @@ public final class TradeContractExecutor {
             TradePaymentPlan plan,
             net.minecraft.core.BlockPos blockPos) {
 
-        Map<TradeItemKey, StockEntry> stocks = new HashMap<>(nodeData.stocks());
+        Map<TradeItemKey, NodeStockEntry> stocks = new HashMap<>(nodeData.stocks());
 
         // 村庄输入：扣除库存（村庄卖出的商品 + 村庄支付的货币）
         for (ItemStack item : plan.villageInputs()) {
             TradeItemKey itemKey = TradeItemKey.from(item);
-            StockEntry current = stocks.get(itemKey);
+            NodeStockEntry current = stocks.get(itemKey);
             if (current == null && itemKey.hasComponents()) {
                 current = stocks.get(TradeItemKey.of(itemKey.itemId()));
             }
@@ -374,7 +371,7 @@ public final class TradeContractExecutor {
         // 村庄输出：增加库存（村庄买入的商品 + 村庄收到的货币）
         for (ItemStack item : plan.villageOutputs()) {
             TradeItemKey itemKey = TradeItemKey.from(item);
-            StockEntry current = stocks.get(itemKey);
+            NodeStockEntry current = stocks.get(itemKey);
             if (current == null && itemKey.hasComponents()) {
                 current = stocks.get(TradeItemKey.of(itemKey.itemId()));
             }

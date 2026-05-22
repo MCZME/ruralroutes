@@ -13,13 +13,13 @@ class ThemeStockSpecificResolutionTest {
 
     @Test
     void resolvesSpecificStockWithItemSourceAndTagFallbacks() {
-        ThemeTemplate.StockConfig config = new ThemeTemplate.StockConfig(
-            Optional.of(new ThemeTemplate.StockRange(8, 16)),
+        StockConfig config = new StockConfig(
+            Optional.of(new StockRange(8, 16)),
             Optional.empty(),
             Optional.of(Map.of(
-                "minecraft:book", new ThemeTemplate.StockRange(11, 12),
-                "demo/key", new ThemeTemplate.StockRange(13, 14),
-                "#ruralroutes:pool/book", new ThemeTemplate.StockRange(15, 16)
+                "minecraft:book", new StockRange(11, 12),
+                "demo/key", new StockRange(13, 14),
+                "#ruralroutes:pool/book", new StockRange(15, 16)
             ))
         );
 

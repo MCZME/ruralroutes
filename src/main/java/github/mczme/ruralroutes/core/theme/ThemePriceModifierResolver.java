@@ -20,11 +20,11 @@ public final class ThemePriceModifierResolver {
     private ThemePriceModifierResolver() {}
 
     /** 默认修正值 */
-    private static final ThemeTemplate.PriceModifier DEFAULT_MODIFIER =
-        ThemeTemplate.PriceModifier.of(TradeTargetRef.item("minecraft:air"), 1.0f, 1.0f);
+    private static final PriceModifier DEFAULT_MODIFIER =
+        PriceModifier.of(TradeTargetRef.item("minecraft:air"), 1.0f, 1.0f);
 
     /** 缓存 key: themeId.toString() + "|" + itemId.toString() */
-    private static final Map<String, ThemeTemplate.PriceModifier> CACHE =
+    private static final Map<String, PriceModifier> CACHE =
         new ConcurrentHashMap<>();
 
     /**
@@ -40,13 +40,13 @@ public final class ThemePriceModifierResolver {
      * @param stack 物品栈
      * @return 价格修正（永不为 null）
      */
-    public static ThemeTemplate.PriceModifier resolve(
+    public static PriceModifier resolve(
             ResolvedTheme template,
             ItemStack stack) {
         return resolve(template, stack, Optional.empty());
     }
 
-    public static ThemeTemplate.PriceModifier resolve(
+    public static PriceModifier resolve(
             ResolvedTheme template,
             ItemStack stack,
             Optional<String> sourceKey) {
@@ -62,7 +62,7 @@ public final class ThemePriceModifierResolver {
         return CACHE.computeIfAbsent(cacheKey, k -> doResolve(template, stack, itemKey, sourceKey));
     }
 
-    public static ThemeTemplate.PriceModifier resolve(
+    public static PriceModifier resolve(
             ResolvedTheme template,
             TradeItemKey itemKey,
             Optional<String> sourceKey) {
@@ -77,20 +77,20 @@ public final class ThemePriceModifierResolver {
     /**
      * 实际解析逻辑（无缓存）
      */
-    private static ThemeTemplate.PriceModifier doResolve(
+    private static PriceModifier doResolve(
             ResolvedTheme template,
             ItemStack stack,
             TradeItemKey itemKey,
             Optional<String> sourceKey) {
 
-        Optional<java.util.List<ThemeTemplate.PriceModifier>> modifiersOpt = template.priceModifiers();
+        Optional<java.util.List<PriceModifier>> modifiersOpt = template.priceModifiers();
         if (modifiersOpt.isEmpty()) {
             return DEFAULT_MODIFIER;
         }
 
-        ThemeTemplate.PriceModifier best = null;
+        PriceModifier best = null;
         int bestScore = -1;
-        for (ThemeTemplate.PriceModifier modifier : modifiersOpt.get()) {
+        for (PriceModifier modifier : modifiersOpt.get()) {
             int score = modifier.targetRef().matchSpecificity(stack, sourceKey, itemKey);
             if (score > bestScore) {
                 bestScore = score;
@@ -105,18 +105,18 @@ public final class ThemePriceModifierResolver {
         return DEFAULT_MODIFIER;
     }
 
-    private static ThemeTemplate.PriceModifier doResolve(
+    private static PriceModifier doResolve(
             ResolvedTheme template,
             TradeItemKey itemKey,
             Optional<String> sourceKey) {
-        Optional<java.util.List<ThemeTemplate.PriceModifier>> modifiersOpt = template.priceModifiers();
+        Optional<java.util.List<PriceModifier>> modifiersOpt = template.priceModifiers();
         if (modifiersOpt.isEmpty()) {
             return DEFAULT_MODIFIER;
         }
 
-        ThemeTemplate.PriceModifier best = null;
+        PriceModifier best = null;
         int bestScore = -1;
-        for (ThemeTemplate.PriceModifier modifier : modifiersOpt.get()) {
+        for (PriceModifier modifier : modifiersOpt.get()) {
             int score = modifier.targetRef().matchSpecificity(null, sourceKey, itemKey);
             if (score > bestScore) {
                 bestScore = score;

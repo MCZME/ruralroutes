@@ -1,5 +1,7 @@
 package github.mczme.ruralroutes.core.node;
 
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,10 +12,10 @@ class NodeStockPlanTest {
     @Test
     void convertsSellAndBuyBasesToSharedStockEntry() {
         // current 代表当前可卖现货，max 代表现货 + 可回收容量，这里固定共享库存语义。
-        StockEntry stockEntry = NodeStockPlan.EMPTY
+        NodeStockEntry stockEntry = NodeStockPlan.EMPTY
                 .addSell(8)
                 .addBuy(5)
-                .toStockEntry();
+                .toStockEntry(new ItemStack(Items.APPLE));
 
         assertEquals(8, stockEntry.current());
         assertEquals(13, stockEntry.max());
@@ -21,7 +23,7 @@ class NodeStockPlanTest {
 
     @Test
     void emptyPlanProducesEmptyStockEntry() {
-        StockEntry stockEntry = NodeStockPlan.EMPTY.toStockEntry();
+        NodeStockEntry stockEntry = NodeStockPlan.EMPTY.toStockEntry(new ItemStack(Items.APPLE));
 
         assertEquals(0, stockEntry.current());
         assertEquals(0, stockEntry.max());

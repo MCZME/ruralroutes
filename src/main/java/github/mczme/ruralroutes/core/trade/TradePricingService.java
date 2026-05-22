@@ -6,11 +6,10 @@ import github.mczme.ruralroutes.core.market.MarketPriceAdjustment;
 import github.mczme.ruralroutes.core.market.MarketState;
 import github.mczme.ruralroutes.core.market.MarketStateResolver;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
-import github.mczme.ruralroutes.core.trade.TradeItemKey;
+import github.mczme.ruralroutes.core.theme.PriceModifier;
 import github.mczme.ruralroutes.core.theme.ResolvedTheme;
 import github.mczme.ruralroutes.core.theme.ThemePriceModifierResolver;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
-import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.value.ValueTableManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -124,7 +123,7 @@ public final class TradePricingService {
         }
 
         TradeItemKey itemKey = TradeItemKey.from(stack);
-        ThemeTemplate.PriceModifier modifier =
+        PriceModifier modifier =
             ThemePriceModifierResolver.resolve(template, itemKey, sourceKey);
 
         return switch (side) {

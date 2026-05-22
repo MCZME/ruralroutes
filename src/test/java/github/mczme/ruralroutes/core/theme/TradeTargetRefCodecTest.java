@@ -40,14 +40,14 @@ class TradeTargetRefCodecTest {
 
     @Test
     void priceModifierPrefersComponentThenSourceThenItemThenTag() {
-        ThemeTemplate.PriceModifier exact = ThemeTemplate.PriceModifier.of(
+        PriceModifier exact = PriceModifier.of(
             TradeTargetRef.exactItem("minecraft:book", java.util.Map.of("minecraft:custom_name", "{\"text\":\"A\"}")),
             1.4f,
             1.5f
         );
-        ThemeTemplate.PriceModifier source = ThemeTemplate.PriceModifier.of(TradeTargetRef.sourceKey("demo/key"), 1.3f, 1.4f);
-        ThemeTemplate.PriceModifier item = ThemeTemplate.PriceModifier.of(TradeTargetRef.item("minecraft:book"), 1.2f, 1.3f);
-        ThemeTemplate.PriceModifier tag = ThemeTemplate.PriceModifier.of(TradeTargetRef.tag("minecraft:bookshelf"), 1.1f, 1.2f);
+        PriceModifier source = PriceModifier.of(TradeTargetRef.sourceKey("demo/key"), 1.3f, 1.4f);
+        PriceModifier item = PriceModifier.of(TradeTargetRef.item("minecraft:book"), 1.2f, 1.3f);
+        PriceModifier tag = PriceModifier.of(TradeTargetRef.tag("minecraft:bookshelf"), 1.1f, 1.2f);
 
         ResolvedTheme template = new ResolvedTheme(
             ResourceLocation.parse("ruralroutes:test"),

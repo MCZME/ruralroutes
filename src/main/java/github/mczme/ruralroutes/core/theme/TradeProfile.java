@@ -14,20 +14,20 @@ import java.util.Optional;
  */
 public record TradeProfile(
     ResourceLocation name,
-    List<ThemeTemplate.ItemReference> sellItems,
-    List<ThemeTemplate.ItemReference> buyItems,
-    Optional<List<ThemeTemplate.ItemReference>> themeSpecialties,
-    Optional<ThemeTemplate.StockConfig> stock,
-    Optional<List<ThemeTemplate.TradeContractEntry>> tradeContracts
+    List<ItemReference> sellItems,
+    List<ItemReference> buyItems,
+    Optional<List<ItemReference>> themeSpecialties,
+    Optional<StockConfig> stock,
+    Optional<List<TradeContractEntry>> tradeContracts
 ) {
     public static final Codec<TradeProfile> CODEC = RecordCodecBuilder.create(
         instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("name").forGetter(TradeProfile::name),
-            ThemeTemplate.ItemReference.CODEC.listOf().optionalFieldOf("sell_items", List.of()).forGetter(TradeProfile::sellItems),
-            ThemeTemplate.ItemReference.CODEC.listOf().optionalFieldOf("buy_items", List.of()).forGetter(TradeProfile::buyItems),
-            ThemeTemplate.ItemReference.CODEC.listOf().optionalFieldOf("theme_specialties").forGetter(TradeProfile::themeSpecialties),
-            ThemeTemplate.StockConfig.CODEC.optionalFieldOf("stock").forGetter(TradeProfile::stock),
-            ThemeTemplate.TradeContractEntry.CODEC.listOf().optionalFieldOf("trade_contracts").forGetter(TradeProfile::tradeContracts)
+            ItemReference.CODEC.listOf().optionalFieldOf("sell_items", List.of()).forGetter(TradeProfile::sellItems),
+            ItemReference.CODEC.listOf().optionalFieldOf("buy_items", List.of()).forGetter(TradeProfile::buyItems),
+            ItemReference.CODEC.listOf().optionalFieldOf("theme_specialties").forGetter(TradeProfile::themeSpecialties),
+            StockConfig.CODEC.optionalFieldOf("stock").forGetter(TradeProfile::stock),
+            TradeContractEntry.CODEC.listOf().optionalFieldOf("trade_contracts").forGetter(TradeProfile::tradeContracts)
         ).apply(instance, TradeProfile::new)
     );
 
@@ -37,7 +37,7 @@ public record TradeProfile(
         buyItems = List.copyOf(Objects.requireNonNull(buyItems, "buyItems"));
         themeSpecialties = themeSpecialties.map(List::copyOf);
         tradeContracts = tradeContracts.map(List::copyOf);
-        if (stock.flatMap(ThemeTemplate.StockConfig::defaultRange).isPresent()) {
+        if (stock.flatMap(StockConfig::defaultRange).isPresent()) {
             throw new IllegalArgumentException("TradeProfile stock.default is not allowed; use ThemeTemplate stock.default");
         }
     }

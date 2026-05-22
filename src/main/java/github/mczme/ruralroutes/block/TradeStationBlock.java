@@ -6,7 +6,8 @@ import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
 import github.mczme.ruralroutes.advancement.trigger.OpenTradeStationTrigger.TradeStationEvent;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
-import github.mczme.ruralroutes.core.node.StockEntry;
+import github.mczme.ruralroutes.core.node.NodeTradeEntry;
+import github.mczme.ruralroutes.core.node.NodeStockEntry;
 import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.core.theme.ResolvedTheme;
@@ -16,7 +17,6 @@ import github.mczme.ruralroutes.register.RRBlockEntities;
 import github.mczme.ruralroutes.register.RRCriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -26,7 +26,6 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -219,8 +218,8 @@ public class TradeStationBlock extends BaseEntityBlock {
      * 前 N 个展示柜分配特产，多余的从库存随机选取
      */
     private void assignDisplayItems(List<DisplayCaseBlockEntity> displayCases, CommercialNodeData nodeData) {
-        List<CommercialNodeData.NodeTradeEntry> specialties = nodeData.specialties();
-        Map<TradeItemKey, StockEntry> stocks = nodeData.stocks();
+        List<NodeTradeEntry> specialties = nodeData.specialties();
+        Map<TradeItemKey, NodeStockEntry> stocks = nodeData.stocks();
         Random random = new Random();
 
         int specialtyCount = specialties.size();
@@ -231,7 +230,7 @@ public class TradeStationBlock extends BaseEntityBlock {
 
             if (i < specialtyCount) {
                 // 分配特产
-                CommercialNodeData.NodeTradeEntry specialty = specialties.get(i);
+                NodeTradeEntry specialty = specialties.get(i);
                 displayItem = specialty.displayStackOrDefault();
             } else {
                 // 从库存随机选取有库存的物品
@@ -243,23 +242,12 @@ public class TradeStationBlock extends BaseEntityBlock {
     }
 
     /**
-     * 根据物品 ID 创建 ItemStack
-     */
-    private ItemStack createItemStack(ResourceLocation itemId) {
-        Item item = BuiltInRegistries.ITEM.get(itemId);
-        if (item == null) {
-            return ItemStack.EMPTY;
-        }
-        return new ItemStack(item, 1);
-    }
-
-    /**
      * 从库存中随机选取一个有库存的物品
      */
-    private ItemStack getRandomItemFromStocks(Map<TradeItemKey, StockEntry> stocks, Random random) {
+    private ItemStack getRandomItemFromStocks(Map<TradeItemKey, NodeStockEntry> stocks, Random random) {
         List<TradeItemKey> availableItems = new ArrayList<>();
 
-        for (Map.Entry<TradeItemKey, StockEntry> entry : stocks.entrySet()) {
+        for (Map.Entry<TradeItemKey, NodeStockEntry> entry : stocks.entrySet()) {
             if (entry.getValue().current() > 0) {
                 availableItems.add(entry.getKey());
             }

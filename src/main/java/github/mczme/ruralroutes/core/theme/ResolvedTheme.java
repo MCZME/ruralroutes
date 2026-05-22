@@ -14,23 +14,23 @@ public final class ResolvedTheme {
 
     private final ResourceLocation name;
     private final ResourceLocation biome;
-    private final List<ThemeTemplate.ItemReference> sellItems;
-    private final List<ThemeTemplate.ItemReference> buyItems;
-    private final Optional<List<ThemeTemplate.ItemReference>> themeSpecialtyItems;
-    private final Optional<ThemeTemplate.StockConfig> stock;
-    private final Optional<List<ThemeTemplate.PriceModifier>> priceModifiers;
-    private final Optional<List<ThemeTemplate.TradeContractEntry>> tradeContracts;
+    private final List<ItemReference> sellItems;
+    private final List<ItemReference> buyItems;
+    private final Optional<List<ItemReference>> themeSpecialtyItems;
+    private final Optional<StockConfig> stock;
+    private final Optional<List<PriceModifier>> priceModifiers;
+    private final Optional<List<TradeContractEntry>> tradeContracts;
     private final Optional<List<ResourceLocation>> tradeProfiles;
 
     public ResolvedTheme(
         ResourceLocation name,
         ResourceLocation biome,
-        List<ThemeTemplate.ItemReference> sellItems,
-        List<ThemeTemplate.ItemReference> buyItems,
-        Optional<List<ThemeTemplate.ItemReference>> themeSpecialtyItems,
-        Optional<ThemeTemplate.StockConfig> stock,
-        Optional<List<ThemeTemplate.PriceModifier>> priceModifiers,
-        Optional<List<ThemeTemplate.TradeContractEntry>> tradeContracts,
+        List<ItemReference> sellItems,
+        List<ItemReference> buyItems,
+        Optional<List<ItemReference>> themeSpecialtyItems,
+        Optional<StockConfig> stock,
+        Optional<List<PriceModifier>> priceModifiers,
+        Optional<List<TradeContractEntry>> tradeContracts,
         Optional<List<ResourceLocation>> tradeProfiles
     ) {
         this.name = Objects.requireNonNull(name, "name");
@@ -52,35 +52,35 @@ public final class ResolvedTheme {
         return biome;
     }
 
-    public List<ThemeTemplate.ItemReference> sellItems() {
+    public List<ItemReference> sellItems() {
         return sellItems;
     }
 
-    public List<ThemeTemplate.ItemReference> buyItems() {
+    public List<ItemReference> buyItems() {
         return buyItems;
     }
 
-    public Optional<List<ThemeTemplate.ItemReference>> themeSpecialtyItems() {
+    public Optional<List<ItemReference>> themeSpecialtyItems() {
         return themeSpecialtyItems;
     }
 
     public Optional<List<ResourceLocation>> themeSpecialties() {
         return themeSpecialtyItems.map(items -> items.stream()
-            .filter(ThemeTemplate.ItemReference::isExactItem)
-            .map(ThemeTemplate.ItemReference::itemId)
+            .filter(ItemReference::isExactItem)
+            .map(ItemReference::itemId)
             .map(ResourceLocation::parse)
             .toList());
     }
 
-    public Optional<ThemeTemplate.StockConfig> stock() {
+    public Optional<StockConfig> stock() {
         return stock;
     }
 
-    public Optional<List<ThemeTemplate.PriceModifier>> priceModifiers() {
+    public Optional<List<PriceModifier>> priceModifiers() {
         return priceModifiers;
     }
 
-    public Optional<List<ThemeTemplate.TradeContractEntry>> tradeContracts() {
+    public Optional<List<TradeContractEntry>> tradeContracts() {
         return tradeContracts;
     }
 

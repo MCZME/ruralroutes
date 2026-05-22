@@ -7,9 +7,13 @@ import github.mczme.ruralroutes.core.market.MarketContext;
 import github.mczme.ruralroutes.core.market.MarketState;
 import github.mczme.ruralroutes.core.market.MarketStockAdjustment;
 import github.mczme.ruralroutes.core.market.MarketStateResolver;
+import github.mczme.ruralroutes.core.theme.ItemEntry;
+import github.mczme.ruralroutes.core.theme.ItemReference;
 import github.mczme.ruralroutes.core.theme.ResolvedTheme;
+import github.mczme.ruralroutes.core.theme.StockConfig;
+import github.mczme.ruralroutes.core.theme.StockRange;
+import github.mczme.ruralroutes.core.theme.StockTarget;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
-import github.mczme.ruralroutes.core.theme.ThemeTemplate;
 import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import github.mczme.ruralroutes.core.util.TagLookupCache;
 import github.mczme.ruralroutes.register.RRAttachments;
@@ -174,8 +178,8 @@ public class CommercialNodeManager {
 
         // 1. 主题特产
         if (template.themeSpecialtyItems().isPresent()) {
-            List<ThemeTemplate.ItemReference> themeSpecialties = template.themeSpecialtyItems().get();
-            for (ThemeTemplate.ItemReference specialtyRef : themeSpecialties) {
+            List<ItemReference> themeSpecialties = template.themeSpecialtyItems().get();
+            for (ItemReference specialtyRef : themeSpecialties) {
                 if (!specialtyRef.isExactItem()) {
                     RuralRoutes.LOGGER.warn("Theme specialty must resolve to an exact item, got {}", specialtyRef.debugLabel());
                     continue;
@@ -243,9 +247,9 @@ public class CommercialNodeManager {
         MarketContext marketContext = MarketContext.fromTheme(template);
 
         if (template.stock().isPresent()) {
-            ThemeTemplate.StockConfig stockConfig = template.stock().get();
+            StockConfig stockConfig = template.stock().get();
             if (stockConfig.defaultRange().isPresent()) {
-                ThemeTemplate.StockRange range = stockConfig.defaultRange().get();
+                StockRange range = stockConfig.defaultRange().get();
                 defaultMin = range.min();
                 defaultMax = range.max();
             }
@@ -274,11 +278,11 @@ public class CommercialNodeManager {
      * 2. 若引用声明了 pick，则从单引用或候选组展开后的全集中随机抽取指定数量
      * 3. 不同引用命中同一物品时，保留先出现的那条引用
      */
-    private static List<SelectedTradeItem> selectTradeItems(List<ThemeTemplate.ItemReference> itemRefs) {
+    private static List<SelectedTradeItem> selectTradeItems(List<ItemReference> itemRefs) {
         Map<String, SelectedTradeItem> selected = new LinkedHashMap<>();
         Random random = new Random();
 
-        for (ThemeTemplate.ItemReference itemRef : itemRefs) {
+        for (ItemReference itemRef : itemRefs) {
             List<SelectedTradeItem> candidates = resolveItemCandidates(itemRef);
             if (candidates.isEmpty()) {
                 continue;
@@ -293,13 +297,16 @@ public class CommercialNodeManager {
         return List.copyOf(selected.values());
     }
 
-    private static List<SelectedTradeItem> resolveItemCandidates(ThemeTemplate.ItemReference itemRef) {
+    private static List<SelectedTradeItem> resolveItemCandidates(ItemReference itemRef) {
         Map<String, SelectedTradeItem> candidates = new LinkedHashMap<>();
-        for (ThemeTemplate.ItemEntry itemEntry : itemRef.itemEntries()) {
-            ItemStack displayStack = createItemStack(itemEntry);
+        for (ItemEntry itemEntry : itemRef.itemEntries()) {
             for (Item item : TagLookupCache.getItems(itemEntry.ref())) {
                 ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
                 if (itemId != null) {
+                    ItemStack displayStack = createItemStack(item, itemEntry);
+                    if (displayStack.isEmpty()) {
+                        continue;
+                    }
                     SelectedTradeItem selected = new SelectedTradeItem(itemRef.sourceKey(), itemId, displayStack.copy(), TradeItemKey.from(displayStack));
                     candidates.putIfAbsent(selected.tradeItemKey().canonicalKey(), selected);
                 }
@@ -315,7 +322,7 @@ public class CommercialNodeManager {
             .toList();
     }
 
-    private static List<SelectedTradeItem> chooseItems(ThemeTemplate.ItemReference itemRef,
+    private static List<SelectedTradeItem> chooseItems(ItemReference itemRef,
             List<SelectedTradeItem> candidates, Random random) {
 
         if (itemRef.pick().isEmpty() || itemRef.pick().get() >= candidates.size()) {
@@ -358,11 +365,11 @@ public class CommercialNodeManager {
         MarketContext marketContext = MarketContext.fromTheme(template);
 
         if (template.stock().isPresent()) {
-            ThemeTemplate.StockConfig stockConfig = template.stock().get();
+            StockConfig stockConfig = template.stock().get();
 
             // 获取默认范围
             if (stockConfig.defaultRange().isPresent()) {
-                ThemeTemplate.StockRange range = stockConfig.defaultRange().get();
+                StockRange range = stockConfig.defaultRange().get();
                 defaultMin = range.min();
                 defaultMax = range.max();
             }
@@ -427,11 +434,11 @@ public class CommercialNodeManager {
             int defaultMin, int defaultMax, boolean isSellItem) {
 
         if (template.stock().isPresent()) {
-            ThemeTemplate.StockConfig stockConfig = template.stock().get();
+            StockConfig stockConfig = template.stock().get();
             if (stockConfig.targetEntries().isPresent()) {
-                ThemeTemplate.StockTarget target = stockConfig.resolveTarget(itemRefId, itemId).orElse(null);
+                StockTarget target = stockConfig.resolveTarget(itemRefId, itemId).orElse(null);
                 if (target != null) {
-                    ThemeTemplate.StockRange range = target.shared().orElse(null);
+                    StockRange range = target.shared().orElse(null);
                     if (range == null) {
                         range = isSellItem
                             ? target.sell().orElse(target.buy().orElse(null))
@@ -443,7 +450,7 @@ public class CommercialNodeManager {
                 }
             }
             if (stockConfig.specific().isPresent()) {
-                Optional<ThemeTemplate.StockRange> resolved = stockConfig.resolveSpecific(itemRefId, itemId);
+                Optional<StockRange> resolved = stockConfig.resolveSpecific(itemRefId, itemId);
                 if (resolved.isPresent()) {
                     return randomInRange(resolved.get());
                 }
@@ -457,12 +464,21 @@ public class CommercialNodeManager {
     /**
      * 在范围内取随机值
      */
-    private static int randomInRange(ThemeTemplate.StockRange range) {
+    private static int randomInRange(StockRange range) {
         return range.min() + (int)(Math.random() * (range.max() - range.min() + 1));
     }
 
-    private static ItemStack createItemStack(ThemeTemplate.ItemEntry itemEntry) {
+    private static ItemStack createItemStack(ItemEntry itemEntry) {
+        if (itemEntry.isTag()) {
+            RuralRoutes.LOGGER.warn("Cannot create a display stack directly from tag reference: {}", itemEntry.ref());
+            return ItemStack.EMPTY;
+        }
+
         Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemEntry.ref()));
+        return createItemStack(item, itemEntry);
+    }
+
+    private static ItemStack createItemStack(Item item, ItemEntry itemEntry) {
         if (item == Items.AIR) {
             return ItemStack.EMPTY;
         }

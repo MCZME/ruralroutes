@@ -1,6 +1,8 @@
 package github.mczme.ruralroutes.data;
 
-import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.theme.CompositionStrategy;
+import github.mczme.ruralroutes.core.theme.InputEntry;
+import github.mczme.ruralroutes.core.theme.OutputEntry;
 import github.mczme.ruralroutes.core.theme.TradeProfile;
 import github.mczme.ruralroutes.core.trade.TradeSide;
 import github.mczme.ruralroutes.data.builder.TradeProfileBuilder;
@@ -66,7 +68,7 @@ public class TradeProfileDataProvider extends JsonCodecProvider<TradeProfile> {
                 TradeSide.BUY_FROM_PLAYER,
                 refs(tagRef(RRItemTags.POOL_MINERAL)),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
-                ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
+                CompositionStrategy.LARGEST_FIRST)
             .specialty("minecraft:golden_carrot"));
 
         consumer.accept(profile("plains_pasture")
@@ -88,7 +90,7 @@ public class TradeProfileDataProvider extends JsonCodecProvider<TradeProfile> {
                 TradeSide.BUY_FROM_PLAYER,
                 refs("minecraft:iron_sword", "minecraft:iron_axe", "minecraft:shears"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
-                ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
+                CompositionStrategy.LARGEST_FIRST)
             .specialty("minecraft:saddle"));
 
         consumer.accept(profile("plains_workshop")
@@ -110,12 +112,12 @@ public class TradeProfileDataProvider extends JsonCodecProvider<TradeProfile> {
                 TradeSide.SELL_TO_PLAYER,
                 refs("minecraft:iron_pickaxe", tagRef(RRItemTags.CANDIDATE_THEME_PLAINS_WORKSHOP_TOOL_GOODS)),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
-                ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
+                CompositionStrategy.LARGEST_FIRST)
             .addCurrencyBasketTrade(
                 TradeSide.BUY_FROM_PLAYER,
                 refs(tagRef(RRItemTags.POOL_MINERAL)),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
-                ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
+                CompositionStrategy.LARGEST_FIRST)
             .specialty("minecraft:anvil"));
 
         consumer.accept(profile("desert_quarry")
@@ -152,7 +154,7 @@ public class TradeProfileDataProvider extends JsonCodecProvider<TradeProfile> {
                 TradeSide.BUY_FROM_PLAYER,
                 refs(tagRef(RRItemTags.POOL_MINERAL), "minecraft:bucket"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
-                ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
+                CompositionStrategy.LARGEST_FIRST)
             .specialty("minecraft:golden_carrot"));
 
         consumer.accept(profile("desert_dyeworks")
@@ -189,7 +191,7 @@ public class TradeProfileDataProvider extends JsonCodecProvider<TradeProfile> {
                 TradeSide.BUY_FROM_PLAYER,
                 refs(tagRef(RRItemTags.POOL_MINERAL), "minecraft:iron_axe"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
-                ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
+                CompositionStrategy.LARGEST_FIRST)
             .specialty("minecraft:saddle"));
 
         consumer.accept(profile("savanna_terracotta")
@@ -226,7 +228,7 @@ public class TradeProfileDataProvider extends JsonCodecProvider<TradeProfile> {
                 TradeSide.BUY_FROM_PLAYER,
                 refs("minecraft:iron_sword", "minecraft:iron_axe", "minecraft:shears"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
-                ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
+                CompositionStrategy.LARGEST_FIRST)
             .specialty("minecraft:rabbit_hide"));
 
         consumer.accept(profile("taiga_lumber")
@@ -246,7 +248,7 @@ public class TradeProfileDataProvider extends JsonCodecProvider<TradeProfile> {
                 TradeSide.BUY_FROM_PLAYER,
                 refs(tagRef(RRItemTags.POOL_MINERAL), "minecraft:iron_axe"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
-                ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
+                CompositionStrategy.LARGEST_FIRST)
             .specialty("minecraft:spruce_boat"));
 
         consumer.accept(profile("taiga_berries")
@@ -267,7 +269,7 @@ public class TradeProfileDataProvider extends JsonCodecProvider<TradeProfile> {
                 TradeSide.BUY_FROM_PLAYER,
                 refs("minecraft:iron_ingot", "minecraft:iron_hoe"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
-                ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
+                CompositionStrategy.LARGEST_FIRST)
             .specialty("minecraft:glow_berries"));
 
         consumer.accept(profile("taiga_fur")
@@ -288,7 +290,7 @@ public class TradeProfileDataProvider extends JsonCodecProvider<TradeProfile> {
                 TradeSide.BUY_FROM_PLAYER,
                 refs("minecraft:iron_sword", "minecraft:iron_axe", "minecraft:shears"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
-                ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
+                CompositionStrategy.LARGEST_FIRST)
             .specialty("minecraft:campfire"));
 
         consumer.accept(profile("snowy_iceworks")
@@ -328,7 +330,7 @@ public class TradeProfileDataProvider extends JsonCodecProvider<TradeProfile> {
                 TradeSide.BUY_FROM_PLAYER,
                 refs(tagRef(RRItemTags.POOL_MINERAL)),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
-                ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
+                CompositionStrategy.LARGEST_FIRST)
             .specialty("minecraft:campfire"));
 
         consumer.accept(profile("snowy_hunter")
@@ -348,7 +350,7 @@ public class TradeProfileDataProvider extends JsonCodecProvider<TradeProfile> {
                 TradeSide.BUY_FROM_PLAYER,
                 refs("minecraft:iron_sword", "minecraft:iron_axe"),
                 currencies("ruralroutes:iron_coin", "ruralroutes:copper_coin"),
-                ThemeTemplate.CompositionStrategy.LARGEST_FIRST)
+                CompositionStrategy.LARGEST_FIRST)
             .specialty("minecraft:bone_block"));
     }
 
@@ -360,21 +362,21 @@ public class TradeProfileDataProvider extends JsonCodecProvider<TradeProfile> {
         return "#" + tag.location();
     }
 
-    private static ThemeTemplate.InputEntry in(String item, int count) {
-        return new ThemeTemplate.InputEntry(item, count);
+    private static InputEntry in(String item, int count) {
+        return new InputEntry(item, count);
     }
 
-    private static ThemeTemplate.OutputEntry out(String item, int count) {
-        return new ThemeTemplate.OutputEntry(item, count);
+    private static OutputEntry out(String item, int count) {
+        return new OutputEntry(item, count);
     }
 
     @SafeVarargs
-    private static List<ThemeTemplate.InputEntry> inputs(ThemeTemplate.InputEntry... entries) {
+    private static List<InputEntry> inputs(InputEntry... entries) {
         return List.of(entries);
     }
 
     @SafeVarargs
-    private static List<ThemeTemplate.OutputEntry> outputs(ThemeTemplate.OutputEntry... entries) {
+    private static List<OutputEntry> outputs(OutputEntry... entries) {
         return List.of(entries);
     }
 
