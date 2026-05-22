@@ -1,0 +1,67 @@
+{
+  "buy_items": [
+    "minecraft:iron_ingot",
+    "minecraft:coal",
+    {
+      "items": [
+        "minecraft:stone_axe",
+        "minecraft:iron_axe",
+        "minecraft:raw_iron"
+      ],
+      "key": "savanna_woodworks/tools",
+      "pick": 2
+    },
+    "#ruralroutes:currency"
+  ],
+  "name": "ruralroutes:savanna_woodworks",
+  "sell_items": [
+    "minecraft:acacia_log",
+    "minecraft:charcoal",
+    {
+      "id": "#ruralroutes:candidate/biome/savanna/wood",
+      "pick": 3
+    },
+    "#ruralroutes:currency"
+  ],
+  "theme_specialties": [
+    "minecraft:saddle"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 4,
+          "item": "minecraft:leather"
+        },
+        {
+          "count": 4,
+          "item": "minecraft:acacia_log"
+        },
+        {
+          "count": 4,
+          "item": "minecraft:charcoal"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:saddle"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "#ruralroutes:pool/mineral",
+        "minecraft:iron_axe"
+      ],
+      "side": "buy_from_player"
+    }
+  ]
+}

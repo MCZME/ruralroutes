@@ -1,6 +1,7 @@
 package github.mczme.ruralroutes.core.market;
 
 import github.mczme.ruralroutes.core.rumor.RumorFamily;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
@@ -76,7 +77,7 @@ class MarketStockAdjustmentTest {
     private static MarketEvent event(String path, Optional<MarketStockModifier> stock) {
         return new MarketEvent(
                 ResourceLocation.parse("ruralroutes:" + path),
-                "minecraft:apple",
+                TradeTargetRef.item("minecraft:apple"),
                 MarketScopeType.GLOBAL,
                 Optional.empty(),
                 0.10f,

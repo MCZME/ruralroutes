@@ -1,6 +1,6 @@
 package github.mczme.ruralroutes.core.trade;
 
-import github.mczme.ruralroutes.core.theme.ThemeTemplate.CompositionStrategy;
+import github.mczme.ruralroutes.core.theme.CompositionStrategy;
 import github.mczme.ruralroutes.core.util.TagLookupCache;
 import github.mczme.ruralroutes.core.value.ValueTableManager;
 import net.minecraft.core.registries.BuiltInRegistries;

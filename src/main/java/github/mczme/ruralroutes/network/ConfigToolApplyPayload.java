@@ -5,7 +5,7 @@ import github.mczme.ruralroutes.block.BlockStyleHelper;
 import github.mczme.ruralroutes.blockentity.TradeNodeBlockEntity;
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
-import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.theme.ResolvedTheme;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.item.ConfigToolItem;
 import github.mczme.ruralroutes.register.RRDataComponents;
@@ -157,7 +157,7 @@ public record ConfigToolApplyPayload(
                 if (payload.themeName() != null && be instanceof TradeStationBlockEntity station) {
                     station.setVillageTheme(payload.themeName());
 
-                    ThemeTemplate template = ThemeManager.INSTANCE.getTheme(payload.themeName());
+                    ResolvedTheme template = ThemeManager.INSTANCE.getTheme(payload.themeName());
                     VillageStyle resolvedStyle = template != null
                         ? VillageStyle.fromBiome(template.biome())
                         : VillageStyle.PLAINS;

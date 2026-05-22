@@ -1,0 +1,62 @@
+{
+  "buy_items": [
+    "minecraft:iron_sword",
+    "minecraft:spruce_log",
+    {
+      "items": [
+        "minecraft:stone_axe",
+        "minecraft:iron_axe",
+        "minecraft:charcoal"
+      ],
+      "key": "snowy_hunter/tools",
+      "pick": 2
+    },
+    "#ruralroutes:currency"
+  ],
+  "name": "ruralroutes:snowy_hunter",
+  "sell_items": [
+    {
+      "items": [
+        "#ruralroutes:candidate/biome/snowy/leather_fiber",
+        "minecraft:beef",
+        "minecraft:rabbit"
+      ],
+      "key": "snowy_hunter/game_goods",
+      "pick": 3
+    },
+    "#ruralroutes:currency"
+  ],
+  "theme_specialties": [
+    "minecraft:bone_block"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 3,
+          "item": "minecraft:bone"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:bone_block"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "minecraft:iron_sword",
+        "minecraft:iron_axe"
+      ],
+      "side": "buy_from_player"
+    }
+  ]
+}

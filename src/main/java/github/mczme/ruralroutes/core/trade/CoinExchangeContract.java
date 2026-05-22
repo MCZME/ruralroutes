@@ -1,12 +1,10 @@
 package github.mczme.ruralroutes.core.trade;
 
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
-import github.mczme.ruralroutes.core.node.StockEntry;
+import github.mczme.ruralroutes.core.node.NodeStockEntry;
 import github.mczme.ruralroutes.core.value.ValueTableManager;
 import github.mczme.ruralroutes.register.RRItems;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
@@ -123,8 +121,7 @@ public record CoinExchangeContract(
             return TradeResult.fail(TradeResult.Reason.INVALID_INPUT);
         }
 
-        ResourceLocation outputId = BuiltInRegistries.ITEM.getKey(exchangeType.outputItem);
-        StockEntry outputStock = nodeData.getStock(outputId);
+        NodeStockEntry outputStock = nodeData.getStock(new ItemStack(exchangeType.outputItem));
 
         if (outputStock == null || outputStock.current() < outputCount) {
             return TradeResult.fail(TradeResult.Reason.VILLAGE_INSUFFICIENT);

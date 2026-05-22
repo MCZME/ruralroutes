@@ -2,8 +2,9 @@ package github.mczme.ruralroutes.core.market;
 
 import github.mczme.ruralroutes.Config;
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
-import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.theme.ResolvedTheme;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -153,9 +154,9 @@ public final class MarketStateGenerator {
     /**
      * 构建事件唯一键
      */
-    private static String buildEventKey(ResourceLocation ruleId, String targetRef,
+    private static String buildEventKey(ResourceLocation ruleId, TradeTargetRef targetRef,
                                          MarketScopeType scopeType, ResourceLocation scopeTarget) {
-        return ruleId + "|" + targetRef + "|" + scopeType + "|" +
+        return ruleId + "|" + targetRef.canonicalKey() + "|" + scopeType + "|" +
                 (scopeTarget == null ? "" : scopeTarget);
     }
 
@@ -163,9 +164,9 @@ public final class MarketStateGenerator {
      * 获取所有可用群系（从已加载主题中提取）
      */
     private static List<ResourceLocation> getAvailableBiomes() {
-        Map<ResourceLocation, ThemeTemplate> themes = ThemeManager.INSTANCE.getAllThemes();
+        Map<ResourceLocation, ResolvedTheme> themes = ThemeManager.INSTANCE.getAllThemes();
         return themes.values().stream()
-                .map(ThemeTemplate::biome)
+                .map(ResolvedTheme::biome)
                 .distinct()
                 .toList();
     }

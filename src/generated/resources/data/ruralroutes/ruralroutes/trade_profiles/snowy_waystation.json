@@ -1,0 +1,67 @@
+{
+  "buy_items": [
+    "minecraft:iron_ingot",
+    "minecraft:gold_ingot",
+    {
+      "items": [
+        "minecraft:raw_iron",
+        "minecraft:coal",
+        "minecraft:charcoal"
+      ],
+      "key": "snowy_waystation/valuables",
+      "pick": 2
+    },
+    "#ruralroutes:currency"
+  ],
+  "name": "ruralroutes:snowy_waystation",
+  "sell_items": [
+    {
+      "items": [
+        "#ruralroutes:candidate/biome/snowy/food",
+        "minecraft:bread",
+        "minecraft:oak_log",
+        "minecraft:spruce_log",
+        "minecraft:charcoal"
+      ],
+      "key": "snowy_waystation/supplies",
+      "pick": 4
+    },
+    "#ruralroutes:currency"
+  ],
+  "theme_specialties": [
+    "minecraft:campfire"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 1,
+          "item": "minecraft:bread"
+        },
+        {
+          "count": 1,
+          "item": "minecraft:spruce_log"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:campfire"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "#ruralroutes:pool/mineral"
+      ],
+      "side": "buy_from_player"
+    }
+  ]
+}

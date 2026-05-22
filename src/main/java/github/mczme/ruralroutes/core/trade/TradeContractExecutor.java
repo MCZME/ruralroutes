@@ -3,10 +3,8 @@ package github.mczme.ruralroutes.core.trade;
 import github.mczme.ruralroutes.core.cycle.CycleManager;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
-import github.mczme.ruralroutes.core.node.StockEntry;
+import github.mczme.ruralroutes.core.node.NodeStockEntry;
 import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
@@ -15,6 +13,7 @@ import net.minecraft.world.level.ChunkPos;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -79,23 +78,29 @@ public final class TradeContractExecutor {
             TradeResult result,
             net.minecraft.core.BlockPos blockPos) {
 
-        Map<ResourceLocation, StockEntry> stocks = new HashMap<>(nodeData.stocks());
+        Map<TradeItemKey, NodeStockEntry> stocks = new HashMap<>(nodeData.stocks());
 
         // 玩家消耗的物品加入村庄库存
         for (ItemStack item : result.consumed()) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item.getItem());
-            StockEntry current = stocks.get(itemId);
+            TradeItemKey itemKey = TradeItemKey.from(item);
+            NodeStockEntry current = stocks.get(itemKey);
+            if (current == null && itemKey.hasComponents()) {
+                current = stocks.get(TradeItemKey.of(itemKey.itemId()));
+            }
             if (current != null) {
-                stocks.put(itemId, current.increase(item.getCount()));
+                stocks.put(itemKey, current.increase(item.getCount()));
             }
         }
 
         // 玩家获得的物品从村庄库存扣除
         for (ItemStack item : result.outputs()) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item.getItem());
-            StockEntry current = stocks.get(itemId);
+            TradeItemKey itemKey = TradeItemKey.from(item);
+            NodeStockEntry current = stocks.get(itemKey);
+            if (current == null && itemKey.hasComponents()) {
+                current = stocks.get(TradeItemKey.of(itemKey.itemId()));
+            }
             if (current != null) {
-                stocks.put(itemId, current.decrease(item.getCount()));
+                stocks.put(itemKey, current.decrease(item.getCount()));
             }
         }
 
@@ -256,7 +261,7 @@ public final class TradeContractExecutor {
     /**
      * 合并相同物品的数量
      */
-    private TradePaymentPlan consolidatePlan(TradePaymentPlan plan) {
+    TradePaymentPlan consolidatePlan(TradePaymentPlan plan) {
         return new TradePaymentPlan(
             consolidateStacks(plan.playerInputs()),
             consolidateStacks(plan.playerOutputs()),
@@ -269,13 +274,21 @@ public final class TradeContractExecutor {
      * 合并物品列表中相同物品的数量
      */
     private List<ItemStack> consolidateStacks(List<ItemStack> stacks) {
-        Map<Item, Integer> itemCounts = new HashMap<>();
+        Map<TradeItemKey, Integer> itemCounts = new LinkedHashMap<>();
+        Map<TradeItemKey, ItemStack> prototypes = new LinkedHashMap<>();
         for (ItemStack stack : stacks) {
-            itemCounts.merge(stack.getItem(), stack.getCount(), Integer::sum);
+            if (stack == null || stack.isEmpty()) {
+                continue;
+            }
+            TradeItemKey key = TradeItemKey.from(stack);
+            itemCounts.merge(key, stack.getCount(), Integer::sum);
+            prototypes.putIfAbsent(key, normalizedPrototype(stack));
         }
         List<ItemStack> result = new ArrayList<>();
-        for (Map.Entry<Item, Integer> entry : itemCounts.entrySet()) {
-            result.add(new ItemStack(entry.getKey(), entry.getValue()));
+        for (Map.Entry<TradeItemKey, Integer> entry : itemCounts.entrySet()) {
+            ItemStack merged = prototypes.get(entry.getKey()).copy();
+            merged.setCount(entry.getValue());
+            result.add(merged);
         }
         return result;
     }
@@ -296,14 +309,7 @@ public final class TradeContractExecutor {
      * 验证玩家库存
      */
     private List<ItemStack> validatePlayerInventory(ServerPlayer player, TradePaymentPlan plan) {
-        List<ItemStack> shortfall = new ArrayList<>();
-        for (ItemStack required : plan.playerInputs()) {
-            int has = countItemInInventory(player, required.getItem());
-            if (has < required.getCount()) {
-                shortfall.add(new ItemStack(required.getItem(), required.getCount() - has));
-            }
-        }
-        return shortfall;
+        return calculatePlayerShortfall(player.getInventory().items, plan.playerInputs());
     }
 
     /**
@@ -312,8 +318,7 @@ public final class TradeContractExecutor {
     private List<ItemStack> validateVillageInventory(CommercialNodeData nodeData, TradePaymentPlan plan) {
         List<ItemStack> shortfall = new ArrayList<>();
         for (ItemStack required : plan.villageInputs()) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(required.getItem());
-            StockEntry entry = nodeData.getStock(itemId);
+            NodeStockEntry entry = nodeData.getStock(required);
             if (entry == null || entry.current() < required.getCount()) {
                 shortfall.add(new ItemStack(required.getItem(), required.getCount() - (entry != null ? entry.current() : 0)));
             }
@@ -331,7 +336,7 @@ public final class TradeContractExecutor {
             TradePaymentPlan plan,
             net.minecraft.core.BlockPos blockPos) {
 
-        for (ItemStack item : plan.playerInputs()) {
+        for (ItemStack item : sortRequirementsForMatching(plan.playerInputs())) {
             removeItemFromPlayer(player, item);
         }
 
@@ -351,23 +356,29 @@ public final class TradeContractExecutor {
             TradePaymentPlan plan,
             net.minecraft.core.BlockPos blockPos) {
 
-        Map<ResourceLocation, StockEntry> stocks = new HashMap<>(nodeData.stocks());
+        Map<TradeItemKey, NodeStockEntry> stocks = new HashMap<>(nodeData.stocks());
 
         // 村庄输入：扣除库存（村庄卖出的商品 + 村庄支付的货币）
         for (ItemStack item : plan.villageInputs()) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item.getItem());
-            StockEntry current = stocks.get(itemId);
+            TradeItemKey itemKey = TradeItemKey.from(item);
+            NodeStockEntry current = stocks.get(itemKey);
+            if (current == null && itemKey.hasComponents()) {
+                current = stocks.get(TradeItemKey.of(itemKey.itemId()));
+            }
             if (current != null) {
-                stocks.put(itemId, current.decrease(item.getCount()));
+                stocks.put(itemKey, current.decrease(item.getCount()));
             }
         }
 
         // 村庄输出：增加库存（村庄买入的商品 + 村庄收到的货币）
         for (ItemStack item : plan.villageOutputs()) {
-            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item.getItem());
-            StockEntry current = stocks.get(itemId);
+            TradeItemKey itemKey = TradeItemKey.from(item);
+            NodeStockEntry current = stocks.get(itemKey);
+            if (current == null && itemKey.hasComponents()) {
+                current = stocks.get(TradeItemKey.of(itemKey.itemId()));
+            }
             if (current != null) {
-                stocks.put(itemId, current.increase(item.getCount()));
+                stocks.put(itemKey, current.increase(item.getCount()));
             }
         }
 
@@ -383,26 +394,8 @@ public final class TradeContractExecutor {
         CommercialNodeManager.updateNodeData(level, blockPos, newData);
     }
 
-    private int countItemInInventory(ServerPlayer player, Item item) {
-        int count = 0;
-        for (ItemStack stack : player.getInventory().items) {
-            if (stack.getItem() == item) {
-                count += stack.getCount();
-            }
-        }
-        return count;
-    }
-
     private void removeItemFromPlayer(ServerPlayer player, ItemStack toRemove) {
-        int remaining = toRemove.getCount();
-        for (int i = 0; i < player.getInventory().items.size() && remaining > 0; i++) {
-            ItemStack stack = player.getInventory().items.get(i);
-            if (stack.getItem() == toRemove.getItem()) {
-                int toTake = Math.min(remaining, stack.getCount());
-                stack.shrink(toTake);
-                remaining -= toTake;
-            }
-        }
+        removeMatchingItems(player.getInventory().items, toRemove);
     }
 
     private void addItemToPlayer(ServerPlayer player, ItemStack toAdd) {
@@ -410,5 +403,90 @@ public final class TradeContractExecutor {
         if (!success && !toAdd.isEmpty()) {
             player.spawnAtLocation(toAdd);
         }
+    }
+
+    static int countMatchingItems(List<ItemStack> inventory, ItemStack required) {
+        if (required == null || required.isEmpty()) {
+            return 0;
+        }
+
+        TradeItemKey requiredKey = TradeItemKey.from(required);
+        int count = 0;
+        for (ItemStack stack : inventory) {
+            if (matchesRequiredStack(stack, requiredKey, required.getItem())) {
+                count += stack.getCount();
+            }
+        }
+        return count;
+    }
+
+    static int removeMatchingItems(List<ItemStack> inventory, ItemStack toRemove) {
+        if (toRemove == null || toRemove.isEmpty()) {
+            return 0;
+        }
+
+        TradeItemKey requiredKey = TradeItemKey.from(toRemove);
+        int remaining = toRemove.getCount();
+        for (int i = 0; i < inventory.size() && remaining > 0; i++) {
+            ItemStack stack = inventory.get(i);
+            if (!matchesRequiredStack(stack, requiredKey, toRemove.getItem())) {
+                continue;
+            }
+
+            int toTake = Math.min(remaining, stack.getCount());
+            stack.shrink(toTake);
+            remaining -= toTake;
+        }
+        return toRemove.getCount() - remaining;
+    }
+
+    private static ItemStack normalizedPrototype(ItemStack stack) {
+        ItemStack copy = stack.copy();
+        copy.setCount(1);
+        return copy;
+    }
+
+    private static boolean matchesRequiredStack(ItemStack candidate, TradeItemKey requiredKey, Item requiredItem) {
+        if (candidate == null || candidate.isEmpty()) {
+            return false;
+        }
+        if (requiredKey.hasComponents()) {
+            return TradeItemKey.from(candidate).equals(requiredKey);
+        }
+        return candidate.getItem() == requiredItem;
+    }
+
+    static List<ItemStack> calculatePlayerShortfall(List<ItemStack> inventory, List<ItemStack> requiredItems) {
+        List<ItemStack> workingInventory = copyInventory(inventory);
+        List<ItemStack> shortfall = new ArrayList<>();
+        for (ItemStack required : sortRequirementsForMatching(requiredItems)) {
+            int removed = removeMatchingItems(workingInventory, required.copy());
+            if (removed < required.getCount()) {
+                ItemStack missing = required.copy();
+                missing.setCount(required.getCount() - removed);
+                shortfall.add(missing);
+            }
+        }
+        return shortfall;
+    }
+
+    private static List<ItemStack> copyInventory(List<ItemStack> inventory) {
+        List<ItemStack> copy = new ArrayList<>(inventory.size());
+        for (ItemStack stack : inventory) {
+            copy.add(stack.copy());
+        }
+        return copy;
+    }
+
+    private static List<ItemStack> sortRequirementsForMatching(List<ItemStack> requiredItems) {
+        List<ItemStack> sorted = new ArrayList<>(requiredItems.size());
+        for (ItemStack stack : requiredItems) {
+            sorted.add(stack.copy());
+        }
+        sorted.sort((left, right) -> Boolean.compare(
+            TradeItemKey.from(right).hasComponents(),
+            TradeItemKey.from(left).hasComponents()
+        ));
+        return sorted;
     }
 }

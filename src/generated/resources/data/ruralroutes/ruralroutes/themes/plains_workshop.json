@@ -1,50 +1,27 @@
 {
   "biome": "minecraft:plains",
-  "buy_items": [
-    "minecraft:iron_ingot",
-    "minecraft:coal",
-    "minecraft:diamond",
-    {
-      "items": [
-        "minecraft:raw_iron",
-        "minecraft:charcoal",
-        "minecraft:oak_planks"
-      ],
-      "key": "plains_workshop/materials",
-      "pick": 2
-    },
-    "#ruralroutes:currency"
-  ],
   "name": "ruralroutes:plains_workshop",
-  "price_modifiers": {
-    "#ruralroutes:candidate/biome/plains/wood": {
+  "price_modifiers": [
+    {
+      "buy": 0.82,
+      "sell": 0.88,
+      "target": "#ruralroutes:candidate/theme/plains_workshop/tool_goods"
+    },
+    {
       "buy": 0.9,
-      "sell": 0.96
+      "sell": 0.96,
+      "target": "#ruralroutes:candidate/biome/plains/wood"
     },
-    "#ruralroutes:candidate/theme/plains_workshop/tool_goods": {
-      "buy": 0.82,
-      "sell": 0.88
-    },
-    "#ruralroutes:pool/mineral": {
+    {
       "buy": 1.16,
-      "sell": 1.08
+      "sell": 1.08,
+      "target": "#ruralroutes:pool/mineral"
     },
-    "minecraft:anvil": {
+    {
       "buy": 0.82,
-      "sell": 1.15
+      "sell": 1.15,
+      "target": "minecraft:anvil"
     }
-  },
-  "sell_items": [
-    "minecraft:iron_pickaxe",
-    {
-      "id": "#ruralroutes:candidate/biome/plains/wood",
-      "pick": 2
-    },
-    {
-      "id": "#ruralroutes:candidate/theme/plains_workshop/tool_goods",
-      "pick": 3
-    },
-    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {
@@ -82,57 +59,7 @@
       }
     }
   },
-  "theme_specialties": [
-    "minecraft:anvil"
-  ],
-  "trade_contracts": [
-    {
-      "type": "fixed",
-      "inputs": [
-        {
-          "count": 6,
-          "item": "minecraft:iron_ingot"
-        },
-        {
-          "count": 3,
-          "item": "minecraft:charcoal"
-        },
-        {
-          "count": 6,
-          "item": "minecraft:oak_planks"
-        }
-      ],
-      "outputs": [
-        {
-          "count": 1,
-          "item": "minecraft:anvil"
-        }
-      ]
-    },
-    {
-      "type": "currency_basket_dynamic",
-      "accepted_currencies": [
-        "ruralroutes:iron_coin",
-        "ruralroutes:copper_coin"
-      ],
-      "composition": "largest_first",
-      "items": [
-        "minecraft:iron_pickaxe",
-        "#ruralroutes:candidate/theme/plains_workshop/tool_goods"
-      ],
-      "side": "sell_to_player"
-    },
-    {
-      "type": "currency_basket_dynamic",
-      "accepted_currencies": [
-        "ruralroutes:iron_coin",
-        "ruralroutes:copper_coin"
-      ],
-      "composition": "largest_first",
-      "items": [
-        "#ruralroutes:pool/mineral"
-      ],
-      "side": "buy_from_player"
-    }
+  "trade_profiles": [
+    "ruralroutes:plains_workshop"
   ]
 }

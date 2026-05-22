@@ -1,0 +1,53 @@
+{
+  "buy_items": [
+    "minecraft:clay_ball",
+    "minecraft:bone_meal",
+    {
+      "items": [
+        "minecraft:cactus",
+        "minecraft:sand",
+        "minecraft:charcoal"
+      ],
+      "key": "desert_dyeworks/inputs",
+      "pick": 2
+    },
+    "#ruralroutes:currency"
+  ],
+  "name": "ruralroutes:desert_dyeworks",
+  "sell_items": [
+    "minecraft:terracotta",
+    {
+      "id": "#ruralroutes:candidate/biome/desert/dye_decor",
+      "pick": 2
+    },
+    {
+      "id": "#ruralroutes:candidate/theme/desert_dyeworks/finished_goods",
+      "pick": 2
+    },
+    "#ruralroutes:currency"
+  ],
+  "theme_specialties": [
+    "minecraft:cyan_dye"
+  ],
+  "trade_contracts": [
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 1,
+          "item": "minecraft:cactus"
+        },
+        {
+          "count": 1,
+          "item": "minecraft:bone_meal"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:cyan_dye"
+        }
+      ]
+    }
+  ]
+}

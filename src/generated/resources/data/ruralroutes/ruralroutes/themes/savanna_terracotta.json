@@ -1,49 +1,27 @@
 {
   "biome": "minecraft:savanna",
-  "buy_items": [
-    "minecraft:bread",
-    "minecraft:cooked_beef",
-    {
-      "items": [
-        "minecraft:charcoal",
-        "minecraft:clay_ball",
-        "minecraft:acacia_log"
-      ],
-      "key": "savanna_terracotta/supplies",
-      "pick": 2
-    },
-    "#ruralroutes:currency"
-  ],
   "name": "ruralroutes:savanna_terracotta",
-  "price_modifiers": {
-    "#ruralroutes:candidate/biome/savanna/dye_decor": {
+  "price_modifiers": [
+    {
       "buy": 0.78,
-      "sell": 0.84
+      "sell": 0.84,
+      "target": "#ruralroutes:candidate/biome/savanna/dye_decor"
     },
-    "#ruralroutes:candidate/theme/savanna_terracotta/kiln_goods": {
+    {
       "buy": 0.82,
-      "sell": 0.88
+      "sell": 0.88,
+      "target": "#ruralroutes:candidate/theme/savanna_terracotta/kiln_goods"
     },
-    "#ruralroutes:pool/food": {
+    {
       "buy": 1.1,
-      "sell": 1.04
+      "sell": 1.04,
+      "target": "#ruralroutes:pool/food"
     },
-    "minecraft:yellow_glazed_terracotta": {
+    {
       "buy": 0.88,
-      "sell": 1.1
+      "sell": 1.1,
+      "target": "minecraft:yellow_glazed_terracotta"
     }
-  },
-  "sell_items": [
-    "minecraft:terracotta",
-    {
-      "id": "#ruralroutes:candidate/biome/savanna/dye_decor",
-      "pick": 2
-    },
-    {
-      "id": "#ruralroutes:candidate/theme/savanna_terracotta/kiln_goods",
-      "pick": 2
-    },
-    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {
@@ -73,28 +51,7 @@
       }
     }
   },
-  "theme_specialties": [
-    "minecraft:yellow_glazed_terracotta"
-  ],
-  "trade_contracts": [
-    {
-      "type": "fixed",
-      "inputs": [
-        {
-          "count": 1,
-          "item": "minecraft:terracotta"
-        },
-        {
-          "count": 1,
-          "item": "minecraft:charcoal"
-        }
-      ],
-      "outputs": [
-        {
-          "count": 1,
-          "item": "minecraft:yellow_glazed_terracotta"
-        }
-      ]
-    }
+  "trade_profiles": [
+    "ruralroutes:savanna_terracotta"
   ]
 }

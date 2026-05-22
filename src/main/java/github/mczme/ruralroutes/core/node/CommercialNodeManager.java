@@ -7,16 +7,28 @@ import github.mczme.ruralroutes.core.market.MarketContext;
 import github.mczme.ruralroutes.core.market.MarketState;
 import github.mczme.ruralroutes.core.market.MarketStockAdjustment;
 import github.mczme.ruralroutes.core.market.MarketStateResolver;
+import github.mczme.ruralroutes.core.theme.ItemEntry;
+import github.mczme.ruralroutes.core.theme.ItemReference;
+import github.mczme.ruralroutes.core.theme.ResolvedTheme;
+import github.mczme.ruralroutes.core.theme.StockConfig;
+import github.mczme.ruralroutes.core.theme.StockRange;
+import github.mczme.ruralroutes.core.theme.StockTarget;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
-import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import github.mczme.ruralroutes.core.util.TagLookupCache;
 import github.mczme.ruralroutes.register.RRAttachments;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -38,7 +50,9 @@ public class CommercialNodeManager {
      */
     private record SelectedTradeItem(
         String sourceRefId,
-        ResourceLocation itemId
+        ResourceLocation itemId,
+        ItemStack displayStack,
+        TradeItemKey tradeItemKey
     ) {}
 
     /**
@@ -109,7 +123,7 @@ public class CommercialNodeManager {
      * @return 创建的商业节点数据，创建失败返回 null
      */
     public static CommercialNodeData createNodeData(Level level, BlockPos pos, ResourceLocation themeName) {
-        ThemeTemplate template = ThemeManager.INSTANCE.getTheme(themeName);
+        ResolvedTheme template = ThemeManager.INSTANCE.getTheme(themeName);
         if (template == null) {
             RuralRoutes.LOGGER.warn("Cannot create commercial node: theme {} not found", themeName);
             return null;
@@ -118,11 +132,11 @@ public class CommercialNodeManager {
         UUID tradeNodeId = UUID.randomUUID();
         List<SelectedTradeItem> selectedSellItems = selectTradeItems(template.sellItems());
         List<SelectedTradeItem> selectedBuyItems = selectTradeItems(template.buyItems());
-        List<ResourceLocation> sellItems = toItemIds(selectedSellItems);
-        List<ResourceLocation> buyItems = toItemIds(selectedBuyItems);
-        List<ResourceLocation> specialties = generateSpecialties(template);
+        List<NodeTradeEntry> sellItems = toTradeEntries(selectedSellItems);
+        List<NodeTradeEntry> buyItems = toTradeEntries(selectedBuyItems);
+        List<NodeTradeEntry> specialties = generateSpecialties(template);
         MarketState marketState = getCurrentMarketState(level);
-        Map<ResourceLocation, StockEntry> stocks = initializeStocks(
+        Map<TradeItemKey, NodeStockEntry> stocks = initializeStocks(
             template, selectedSellItems, selectedBuyItems, marketState);
 
         // 将特产加入出售列表和库存
@@ -133,7 +147,15 @@ public class CommercialNodeManager {
             ? CycleManager.getEffectiveTime(serverLevel) 
             : level.getGameTime();
 
-        CommercialNodeData data = CommercialNodeData.create(tradeNodeId, themeName, sellItems, buyItems, specialties, stocks, timestamp);
+        CommercialNodeData data = CommercialNodeData.create(
+            tradeNodeId,
+            themeName,
+            sellItems,
+            buyItems,
+            specialties,
+            stocks,
+            timestamp
+        );
 
         // 存储到区块
         ChunkAccess chunk = level.getChunk(pos);
@@ -150,15 +172,26 @@ public class CommercialNodeManager {
      * @param template 主题模板
      * @return 特产ID列表（主题特产 + 随机特产）
      */
-    private static List<ResourceLocation> generateSpecialties(ThemeTemplate template) {
-        List<ResourceLocation> specialties = new ArrayList<>();
+    private static List<NodeTradeEntry> generateSpecialties(ResolvedTheme template) {
+        List<NodeTradeEntry> specialties = new ArrayList<>();
+        Set<ResourceLocation> seen = new LinkedHashSet<>();
 
         // 1. 主题特产
-        if (template.themeSpecialties().isPresent()) {
-            List<ResourceLocation> themeSpecialties = template.themeSpecialties().get();
-            for (ResourceLocation specialtyId : themeSpecialties) {
-                if (!specialties.contains(specialtyId)) {
-                    specialties.add(specialtyId);
+        if (template.themeSpecialtyItems().isPresent()) {
+            List<ItemReference> themeSpecialties = template.themeSpecialtyItems().get();
+            for (ItemReference specialtyRef : themeSpecialties) {
+                if (!specialtyRef.isExactItem()) {
+                    RuralRoutes.LOGGER.warn("Theme specialty must resolve to an exact item, got {}", specialtyRef.debugLabel());
+                    continue;
+                }
+                ResourceLocation specialtyId = ResourceLocation.parse(specialtyRef.itemId());
+                ItemStack displayStack = createItemStack(specialtyRef.itemEntries().get(0));
+                if (seen.add(specialtyId)) {
+                    specialties.add(NodeTradeEntry.of(
+                        specialtyRef.sourceKey(),
+                        specialtyId,
+                        displayStack
+                    ));
                 }
             }
         }
@@ -176,8 +209,8 @@ public class CommercialNodeManager {
                 if (added >= count) break;
 
                 ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
-                if (!specialties.contains(itemId)) {
-                    specialties.add(itemId);
+                if (seen.add(itemId)) {
+                    specialties.add(NodeTradeEntry.of(itemId.toString(), itemId));
                     added++;
                 }
             }
@@ -189,10 +222,15 @@ public class CommercialNodeManager {
     /**
      * 将特产加入出售列表
      */
-    private static void addSpecialtiesToSellItems(List<ResourceLocation> sellItems, List<ResourceLocation> specialties) {
-        for (ResourceLocation specialtyId : specialties) {
-            if (!sellItems.contains(specialtyId)) {
-                sellItems.add(specialtyId);
+    private static void addSpecialtiesToSellItems(List<NodeTradeEntry> sellItems,
+            List<NodeTradeEntry> specialties) {
+        for (NodeTradeEntry specialty : specialties) {
+            boolean exists = sellItems.stream().anyMatch(entry -> entry.itemId().equals(specialty.itemId()));
+            if (!exists) {
+                sellItems.add(NodeTradeEntry.of(
+                    specialty.sourceKey(),
+                    specialty.stockKey()
+                ));
             }
         }
     }
@@ -200,8 +238,8 @@ public class CommercialNodeManager {
     /**
      * 将特产加入库存（作为出售物品，初始满库存）
      */
-    private static void addSpecialtiesToStocks(Map<ResourceLocation, StockEntry> stocks,
-            ThemeTemplate template, List<ResourceLocation> specialties, MarketState marketState) {
+    private static void addSpecialtiesToStocks(Map<TradeItemKey, NodeStockEntry> stocks,
+            ResolvedTheme template, List<NodeTradeEntry> specialties, MarketState marketState) {
 
         // 默认库存范围
         int defaultMin = 8;
@@ -209,20 +247,26 @@ public class CommercialNodeManager {
         MarketContext marketContext = MarketContext.fromTheme(template);
 
         if (template.stock().isPresent()) {
-            ThemeTemplate.StockConfig stockConfig = template.stock().get();
+            StockConfig stockConfig = template.stock().get();
             if (stockConfig.defaultRange().isPresent()) {
-                ThemeTemplate.StockRange range = stockConfig.defaultRange().get();
+                StockRange range = stockConfig.defaultRange().get();
                 defaultMin = range.min();
                 defaultMax = range.max();
             }
         }
 
-        for (ResourceLocation specialtyId : specialties) {
-            if (!stocks.containsKey(specialtyId)) {
-                int baseMax = getBaseStockMax(template, specialtyId.toString(), specialtyId, defaultMin, defaultMax);
-                MarketStockAdjustment stockAdjustment = resolveStockAdjustment(marketState, marketContext, specialtyId);
+        for (NodeTradeEntry specialty : specialties) {
+            ResourceLocation specialtyId = specialty.itemId();
+            TradeItemKey stockKey = specialty.tradeItemKey();
+            if (!stocks.containsKey(stockKey)) {
+                int baseMax = getBaseStockMax(template, specialtyId.toString(), specialtyId, defaultMin, defaultMax, true);
+                MarketStockAdjustment stockAdjustment = resolveStockAdjustment(
+                    marketState,
+                    marketContext,
+                    specialty.tradeItemKey(),
+                    Optional.of(specialty.sourceKey()));
                 int sellBase = stockAdjustment.applySellBase(baseMax);
-                stocks.put(specialtyId, StockEntry.full(sellBase));
+                stocks.put(stockKey, NodeStockEntry.full(specialty.displayStackOrDefault(), sellBase));
             }
         }
     }
@@ -234,32 +278,37 @@ public class CommercialNodeManager {
      * 2. 若引用声明了 pick，则从单引用或候选组展开后的全集中随机抽取指定数量
      * 3. 不同引用命中同一物品时，保留先出现的那条引用
      */
-    private static List<SelectedTradeItem> selectTradeItems(List<ThemeTemplate.ItemReference> itemRefs) {
-        Map<ResourceLocation, SelectedTradeItem> selected = new LinkedHashMap<>();
+    private static List<SelectedTradeItem> selectTradeItems(List<ItemReference> itemRefs) {
+        Map<String, SelectedTradeItem> selected = new LinkedHashMap<>();
         Random random = new Random();
 
-        for (ThemeTemplate.ItemReference itemRef : itemRefs) {
-            List<ResourceLocation> candidates = resolveItemCandidates(itemRef);
+        for (ItemReference itemRef : itemRefs) {
+            List<SelectedTradeItem> candidates = resolveItemCandidates(itemRef);
             if (candidates.isEmpty()) {
                 continue;
             }
 
-            List<ResourceLocation> chosen = chooseItems(itemRef, candidates, random);
-            for (ResourceLocation itemId : chosen) {
-                selected.putIfAbsent(itemId, new SelectedTradeItem(itemRef.sourceKey(), itemId));
+            List<SelectedTradeItem> chosen = chooseItems(itemRef, candidates, random);
+            for (SelectedTradeItem item : chosen) {
+                selected.putIfAbsent(item.tradeItemKey().canonicalKey(), item);
             }
         }
 
         return List.copyOf(selected.values());
     }
 
-    private static List<ResourceLocation> resolveItemCandidates(ThemeTemplate.ItemReference itemRef) {
-        Set<ResourceLocation> candidates = new LinkedHashSet<>();
-        for (String ref : itemRef.refs()) {
-            for (Item item : TagLookupCache.getItems(ref)) {
+    private static List<SelectedTradeItem> resolveItemCandidates(ItemReference itemRef) {
+        Map<String, SelectedTradeItem> candidates = new LinkedHashMap<>();
+        for (ItemEntry itemEntry : itemRef.itemEntries()) {
+            for (Item item : TagLookupCache.getItems(itemEntry.ref())) {
                 ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
                 if (itemId != null) {
-                    candidates.add(itemId);
+                    ItemStack displayStack = createItemStack(item, itemEntry);
+                    if (displayStack.isEmpty()) {
+                        continue;
+                    }
+                    SelectedTradeItem selected = new SelectedTradeItem(itemRef.sourceKey(), itemId, displayStack.copy(), TradeItemKey.from(displayStack));
+                    candidates.putIfAbsent(selected.tradeItemKey().canonicalKey(), selected);
                 }
             }
         }
@@ -268,30 +317,34 @@ public class CommercialNodeManager {
             RuralRoutes.LOGGER.warn("Theme item reference resolved to empty set: {}", itemRef.debugLabel());
         }
 
-        return candidates.stream()
-            .sorted(Comparator.comparing(ResourceLocation::toString))
+        return candidates.values().stream()
+            .sorted(Comparator.comparing(item -> item.itemId().toString()))
             .toList();
     }
 
-    private static List<ResourceLocation> chooseItems(ThemeTemplate.ItemReference itemRef,
-            List<ResourceLocation> candidates, Random random) {
+    private static List<SelectedTradeItem> chooseItems(ItemReference itemRef,
+            List<SelectedTradeItem> candidates, Random random) {
 
         if (itemRef.pick().isEmpty() || itemRef.pick().get() >= candidates.size()) {
             return candidates;
         }
 
-        List<ResourceLocation> shuffled = new ArrayList<>(candidates);
+        List<SelectedTradeItem> shuffled = new ArrayList<>(candidates);
         Collections.shuffle(shuffled, random);
 
-        List<ResourceLocation> chosen = new ArrayList<>(shuffled.subList(0, itemRef.pick().get()));
-        chosen.sort(Comparator.comparing(ResourceLocation::toString));
+        List<SelectedTradeItem> chosen = new ArrayList<>(shuffled.subList(0, itemRef.pick().get()));
+        chosen.sort(Comparator.comparing(item -> item.itemId().toString()));
         return chosen;
     }
 
-    private static List<ResourceLocation> toItemIds(List<SelectedTradeItem> selectedItems) {
-        List<ResourceLocation> itemIds = new ArrayList<>(selectedItems.size());
+    private static List<NodeTradeEntry> toTradeEntries(List<SelectedTradeItem> selectedItems) {
+        List<NodeTradeEntry> itemIds = new ArrayList<>(selectedItems.size());
         for (SelectedTradeItem selectedItem : selectedItems) {
-            itemIds.add(selectedItem.itemId());
+            itemIds.add(NodeTradeEntry.of(
+                selectedItem.sourceRefId(),
+                selectedItem.itemId(),
+                selectedItem.displayStack()
+            ));
         }
         return itemIds;
     }
@@ -300,10 +353,11 @@ public class CommercialNodeManager {
      * 从主题模板初始化库存。
      * 仅为当前周期实际入选的物品建立库存条目。
      */
-    private static Map<ResourceLocation, StockEntry> initializeStocks(ThemeTemplate template,
+    private static Map<TradeItemKey, NodeStockEntry> initializeStocks(ResolvedTheme template,
             List<SelectedTradeItem> selectedSellItems, List<SelectedTradeItem> selectedBuyItems,
             MarketState marketState) {
-        Map<ResourceLocation, NodeStockPlan> plans = new HashMap<>();
+        Map<TradeItemKey, NodeStockPlan> plans = new HashMap<>();
+        Map<TradeItemKey, ItemStack> stockStacks = new HashMap<>();
 
         // 默认库存范围
         int defaultMin = 8;
@@ -311,11 +365,11 @@ public class CommercialNodeManager {
         MarketContext marketContext = MarketContext.fromTheme(template);
 
         if (template.stock().isPresent()) {
-            ThemeTemplate.StockConfig stockConfig = template.stock().get();
+            StockConfig stockConfig = template.stock().get();
 
             // 获取默认范围
             if (stockConfig.defaultRange().isPresent()) {
-                ThemeTemplate.StockRange range = stockConfig.defaultRange().get();
+                StockRange range = stockConfig.defaultRange().get();
                 defaultMin = range.min();
                 defaultMax = range.max();
             }
@@ -323,19 +377,22 @@ public class CommercialNodeManager {
 
         // 添加出售物品（村庄卖给玩家）
         for (SelectedTradeItem item : selectedSellItems) {
+            stockStacks.putIfAbsent(item.tradeItemKey(), item.displayStack());
             processStockEntry(plans, template, marketState, marketContext,
-                item.sourceRefId(), item.itemId(), defaultMin, defaultMax, true);
+                item.sourceRefId(), item.itemId(), item.tradeItemKey(), defaultMin, defaultMax, true);
         }
 
         // 添加收购物品（玩家卖给村庄）
         for (SelectedTradeItem item : selectedBuyItems) {
+            stockStacks.putIfAbsent(item.tradeItemKey(), item.displayStack());
             processStockEntry(plans, template, marketState, marketContext,
-                item.sourceRefId(), item.itemId(), defaultMin, defaultMax, false);
+                item.sourceRefId(), item.itemId(), item.tradeItemKey(), defaultMin, defaultMax, false);
         }
 
-        Map<ResourceLocation, StockEntry> stocks = new HashMap<>();
-        for (Map.Entry<ResourceLocation, NodeStockPlan> entry : plans.entrySet()) {
-            StockEntry stockEntry = entry.getValue().toStockEntry();
+        Map<TradeItemKey, NodeStockEntry> stocks = new HashMap<>();
+        for (Map.Entry<TradeItemKey, NodeStockPlan> entry : plans.entrySet()) {
+            ItemStack stockStack = stockStacks.getOrDefault(entry.getKey(), entry.getKey().asItemStack());
+            NodeStockEntry stockEntry = entry.getValue().toStockEntry(stockStack);
             if (stockEntry.max() > 0) {
                 stocks.put(entry.getKey(), stockEntry);
             }
@@ -346,21 +403,25 @@ public class CommercialNodeManager {
     /**
      * 处理单个物品的库存条目
      */
-    private static void processStockEntry(Map<ResourceLocation, NodeStockPlan> plans,
-            ThemeTemplate template, MarketState marketState, MarketContext marketContext,
-            String itemRefId, ResourceLocation itemId,
+    private static void processStockEntry(Map<TradeItemKey, NodeStockPlan> plans,
+            ResolvedTheme template, MarketState marketState, MarketContext marketContext,
+            String itemRefId, ResourceLocation itemId, TradeItemKey stockKey,
             int defaultMin, int defaultMax, boolean isSellItem) {
 
-        int baseAmount = getBaseStockMax(template, itemRefId, itemId, defaultMin, defaultMax);
-        MarketStockAdjustment stockAdjustment = resolveStockAdjustment(marketState, marketContext, itemId);
-        NodeStockPlan existing = plans.getOrDefault(itemId, NodeStockPlan.EMPTY);
+        int baseAmount = getBaseStockMax(template, itemRefId, itemId, defaultMin, defaultMax, isSellItem);
+        MarketStockAdjustment stockAdjustment = resolveStockAdjustment(
+            marketState,
+            marketContext,
+            stockKey,
+            Optional.ofNullable(itemRefId));
+        NodeStockPlan existing = plans.getOrDefault(stockKey, NodeStockPlan.EMPTY);
 
         if (isSellItem) {
             int sellBase = stockAdjustment.applySellBase(baseAmount);
-            plans.put(itemId, existing.addSell(sellBase));
+            plans.put(stockKey, existing.addSell(sellBase));
         } else {
             int buyBase = stockAdjustment.applyBuyBase(baseAmount);
-            plans.put(itemId, existing.addBuy(buyBase));
+            plans.put(stockKey, existing.addBuy(buyBase));
         }
     }
 
@@ -369,41 +430,29 @@ public class CommercialNodeManager {
      * @param itemRefId 物品引用ID（可能带#前缀的标签ID或精确物品ID）
      * @param itemId 实际物品ID（不带#前缀）
      */
-    private static int getBaseStockMax(ThemeTemplate template, String itemRefId, ResourceLocation itemId,
-            int defaultMin, int defaultMax) {
+    private static int getBaseStockMax(ResolvedTheme template, String itemRefId, ResourceLocation itemId,
+            int defaultMin, int defaultMax, boolean isSellItem) {
 
         if (template.stock().isPresent()) {
-            ThemeTemplate.StockConfig stockConfig = template.stock().get();
-            if (stockConfig.specific().isPresent()) {
-                Map<String, ThemeTemplate.StockRange> specific = stockConfig.specific().get();
-
-                // 优先匹配精确物品ID
-                String itemKey = itemId.toString();
-                if (specific.containsKey(itemKey)) {
-                    ThemeTemplate.StockRange range = specific.get(itemKey);
-                    return randomInRange(range);
-                }
-
-                // 其次匹配来源键原样（适用于显式 key 或单引用）
-                if (specific.containsKey(itemRefId)) {
-                    ThemeTemplate.StockRange range = specific.get(itemRefId);
-                    return randomInRange(range);
-                }
-
-                // 最后匹配标签ID去前缀形式（仅对标签来源生效）
-                if (itemRefId.startsWith("#")) {
-                    String tagKeyNoPrefix = itemRefId.substring(1);
-                    if (specific.containsKey(tagKeyNoPrefix)) {
-                        ThemeTemplate.StockRange range = specific.get(tagKeyNoPrefix);
+            StockConfig stockConfig = template.stock().get();
+            if (stockConfig.targetEntries().isPresent()) {
+                StockTarget target = stockConfig.resolveTarget(itemRefId, itemId).orElse(null);
+                if (target != null) {
+                    StockRange range = target.shared().orElse(null);
+                    if (range == null) {
+                        range = isSellItem
+                            ? target.sell().orElse(target.buy().orElse(null))
+                            : target.buy().orElse(target.sell().orElse(null));
+                    }
+                    if (range != null) {
                         return randomInRange(range);
                     }
                 }
-
-                // 兼容旧逻辑：对单标签来源继续允许不带#写入后自动补前缀匹配
-                String legacyTagKeyWithPrefix = itemRefId.startsWith("#") ? itemRefId : "#" + itemRefId;
-                if (!legacyTagKeyWithPrefix.equals(itemRefId) && specific.containsKey(legacyTagKeyWithPrefix)) {
-                    ThemeTemplate.StockRange range = specific.get(legacyTagKeyWithPrefix);
-                    return randomInRange(range);
+            }
+            if (stockConfig.specific().isPresent()) {
+                Optional<StockRange> resolved = stockConfig.resolveSpecific(itemRefId, itemId);
+                if (resolved.isPresent()) {
+                    return randomInRange(resolved.get());
                 }
             }
         }
@@ -415,8 +464,65 @@ public class CommercialNodeManager {
     /**
      * 在范围内取随机值
      */
-    private static int randomInRange(ThemeTemplate.StockRange range) {
+    private static int randomInRange(StockRange range) {
         return range.min() + (int)(Math.random() * (range.max() - range.min() + 1));
+    }
+
+    private static ItemStack createItemStack(ItemEntry itemEntry) {
+        if (itemEntry.isTag()) {
+            RuralRoutes.LOGGER.warn("Cannot create a display stack directly from tag reference: {}", itemEntry.ref());
+            return ItemStack.EMPTY;
+        }
+
+        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemEntry.ref()));
+        return createItemStack(item, itemEntry);
+    }
+
+    private static ItemStack createItemStack(Item item, ItemEntry itemEntry) {
+        if (item == Items.AIR) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack stack = new ItemStack(item);
+        itemEntry.components().ifPresent(components -> applyComponents(stack, components));
+        return stack;
+    }
+
+    private static void applyComponents(ItemStack stack, Map<String, String> components) {
+        for (Map.Entry<String, String> entry : components.entrySet()) {
+            ResourceLocation componentId = ResourceLocation.tryParse(entry.getKey());
+            if (componentId == null) {
+                continue;
+            }
+
+            DataComponentType<?> type = BuiltInRegistries.DATA_COMPONENT_TYPE.getOptional(componentId).orElse(null);
+            if (type == null) {
+                continue;
+            }
+
+            try {
+                JsonElement json = JsonParser.parseString(entry.getValue());
+                Object value = type.codec().parse(JsonOps.INSTANCE, json)
+                    .resultOrPartial(err -> RuralRoutes.LOGGER.warn(
+                        "Failed to parse component {} for {}: {}",
+                        componentId, stack.getItem(), err))
+                    .orElse(null);
+                if (value instanceof Optional<?> optional) {
+                    value = optional.orElse(null);
+                }
+                if (value != null) {
+                    setComponent(stack, type, value);
+                }
+            } catch (Exception e) {
+                RuralRoutes.LOGGER.warn("Failed to apply component {} to {}: {}",
+                    componentId, stack.getItem(), e.getMessage());
+            }
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void setComponent(ItemStack stack, DataComponentType type, Object value) {
+        stack.set(type, value);
     }
 
     /**
@@ -484,7 +590,7 @@ public class CommercialNodeManager {
     private static CommercialNodeData refreshNodeData(ServerLevel level, BlockPos pos,
             CommercialNodeData oldData, long currentTimestamp) {
 
-        ThemeTemplate template = ThemeManager.INSTANCE.getTheme(oldData.themeName());
+        ResolvedTheme template = ThemeManager.INSTANCE.getTheme(oldData.themeName());
         if (template == null) {
             RuralRoutes.LOGGER.warn("Cannot refresh node: theme {} not found", oldData.themeName());
             return oldData;
@@ -492,16 +598,16 @@ public class CommercialNodeManager {
 
         List<SelectedTradeItem> selectedSellItems = selectTradeItems(template.sellItems());
         List<SelectedTradeItem> selectedBuyItems = selectTradeItems(template.buyItems());
-        List<ResourceLocation> newSellItems = toItemIds(selectedSellItems);
-        List<ResourceLocation> newBuyItems = toItemIds(selectedBuyItems);
+        List<NodeTradeEntry> newSellItems = toTradeEntries(selectedSellItems);
+        List<NodeTradeEntry> newBuyItems = toTradeEntries(selectedBuyItems);
         MarketState marketState = CycleManager.get(level).getOrInitMarketState();
 
         // 重新初始化库存（全量恢复）
-        Map<ResourceLocation, StockEntry> newStocks = initializeStocks(
+        Map<TradeItemKey, NodeStockEntry> newStocks = initializeStocks(
             template, selectedSellItems, selectedBuyItems, marketState);
 
         // 重新生成特产
-        List<ResourceLocation> newSpecialties = generateSpecialties(template);
+        List<NodeTradeEntry> newSpecialties = generateSpecialties(template);
 
         // 重新生成出售列表（包含新特产）
         addSpecialtiesToSellItems(newSellItems, newSpecialties);
@@ -540,7 +646,8 @@ public class CommercialNodeManager {
     private static MarketStockAdjustment resolveStockAdjustment(
             MarketState marketState,
             MarketContext marketContext,
-            ResourceLocation itemId) {
-        return MarketStateResolver.resolveStockAdjustment(marketState, marketContext, itemId);
+            TradeItemKey itemKey,
+            Optional<String> sourceKey) {
+        return MarketStateResolver.resolveStockAdjustment(marketState, marketContext, itemKey, sourceKey);
     }
 }

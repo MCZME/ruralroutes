@@ -311,6 +311,7 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("rumor.target.mineral", "ore");
         add("rumor.target.dye", "dyes");
         add("rumor.target.decor", "decor goods");
+        add("rumor.target.paper", "paper stock");
         add("rumor.target.terracotta", "terracotta wares");
         add("rumor.target.leather_fiber", "hides");
         add("rumor.target.ice_snow", "ice goods");

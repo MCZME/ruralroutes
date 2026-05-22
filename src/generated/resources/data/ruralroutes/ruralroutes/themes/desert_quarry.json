@@ -1,53 +1,32 @@
 {
   "biome": "minecraft:desert",
-  "buy_items": [
-    "minecraft:bread",
-    "minecraft:oak_log",
-    {
-      "items": [
-        "minecraft:charcoal",
-        "minecraft:stick",
-        "minecraft:cooked_beef"
-      ],
-      "key": "desert_quarry/supplies",
-      "pick": 2
-    },
-    "#ruralroutes:currency"
-  ],
   "name": "ruralroutes:desert_quarry",
-  "price_modifiers": {
-    "#ruralroutes:candidate/biome/desert/stone": {
+  "price_modifiers": [
+    {
       "buy": 0.72,
-      "sell": 0.78
+      "sell": 0.78,
+      "target": "#ruralroutes:candidate/biome/desert/stone"
     },
-    "#ruralroutes:candidate/theme/desert_quarry/stonework": {
+    {
       "buy": 0.78,
-      "sell": 0.84
+      "sell": 0.84,
+      "target": "#ruralroutes:candidate/theme/desert_quarry/stonework"
     },
-    "#ruralroutes:pool/food": {
+    {
       "buy": 1.12,
-      "sell": 1.04
+      "sell": 1.04,
+      "target": "#ruralroutes:pool/food"
     },
-    "#ruralroutes:pool/wood": {
+    {
       "buy": 1.12,
-      "sell": 1.06
+      "sell": 1.06,
+      "target": "#ruralroutes:pool/wood"
     },
-    "minecraft:chiseled_sandstone": {
+    {
       "buy": 0.86,
-      "sell": 1.1
+      "sell": 1.1,
+      "target": "minecraft:chiseled_sandstone"
     }
-  },
-  "sell_items": [
-    "minecraft:sandstone",
-    {
-      "id": "#ruralroutes:candidate/biome/desert/stone",
-      "pick": 3
-    },
-    {
-      "id": "#ruralroutes:candidate/theme/desert_quarry/stonework",
-      "pick": 2
-    },
-    "#ruralroutes:currency"
   ],
   "stock": {
     "default": {
@@ -77,28 +56,7 @@
       }
     }
   },
-  "theme_specialties": [
-    "minecraft:chiseled_sandstone"
-  ],
-  "trade_contracts": [
-    {
-      "type": "fixed",
-      "inputs": [
-        {
-          "count": 2,
-          "item": "minecraft:red_sandstone"
-        },
-        {
-          "count": 1,
-          "item": "minecraft:stick"
-        }
-      ],
-      "outputs": [
-        {
-          "count": 1,
-          "item": "minecraft:chiseled_sandstone"
-        }
-      ]
-    }
+  "trade_profiles": [
+    "ruralroutes:desert_quarry"
   ]
 }

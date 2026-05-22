@@ -311,6 +311,7 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("rumor.target.mineral", "矿料");
         add("rumor.target.dye", "染料");
         add("rumor.target.decor", "染色商品");
+        add("rumor.target.paper", "纸张");
         add("rumor.target.terracotta", "彩陶");
         add("rumor.target.leather_fiber", "皮货");
         add("rumor.target.ice_snow", "冰货");
