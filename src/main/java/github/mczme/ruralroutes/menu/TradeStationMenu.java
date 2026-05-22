@@ -302,7 +302,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
                 // 动态货币篮：检查 side 和 items
                 if (basketEntry.side() == side) {
                     for (String itemPattern : basketEntry.items()) {
-                        if (itemPattern.equals("*") || TagLookupCache.matchesItem(contractStack, itemPattern)) {
+                        if (matchesContractPattern(entryData, contractStack, itemPattern)) {
                             int price = calculatePriceForContract(itemId, entryData.sourceKey(), contractStack, side);
                             List<ItemStack> priceStacks = CurrencyBasketComposer.compose(
                                 price,
@@ -318,6 +318,19 @@ public class TradeStationMenu extends AbstractContainerMenu {
         }
 
         return null;
+    }
+
+    static boolean matchesContractPattern(NodeTradeEntry entryData, ItemStack contractStack, String itemPattern) {
+        if (itemPattern == null || itemPattern.isBlank()) {
+            return false;
+        }
+        if (itemPattern.equals("*")) {
+            return true;
+        }
+        if (itemPattern.startsWith("@")) {
+            return entryData != null && entryData.sourceKey().equals(itemPattern.substring(1));
+        }
+        return TagLookupCache.matchesItem(contractStack, itemPattern);
     }
 
     /**

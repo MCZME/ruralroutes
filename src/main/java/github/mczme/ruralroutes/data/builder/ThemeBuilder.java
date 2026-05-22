@@ -6,6 +6,7 @@ import github.mczme.ruralroutes.core.theme.StockConfig;
 import github.mczme.ruralroutes.core.theme.StockRange;
 import github.mczme.ruralroutes.core.theme.StockTarget;
 import github.mczme.ruralroutes.core.theme.ThemeTemplate;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
@@ -87,6 +88,11 @@ public class ThemeBuilder {
             sell,
             buy
         ));
+        return this;
+    }
+
+    public ThemeBuilder priceModifier(TradeTargetRef targetRef, float sell, float buy) {
+        priceModifiers.add(PriceModifier.of(targetRef, sell, buy));
         return this;
     }
 

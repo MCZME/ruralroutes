@@ -63,6 +63,17 @@ public class TradeProfileBuilder {
         return this;
     }
 
+    public TradeProfileBuilder sell(String key, String item, Map<String, String> components) {
+        sellItems.add(new ItemReference(
+            Optional.of(item),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(key),
+            Optional.of(components)
+        ));
+        return this;
+    }
+
     public TradeProfileBuilder sellPick(String item, int pick) {
         sellItems.add(parseItemRef(item, pick));
         return this;
@@ -90,6 +101,17 @@ public class TradeProfileBuilder {
         return this;
     }
 
+    public TradeProfileBuilder buy(String key, String item, Map<String, String> components) {
+        buyItems.add(new ItemReference(
+            Optional.of(item),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(key),
+            Optional.of(components)
+        ));
+        return this;
+    }
+
     public TradeProfileBuilder buyPick(String item, int pick) {
         buyItems.add(parseItemRef(item, pick));
         return this;
@@ -114,6 +136,17 @@ public class TradeProfileBuilder {
 
     public TradeProfileBuilder specialty(String item, Map<String, String> components) {
         specialties.add(ItemReference.single(item, components));
+        return this;
+    }
+
+    public TradeProfileBuilder specialty(String key, String item, Map<String, String> components) {
+        specialties.add(new ItemReference(
+            Optional.of(item),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(key),
+            Optional.of(components)
+        ));
         return this;
     }
 

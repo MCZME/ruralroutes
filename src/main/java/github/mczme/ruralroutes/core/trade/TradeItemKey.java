@@ -222,6 +222,9 @@ public record TradeItemKey(
                 Object value = type.codec().parse(JsonOps.INSTANCE, json)
                     .resultOrPartial(err -> { })
                     .orElse(null);
+                if (value instanceof Optional<?> optional) {
+                    value = optional.orElse(null);
+                }
                 if (value != null) {
                     setComponent(stack, type, value);
                 }

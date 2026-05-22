@@ -507,6 +507,9 @@ public class CommercialNodeManager {
                         "Failed to parse component {} for {}: {}",
                         componentId, stack.getItem(), err))
                     .orElse(null);
+                if (value instanceof Optional<?> optional) {
+                    value = optional.orElse(null);
+                }
                 if (value != null) {
                     setComponent(stack, type, value);
                 }
