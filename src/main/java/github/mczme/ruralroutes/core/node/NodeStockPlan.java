@@ -20,10 +20,10 @@ record NodeStockPlan(
         return new NodeStockPlan(sellBase, buyBase + amount);
     }
 
-    StockEntry toStockEntry() {
+    NodeStockEntry toStockEntry(net.minecraft.world.item.ItemStack stack) {
         if (sellBase <= 0 && buyBase <= 0) {
-            return StockEntry.empty(0);
+            return NodeStockEntry.empty(stack, 0);
         }
-        return new StockEntry(sellBase, sellBase + buyBase);
+        return new NodeStockEntry(stack, sellBase, sellBase + buyBase);
     }
 }

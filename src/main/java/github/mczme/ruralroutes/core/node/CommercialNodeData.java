@@ -5,20 +5,17 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.registries.BuiltInRegistries;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 /**
  * 商业节点数据，存储在区块中。
  *
  * 运行时保持两层表达：
  * - 展示层使用 NodeTradeEntry，支持带组件物品的稳定展示和同步
- * - 库存使用 TradeItemKey，价格修正和市场事件使用统一目标引用
+ * - 库存使用 NodeStockEntry 保存物品栈原型和库存数量，TradeItemKey 只作为稳定地址
  */
 public record CommercialNodeData(
     UUID tradeNodeId,
@@ -26,7 +23,7 @@ public record CommercialNodeData(
     List<NodeTradeEntry> sellItems,
     List<NodeTradeEntry> buyItems,
     List<NodeTradeEntry> specialties,
-    Map<TradeItemKey, StockEntry> stocks,
+    Map<TradeItemKey, NodeStockEntry> stocks,
     long refreshTimestamp
 ) {
     public static final Codec<CommercialNodeData> CODEC = RecordCodecBuilder.create(
@@ -46,7 +43,7 @@ public record CommercialNodeData(
             NodeTradeEntry.CODEC.listOf()
                 .fieldOf("specialties")
                 .forGetter(CommercialNodeData::specialties),
-            Codec.unboundedMap(TradeItemKey.CODEC, StockEntry.CODEC)
+            Codec.unboundedMap(TradeItemKey.CODEC, NodeStockEntry.CODEC)
                 .fieldOf("stocks")
                 .forGetter(CommercialNodeData::stocks),
             Codec.LONG
@@ -54,6 +51,15 @@ public record CommercialNodeData(
                 .forGetter(CommercialNodeData::refreshTimestamp)
         ).apply(instance, CommercialNodeData::new)
     );
+
+    public CommercialNodeData {
+        tradeNodeId = Objects.requireNonNull(tradeNodeId, "tradeNodeId");
+        themeName = Objects.requireNonNull(themeName, "themeName");
+        sellItems = List.copyOf(Objects.requireNonNull(sellItems, "sellItems"));
+        buyItems = List.copyOf(Objects.requireNonNull(buyItems, "buyItems"));
+        specialties = List.copyOf(Objects.requireNonNull(specialties, "specialties"));
+        stocks = normalizeStocks(Objects.requireNonNull(stocks, "stocks"));
+    }
 
     /** 创建空的默认实例（用于 Attachment 默认值） */
     public static CommercialNodeData empty() {
@@ -72,32 +78,47 @@ public record CommercialNodeData(
     public static CommercialNodeData create(UUID tradeNodeId, ResourceLocation themeName,
             List<NodeTradeEntry> sellItems, List<NodeTradeEntry> buyItems,
             List<NodeTradeEntry> specialties,
-            Map<TradeItemKey, StockEntry> stocks, long timestamp) {
+            Map<TradeItemKey, NodeStockEntry> stocks, long timestamp) {
         return new CommercialNodeData(tradeNodeId, themeName,
             List.copyOf(sellItems), List.copyOf(buyItems), List.copyOf(specialties),
             Map.copyOf(stocks), timestamp);
     }
 
-    /** 获取指定物品的库存 */
-    public StockEntry getStock(TradeItemKey itemKey) {
+    /** 获取指定库存键对应的库存项 */
+    public NodeStockEntry getStockEntry(TradeItemKey itemKey) {
         if (itemKey == null) {
             return null;
         }
-        StockEntry entry = stocks.get(itemKey);
+        NodeStockEntry entry = stocks.get(itemKey);
         if (entry != null) {
             return entry;
         }
         return itemKey.hasComponents() ? stocks.get(TradeItemKey.of(itemKey.itemId())) : null;
     }
 
-    /** 获取指定物品的库存（兼容旧调用） */
-    public StockEntry getStock(ResourceLocation itemId) {
-        return getStock(TradeItemKey.of(itemId));
+    /** 获取指定物品栈对应的库存项 */
+    public NodeStockEntry getStockEntry(ItemStack stack) {
+        return stack == null || stack.isEmpty() ? null : getStockEntry(TradeItemKey.from(stack));
+    }
+
+    /** 获取指定索引项对应的库存项 */
+    public NodeStockEntry getStockEntry(NodeTradeEntry entry) {
+        return entry == null ? null : getStockEntry(entry.stockKey());
+    }
+
+    /** 获取指定物品的库存 */
+    public NodeStockEntry getStock(TradeItemKey itemKey) {
+        return getStockEntry(itemKey);
     }
 
     /** 获取指定物品栈的库存 */
-    public StockEntry getStock(ItemStack stack) {
+    public NodeStockEntry getStock(ItemStack stack) {
         return stack == null || stack.isEmpty() ? null : getStock(TradeItemKey.from(stack));
+    }
+
+    /** 获取指定索引项对应的库存数量 */
+    public NodeStockEntry getStock(NodeTradeEntry entry) {
+        return getStockEntry(entry);
     }
 
     public List<ResourceLocation> sellItemIds() {
@@ -113,19 +134,10 @@ public record CommercialNodeData(
     }
 
     /** 更新单个物品库存 */
-    public CommercialNodeData withStock(TradeItemKey itemKey, StockEntry newStock) {
-        Map<TradeItemKey, StockEntry> newStocks = new java.util.HashMap<>(stocks);
+    public CommercialNodeData withStock(TradeItemKey itemKey, NodeStockEntry newStock) {
+        Map<TradeItemKey, NodeStockEntry> newStocks = new java.util.HashMap<>(stocks);
         newStocks.put(itemKey, newStock);
         return new CommercialNodeData(tradeNodeId, themeName, sellItems, buyItems, specialties, Map.copyOf(newStocks), refreshTimestamp);
-    }
-
-    /** 更新单个物品库存（兼容旧调用） */
-    public CommercialNodeData withStock(ResourceLocation itemId, StockEntry newStock) {
-        return withStock(TradeItemKey.of(itemId), newStock);
-    }
-
-    public CommercialNodeData withStock(ItemStack stack, StockEntry newStock) {
-        return withStock(TradeItemKey.from(stack), newStock);
     }
 
     /** 更新刷新时间戳 */
@@ -138,49 +150,13 @@ public record CommercialNodeData(
         return new CommercialNodeData(tradeNodeId, themeName, sellItems, buyItems, List.copyOf(newSpecialties), stocks, refreshTimestamp);
     }
 
-    public record NodeTradeEntry(
-        String sourceKey,
-        ResourceLocation itemId,
-        @Nullable ItemStack displayStack
-    ) {
-        public static final Codec<NodeTradeEntry> CODEC = RecordCodecBuilder.create(
-            instance -> instance.group(
-                Codec.STRING.fieldOf("source_key").forGetter(NodeTradeEntry::sourceKey),
-                ResourceLocation.CODEC.fieldOf("item_id").forGetter(NodeTradeEntry::itemId),
-                ItemStack.CODEC.optionalFieldOf("display_stack").forGetter(entry -> java.util.Optional.ofNullable(entry.displayStack))
-            ).apply(instance, (sourceKey, itemId, displayStack) ->
-                new NodeTradeEntry(sourceKey, itemId, displayStack.orElse(null)))
-        );
-
-        public NodeTradeEntry {
-            sourceKey = sourceKey == null ? "" : sourceKey.strip();
+    private static Map<TradeItemKey, NodeStockEntry> normalizeStocks(Map<TradeItemKey, NodeStockEntry> stocks) {
+        Map<TradeItemKey, NodeStockEntry> normalized = new java.util.HashMap<>();
+        for (Map.Entry<TradeItemKey, NodeStockEntry> entry : stocks.entrySet()) {
+            NodeStockEntry stockEntry = Objects.requireNonNull(entry.getValue(), "stock entry");
+            normalized.put(stockEntry.stockKey(), stockEntry);
         }
-
-        public static NodeTradeEntry of(String sourceKey, ResourceLocation itemId, ItemStack displayStack) {
-            return new NodeTradeEntry(sourceKey, itemId, displayStack == null ? null : displayStack.copy());
-        }
-
-        public static NodeTradeEntry of(String sourceKey, ResourceLocation itemId) {
-            return new NodeTradeEntry(sourceKey, itemId, null);
-        }
-
-        public TradeItemKey tradeItemKey() {
-            if (displayStack != null && !displayStack.isEmpty()) {
-                return TradeItemKey.from(displayStack);
-            }
-            return TradeItemKey.of(itemId);
-        }
-
-        public ItemStack displayStackOrDefault() {
-            if (displayStack != null && !displayStack.isEmpty()) {
-                return displayStack.copy();
-            }
-            ItemStack fallback = new ItemStack(BuiltInRegistries.ITEM.get(itemId));
-            return fallback.isEmpty() ? ItemStack.EMPTY : fallback;
-        }
-
-        public boolean hasDisplayStack() {
-            return displayStack != null && !displayStack.isEmpty();
-        }
+        return Map.copyOf(normalized);
     }
+
 }
