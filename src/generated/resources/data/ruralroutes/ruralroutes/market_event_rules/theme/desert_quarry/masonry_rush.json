@@ -1,5 +1,5 @@
 {
-  "delta": 0.2,
+  "delta": 0.22,
   "id": "ruralroutes:theme/desert_quarry/masonry_rush",
   "name_key": "market.ruralroutes.theme.desert_quarry.masonry_rush",
   "rumor_family": "demand",
@@ -14,8 +14,8 @@
     }
   ],
   "stock": {
-    "buy": 0.3,
-    "sell": -0.1
+    "buy": 0.32,
+    "sell": -0.08
   },
   "target_ref": "#ruralroutes:pool/stone",
   "weight": 35

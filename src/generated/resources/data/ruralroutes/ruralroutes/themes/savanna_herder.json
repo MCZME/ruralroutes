@@ -3,46 +3,131 @@
   "name": "ruralroutes:savanna_herder",
   "price_modifiers": [
     {
-      "buy": 0.76,
-      "sell": 0.82,
+      "buy": 0.68,
+      "sell": 0.74,
       "target": "#ruralroutes:candidate/biome/savanna/leather_fiber"
     },
     {
-      "buy": 0.88,
-      "sell": 0.94,
+      "buy": 0.8,
+      "sell": 0.88,
       "target": "#ruralroutes:candidate/biome/savanna/food"
     },
     {
-      "buy": 0.88,
+      "buy": 1.28,
       "sell": 1.08,
+      "target": "@savanna_herder/tools"
+    },
+    {
+      "buy": 0.84,
+      "sell": 0.94,
+      "target": "minecraft:lead"
+    },
+    {
+      "buy": 0.82,
+      "sell": 0.92,
+      "target": "minecraft:saddle"
+    },
+    {
+      "buy": 0.82,
+      "sell": 0.94,
       "target": "minecraft:rabbit_hide"
+    },
+    {
+      "buy": 0.6,
+      "sell": 1.4,
+      "target": "minecraft:ender_pearl"
+    },
+    {
+      "buy": 0.55,
+      "sell": 1.45,
+      "target": "minecraft:blaze_rod"
     }
   ],
   "stock": {
     "default": {
-      "max": 14,
-      "min": 8
+      "max": 8,
+      "min": 4
     },
-    "specific": {
+    "targets": {
       "#ruralroutes:candidate/biome/savanna/food": {
-        "max": 20,
-        "min": 12
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 18,
+          "min": 10
+        }
       },
       "#ruralroutes:candidate/biome/savanna/leather_fiber": {
-        "max": 24,
-        "min": 16
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 24,
+          "min": 14
+        }
       },
-      "minecraft:leather": {
-        "max": 20,
-        "min": 14
+      "minecraft:blaze_rod": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "minecraft:ender_pearl": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "minecraft:lead": {
+        "buy": {
+          "max": 2,
+          "min": 1
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       },
       "minecraft:rabbit_hide": {
-        "max": 4,
-        "min": 2
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 4,
+          "min": 2
+        }
+      },
+      "minecraft:saddle": {
+        "buy": {
+          "max": 1,
+          "min": 0
+        },
+        "sell": {
+          "max": 2,
+          "min": 1
+        }
       },
       "savanna_herder/tools": {
-        "max": 14,
-        "min": 8
+        "buy": {
+          "max": 24,
+          "min": 14
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       }
     }
   },

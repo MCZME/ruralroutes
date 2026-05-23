@@ -1,0 +1,22 @@
+{
+  "delta": 0.22,
+  "id": "ruralroutes:theme/plains_workshop/rush_order",
+  "name_key": "market.ruralroutes.theme.plains_workshop.rush_order",
+  "rumor_family": "demand",
+  "rumor_target_key": "rumor.target.tool",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:plains_workshop"
+      ]
+    }
+  ],
+  "stock": {
+    "buy": 0.35,
+    "sell": -0.12
+  },
+  "target_ref": "@plains_workshop/basic_tools",
+  "weight": 40
+}

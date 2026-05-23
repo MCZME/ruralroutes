@@ -1,6 +1,9 @@
 {
   "values": [
     "minecraft:sweet_berries",
+    "minecraft:carrot",
+    "minecraft:potato",
+    "minecraft:beetroot",
     "minecraft:rabbit",
     "minecraft:cooked_rabbit",
     "minecraft:salmon",

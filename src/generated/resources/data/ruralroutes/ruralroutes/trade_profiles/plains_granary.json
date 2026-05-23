@@ -3,54 +3,124 @@
     "minecraft:wheat",
     "minecraft:iron_ingot",
     "minecraft:coal",
+    "minecraft:bone_meal",
     {
       "items": [
         "minecraft:raw_iron",
         "minecraft:charcoal",
-        "minecraft:stone_hoe"
+        "minecraft:wooden_hoe",
+        "minecraft:wooden_axe",
+        "minecraft:wooden_pickaxe",
+        "minecraft:stone_hoe",
+        "minecraft:stone_axe",
+        "minecraft:stone_pickaxe"
       ],
       "key": "plains_granary/procurement",
-      "pick": 2
+      "pick": 3
     },
     "#ruralroutes:currency"
   ],
   "name": "ruralroutes:plains_granary",
   "sell_items": [
     "minecraft:oak_planks",
+    "minecraft:composter",
     {
       "items": [
         "minecraft:bread",
+        "minecraft:baked_potato",
+        "minecraft:pumpkin_pie",
+        "minecraft:apple",
+        "minecraft:sugar_cane",
         "#ruralroutes:candidate/biome/plains/crop"
       ],
       "key": "plains_granary/staples",
-      "pick": 3
+      "pick": 5
+    },
+    {
+      "items": [
+        "minecraft:golden_carrot",
+        "minecraft:glistering_melon_slice",
+        "minecraft:golden_apple"
+      ],
+      "key": "plains_granary/rare_food",
+      "pick": 1
     },
     "#ruralroutes:currency"
   ],
-  "theme_specialties": [
-    "minecraft:golden_carrot"
-  ],
+  "stock": {
+    "targets": {
+      "ruralroutes:copper_coin": {
+        "buy": {
+          "max": 200,
+          "min": 120
+        },
+        "sell": {
+          "max": 80,
+          "min": 48
+        }
+      },
+      "ruralroutes:gold_coin": {
+        "buy": {
+          "max": 4,
+          "min": 2
+        },
+        "sell": {
+          "max": 1,
+          "min": 0
+        }
+      },
+      "ruralroutes:iron_coin": {
+        "buy": {
+          "max": 36,
+          "min": 20
+        },
+        "sell": {
+          "max": 8,
+          "min": 4
+        }
+      }
+    }
+  },
   "trade_contracts": [
     {
       "type": "fixed",
       "inputs": [
         {
+          "count": 1,
+          "item": "minecraft:apple"
+        },
+        {
           "count": 8,
-          "item": "minecraft:carrot"
-        },
-        {
-          "count": 2,
-          "item": "minecraft:bread"
-        },
-        {
-          "count": 6,
-          "item": "minecraft:wheat"
+          "item": "minecraft:gold_nugget"
         }
       ],
       "outputs": [
         {
           "count": 1,
+          "item": "minecraft:golden_apple"
+        }
+      ]
+    },
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 1,
+          "item": "minecraft:golden_apple"
+        },
+        {
+          "count": 1,
           "item": "minecraft:golden_carrot"
+        },
+        {
+          "count": 1,
+          "item": "ruralroutes:gold_coin"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:ender_pearl"
         }
       ]
     },
@@ -62,7 +132,8 @@
       ],
       "composition": "largest_first",
       "items": [
-        "#ruralroutes:pool/mineral"
+        "#ruralroutes:pool/mineral",
+        "minecraft:bone_meal"
       ],
       "side": "buy_from_player"
     }

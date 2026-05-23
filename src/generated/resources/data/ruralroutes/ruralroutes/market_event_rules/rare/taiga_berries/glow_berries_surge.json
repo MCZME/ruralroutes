@@ -1,5 +1,5 @@
 {
-  "delta": 0.22,
+  "delta": 0.18,
   "id": "ruralroutes:rare/taiga_berries/glow_berries_surge",
   "name_key": "market.ruralroutes.rare.taiga_berries.glow_berries_surge",
   "rumor_family": "demand",
@@ -13,7 +13,7 @@
     }
   ],
   "stock": {
-    "buy": 0.3,
+    "buy": 0.28,
     "sell": -0.1
   },
   "target_ref": "minecraft:glow_berries",

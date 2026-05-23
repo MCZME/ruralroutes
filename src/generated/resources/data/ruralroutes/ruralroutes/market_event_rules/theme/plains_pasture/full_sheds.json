@@ -1,5 +1,5 @@
 {
-  "delta": -0.2,
+  "delta": -0.22,
   "id": "ruralroutes:theme/plains_pasture/full_sheds",
   "name_key": "market.ruralroutes.theme.plains_pasture.full_sheds",
   "rumor_family": "surplus",
@@ -15,7 +15,7 @@
   ],
   "stock": {
     "buy": -0.15,
-    "sell": 0.3
+    "sell": 0.35
   },
   "target_ref": "#ruralroutes:pool/leather_fiber",
   "weight": 35

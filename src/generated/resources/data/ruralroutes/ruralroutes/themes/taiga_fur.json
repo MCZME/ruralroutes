@@ -3,46 +3,121 @@
   "name": "ruralroutes:taiga_fur",
   "price_modifiers": [
     {
-      "buy": 0.76,
-      "sell": 0.82,
+      "buy": 0.7,
+      "sell": 0.76,
       "target": "#ruralroutes:candidate/biome/taiga/leather_fiber"
     },
     {
-      "buy": 0.82,
-      "sell": 0.88,
+      "buy": 0.76,
+      "sell": 0.84,
       "target": "#ruralroutes:candidate/theme/taiga_fur/fur_goods"
     },
     {
-      "buy": 0.9,
+      "buy": 1.28,
       "sell": 1.08,
+      "target": "@taiga_fur/tools"
+    },
+    {
+      "buy": 0.82,
+      "sell": 0.92,
       "target": "minecraft:campfire"
+    },
+    {
+      "buy": 0.6,
+      "sell": 1.4,
+      "target": "minecraft:ender_pearl"
+    },
+    {
+      "buy": 0.55,
+      "sell": 1.45,
+      "target": "minecraft:blaze_rod"
     }
   ],
   "stock": {
     "default": {
-      "max": 13,
-      "min": 7
+      "max": 7,
+      "min": 3
     },
-    "specific": {
+    "targets": {
       "#ruralroutes:candidate/biome/taiga/leather_fiber": {
-        "max": 22,
-        "min": 14
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 22,
+          "min": 12
+        }
       },
       "#ruralroutes:candidate/theme/taiga_fur/fur_goods": {
-        "max": 20,
-        "min": 12
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 18,
+          "min": 10
+        }
+      },
+      "minecraft:arrow": {
+        "buy": {
+          "max": 6,
+          "min": 2
+        },
+        "sell": {
+          "max": 24,
+          "min": 12
+        }
+      },
+      "minecraft:blaze_rod": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "minecraft:bow": {
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 5,
+          "min": 2
+        }
       },
       "minecraft:campfire": {
-        "max": 3,
-        "min": 1
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       },
-      "minecraft:leather": {
-        "max": 18,
-        "min": 12
+      "minecraft:ender_pearl": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
       },
       "taiga_fur/tools": {
-        "max": 14,
-        "min": 8
+        "buy": {
+          "max": 24,
+          "min": 14
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       }
     }
   },

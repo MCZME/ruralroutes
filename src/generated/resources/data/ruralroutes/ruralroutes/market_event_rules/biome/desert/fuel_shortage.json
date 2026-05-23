@@ -1,0 +1,22 @@
+{
+  "delta": 0.18,
+  "id": "ruralroutes:biome/desert/fuel_shortage",
+  "name_key": "market.ruralroutes.biome.desert.fuel_shortage",
+  "rumor_family": "shortage",
+  "rumor_target_key": "rumor.target.wood",
+  "scopes": [
+    {
+      "type": "biome",
+      "selector": "list",
+      "targets": [
+        "minecraft:desert"
+      ]
+    }
+  ],
+  "stock": {
+    "buy": 0.32,
+    "sell": -0.25
+  },
+  "target_ref": "#ruralroutes:pool/wood",
+  "weight": 55
+}

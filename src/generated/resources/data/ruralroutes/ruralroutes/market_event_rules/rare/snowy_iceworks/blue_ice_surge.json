@@ -1,5 +1,5 @@
 {
-  "delta": 0.3,
+  "delta": 0.18,
   "id": "ruralroutes:rare/snowy_iceworks/blue_ice_surge",
   "name_key": "market.ruralroutes.rare.snowy_iceworks.blue_ice_surge",
   "rumor_family": "demand",
@@ -13,8 +13,8 @@
     }
   ],
   "stock": {
-    "buy": 0.4,
-    "sell": -0.18
+    "buy": 0.25,
+    "sell": -0.1
   },
   "target_ref": "minecraft:blue_ice",
   "weight": 8

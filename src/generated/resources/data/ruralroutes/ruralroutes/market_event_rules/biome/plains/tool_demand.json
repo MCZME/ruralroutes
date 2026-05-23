@@ -1,9 +1,9 @@
 {
-  "delta": 0.14,
+  "delta": 0.18,
   "id": "ruralroutes:biome/plains/tool_demand",
   "name_key": "market.ruralroutes.biome.plains.tool_demand",
   "rumor_family": "demand",
-  "rumor_target_key": "rumor.target.mineral",
+  "rumor_target_key": "rumor.target.tool",
   "scopes": [
     {
       "type": "biome",
@@ -14,9 +14,9 @@
     }
   ],
   "stock": {
-    "buy": 0.22,
+    "buy": 0.28,
     "sell": -0.1
   },
-  "target_ref": "#ruralroutes:pool/mineral",
+  "target_ref": "@plains_workshop/basic_tools",
   "weight": 55
 }

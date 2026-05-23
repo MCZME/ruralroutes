@@ -1,5 +1,5 @@
 {
-  "delta": -0.15,
+  "delta": -0.18,
   "id": "ruralroutes:biome/snowy/thaw",
   "name_key": "market.ruralroutes.biome.snowy.thaw",
   "rumor_family": "release",
@@ -15,7 +15,7 @@
   ],
   "stock": {
     "buy": -0.05,
-    "sell": 0.3
+    "sell": 0.35
   },
   "target_ref": "#ruralroutes:pool/ice_snow",
   "weight": 50

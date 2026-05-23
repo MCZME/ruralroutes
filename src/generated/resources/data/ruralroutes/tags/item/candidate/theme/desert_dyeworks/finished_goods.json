@@ -2,6 +2,8 @@
   "values": [
     "minecraft:orange_dye",
     "minecraft:yellow_dye",
+    "minecraft:green_dye",
+    "minecraft:cyan_dye",
     "minecraft:glass",
     "minecraft:orange_stained_glass",
     "minecraft:terracotta"

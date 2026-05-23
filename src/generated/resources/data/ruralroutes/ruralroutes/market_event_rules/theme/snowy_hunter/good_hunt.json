@@ -1,5 +1,5 @@
 {
-  "delta": -0.2,
+  "delta": -0.22,
   "id": "ruralroutes:theme/snowy_hunter/good_hunt",
   "name_key": "market.ruralroutes.theme.snowy_hunter.good_hunt",
   "rumor_family": "release",
@@ -15,8 +15,8 @@
   ],
   "stock": {
     "buy": -0.08,
-    "sell": 0.28
+    "sell": 0.35
   },
-  "target_ref": "#ruralroutes:pool/leather_fiber",
+  "target_ref": "@snowy_hunter/game_goods",
   "weight": 35
 }

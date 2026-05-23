@@ -1,5 +1,5 @@
 {
-  "delta": -0.15,
+  "delta": -0.18,
   "id": "ruralroutes:biome/taiga/logging_season",
   "name_key": "market.ruralroutes.biome.taiga.logging_season",
   "rumor_family": "release",
@@ -15,7 +15,7 @@
   ],
   "stock": {
     "buy": -0.08,
-    "sell": 0.3
+    "sell": 0.35
   },
   "target_ref": "#ruralroutes:pool/wood",
   "weight": 60

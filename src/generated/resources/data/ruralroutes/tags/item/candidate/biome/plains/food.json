@@ -1,6 +1,9 @@
 {
   "values": [
     "minecraft:bread",
+    "minecraft:baked_potato",
+    "minecraft:pumpkin_pie",
+    "minecraft:apple",
     "minecraft:beef",
     "minecraft:cooked_beef",
     "minecraft:mutton",

@@ -1,5 +1,5 @@
 {
-  "delta": 0.22,
+  "delta": 0.24,
   "id": "ruralroutes:theme/snowy_waystation/rations_low",
   "name_key": "market.ruralroutes.theme.snowy_waystation.rations_low",
   "rumor_family": "shortage",
@@ -14,9 +14,9 @@
     }
   ],
   "stock": {
-    "buy": 0.08,
-    "sell": -0.38
+    "buy": 0.18,
+    "sell": -0.4
   },
-  "target_ref": "#ruralroutes:pool/food",
+  "target_ref": "@snowy_waystation/supplies",
   "weight": 35
 }

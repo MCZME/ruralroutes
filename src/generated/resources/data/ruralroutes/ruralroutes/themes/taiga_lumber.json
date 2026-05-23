@@ -3,46 +3,136 @@
   "name": "ruralroutes:taiga_lumber",
   "price_modifiers": [
     {
-      "buy": 0.74,
-      "sell": 0.8,
+      "buy": 0.64,
+      "sell": 0.7,
       "target": "#ruralroutes:candidate/biome/taiga/wood"
     },
     {
-      "buy": 1.16,
+      "buy": 1.28,
+      "sell": 1.08,
+      "target": "@taiga_lumber/tools"
+    },
+    {
+      "buy": 1.24,
       "sell": 1.08,
       "target": "#ruralroutes:pool/mineral"
     },
     {
-      "buy": 0.88,
-      "sell": 1.1,
+      "buy": 0.82,
+      "sell": 0.92,
       "target": "minecraft:spruce_boat"
+    },
+    {
+      "buy": 0.84,
+      "sell": 0.94,
+      "target": "minecraft:campfire"
+    },
+    {
+      "buy": 0.6,
+      "sell": 1.4,
+      "target": "minecraft:ender_pearl"
+    },
+    {
+      "buy": 0.55,
+      "sell": 1.45,
+      "target": "minecraft:blaze_rod"
     }
   ],
   "stock": {
     "default": {
-      "max": 18,
-      "min": 10
+      "max": 8,
+      "min": 4
     },
-    "specific": {
+    "targets": {
       "#ruralroutes:candidate/biome/taiga/wood": {
-        "max": 32,
-        "min": 20
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 30,
+          "min": 18
+        }
+      },
+      "minecraft:blaze_rod": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "minecraft:campfire": {
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       },
       "minecraft:charcoal": {
-        "max": 24,
-        "min": 14
+        "buy": {
+          "max": 10,
+          "min": 6
+        },
+        "sell": {
+          "max": 22,
+          "min": 12
+        }
+      },
+      "minecraft:ender_pearl": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
       },
       "minecraft:spruce_boat": {
-        "max": 3,
-        "min": 1
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       },
       "minecraft:spruce_log": {
-        "max": 26,
-        "min": 16
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 26,
+          "min": 16
+        }
+      },
+      "minecraft:spruce_planks": {
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 24,
+          "min": 14
+        }
       },
       "taiga_lumber/tools": {
-        "max": 14,
-        "min": 8
+        "buy": {
+          "max": 24,
+          "min": 14
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       }
     }
   },

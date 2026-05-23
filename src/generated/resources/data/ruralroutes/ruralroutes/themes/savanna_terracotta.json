@@ -3,51 +3,116 @@
   "name": "ruralroutes:savanna_terracotta",
   "price_modifiers": [
     {
-      "buy": 0.78,
+      "buy": 0.9,
       "sell": 0.84,
       "target": "#ruralroutes:candidate/biome/savanna/dye_decor"
     },
     {
       "buy": 0.82,
-      "sell": 0.88,
+      "sell": 0.86,
       "target": "#ruralroutes:candidate/theme/savanna_terracotta/kiln_goods"
     },
     {
-      "buy": 1.1,
-      "sell": 1.04,
-      "target": "#ruralroutes:pool/food"
+      "buy": 1.28,
+      "sell": 1.08,
+      "target": "@savanna_terracotta/supplies"
     },
     {
-      "buy": 0.88,
-      "sell": 1.1,
+      "buy": 0.84,
+      "sell": 0.94,
       "target": "minecraft:yellow_glazed_terracotta"
+    },
+    {
+      "buy": 1.18,
+      "sell": 1.04,
+      "target": "minecraft:cyan_dye"
+    },
+    {
+      "buy": 0.6,
+      "sell": 1.4,
+      "target": "minecraft:ender_pearl"
+    },
+    {
+      "buy": 0.55,
+      "sell": 1.45,
+      "target": "minecraft:blaze_rod"
     }
   ],
   "stock": {
     "default": {
-      "max": 13,
-      "min": 7
+      "max": 7,
+      "min": 3
     },
-    "specific": {
+    "targets": {
       "#ruralroutes:candidate/biome/savanna/dye_decor": {
-        "max": 20,
-        "min": 12
+        "buy": {
+          "max": 10,
+          "min": 5
+        },
+        "sell": {
+          "max": 16,
+          "min": 8
+        }
       },
       "#ruralroutes:candidate/theme/savanna_terracotta/kiln_goods": {
-        "max": 18,
-        "min": 10
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 16,
+          "min": 8
+        }
       },
-      "minecraft:terracotta": {
-        "max": 20,
-        "min": 12
+      "minecraft:blaze_rod": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "minecraft:cyan_dye": {
+        "buy": {
+          "max": 14,
+          "min": 8
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
+      },
+      "minecraft:ender_pearl": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
       },
       "minecraft:yellow_glazed_terracotta": {
-        "max": 3,
-        "min": 1
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       },
       "savanna_terracotta/supplies": {
-        "max": 14,
-        "min": 8
+        "buy": {
+          "max": 28,
+          "min": 16
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       }
     }
   },

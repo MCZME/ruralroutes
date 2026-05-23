@@ -7,12 +7,16 @@ import github.mczme.ruralroutes.core.theme.FixedTradeEntry;
 import github.mczme.ruralroutes.core.theme.InputEntry;
 import github.mczme.ruralroutes.core.theme.ItemReference;
 import github.mczme.ruralroutes.core.theme.OutputEntry;
+import github.mczme.ruralroutes.core.theme.StockConfig;
+import github.mczme.ruralroutes.core.theme.StockRange;
+import github.mczme.ruralroutes.core.theme.StockTarget;
 import github.mczme.ruralroutes.core.theme.TradeContractEntry;
 import github.mczme.ruralroutes.core.theme.TradeProfile;
 import github.mczme.ruralroutes.core.trade.TradeSide;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,8 +32,9 @@ public class TradeProfileBuilder {
     private final String name;
     private final List<ItemReference> sellItems = new ArrayList<>();
     private final List<ItemReference> buyItems = new ArrayList<>();
-    private final List<ItemReference> specialties = new ArrayList<>();
     private final List<TradeContractEntry> tradeContracts = new ArrayList<>();
+    private final Map<String, StockTarget> stockTargets = new LinkedHashMap<>();
+    private final Map<String, StockRange> stockSpecific = new LinkedHashMap<>();
     private boolean withCurrency = false;
     private BiConsumer<ResourceLocation, TradeProfile> registrar;
 
@@ -43,6 +48,14 @@ public class TradeProfileBuilder {
 
     public TradeProfileBuilder withCurrency() {
         this.withCurrency = true;
+        return this;
+    }
+
+    public TradeProfileBuilder withCurrency(CurrencyStockConfig stockConfig) {
+        this.withCurrency = true;
+        if (stockConfig != null) {
+            applyCurrencyStock(stockConfig);
+        }
         return this;
     }
 
@@ -128,26 +141,15 @@ public class TradeProfileBuilder {
     }
 
     public TradeProfileBuilder specialty(String... items) {
-        for (String item : items) {
-            specialties.add(ItemReference.single(item));
-        }
-        return this;
+        return sell(items);
     }
 
     public TradeProfileBuilder specialty(String item, Map<String, String> components) {
-        specialties.add(ItemReference.single(item, components));
-        return this;
+        return sell(item, components);
     }
 
     public TradeProfileBuilder specialty(String key, String item, Map<String, String> components) {
-        specialties.add(new ItemReference(
-            Optional.of(item),
-            Optional.empty(),
-            Optional.empty(),
-            Optional.of(key),
-            Optional.of(components)
-        ));
-        return this;
+        return sell(key, item, components);
     }
 
     public TradeProfileBuilder addFixedTrade(List<InputEntry> inputs, List<OutputEntry> outputs) {
@@ -165,6 +167,24 @@ public class TradeProfileBuilder {
         return this;
     }
 
+    public TradeProfileBuilder stockSpecific(String key, int min, int max) {
+        stockSpecific.put(key, new StockRange(min, max));
+        return this;
+    }
+
+    public TradeProfileBuilder stockTarget(String key, int min, int max) {
+        stockTargets.put(key, StockTarget.shared(new StockRange(min, max)));
+        return this;
+    }
+
+    public TradeProfileBuilder stockTarget(String key, int sellMin, int sellMax, int buyMin, int buyMax) {
+        stockTargets.put(key, StockTarget.directional(
+            new StockRange(sellMin, sellMax),
+            new StockRange(buyMin, buyMax)
+        ));
+        return this;
+    }
+
     public ResourceLocation getId() {
         return ResourceLocation.fromNamespaceAndPath(RuralRoutes.MODID, name);
     }
@@ -178,12 +198,19 @@ public class TradeProfileBuilder {
             finalBuyItems.add(ItemReference.single("#ruralroutes:currency"));
         }
 
+        Optional<StockConfig> stock = stockTargets.isEmpty() && stockSpecific.isEmpty()
+            ? Optional.empty()
+            : Optional.of(new StockConfig(
+                Optional.empty(),
+                stockTargets.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(stockTargets)),
+                stockSpecific.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(stockSpecific))
+            ));
+
         return new TradeProfile(
             getId(),
             List.copyOf(finalSellItems),
             List.copyOf(finalBuyItems),
-            specialties.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(specialties)),
-            Optional.empty(),
+            stock,
             tradeContracts.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(tradeContracts))
         );
     }
@@ -208,5 +235,17 @@ public class TradeProfileBuilder {
             refs.add(item);
         }
         return ItemReference.group(refs, pick, key);
+    }
+
+    private void applyCurrencyStock(CurrencyStockConfig stockConfig) {
+        stockTarget("ruralroutes:copper_coin",
+            stockConfig.copperSell().min(), stockConfig.copperSell().max(),
+            stockConfig.copperBuy().min(), stockConfig.copperBuy().max());
+        stockTarget("ruralroutes:iron_coin",
+            stockConfig.ironSell().min(), stockConfig.ironSell().max(),
+            stockConfig.ironBuy().min(), stockConfig.ironBuy().max());
+        stockTarget("ruralroutes:gold_coin",
+            stockConfig.goldSell().min(), stockConfig.goldSell().max(),
+            stockConfig.goldBuy().min(), stockConfig.goldBuy().max());
     }
 }

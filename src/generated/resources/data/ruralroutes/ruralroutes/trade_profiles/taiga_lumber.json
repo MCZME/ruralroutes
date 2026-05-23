@@ -1,31 +1,71 @@
 {
   "buy_items": [
     "minecraft:iron_ingot",
+    "minecraft:raw_iron",
     "minecraft:coal",
+    "minecraft:lantern",
     {
       "items": [
+        "minecraft:wooden_axe",
         "minecraft:stone_axe",
         "minecraft:iron_axe",
-        "minecraft:raw_iron"
+        "minecraft:raw_iron",
+        "minecraft:stick"
       ],
       "key": "taiga_lumber/tools",
-      "pick": 2
+      "pick": 3
     },
     "#ruralroutes:currency"
   ],
   "name": "ruralroutes:taiga_lumber",
   "sell_items": [
     "minecraft:spruce_log",
+    "minecraft:spruce_planks",
     "minecraft:charcoal",
+    "minecraft:spruce_boat",
+    "minecraft:campfire",
+    "minecraft:barrel",
+    "minecraft:chest",
     {
       "id": "#ruralroutes:candidate/biome/taiga/wood",
       "pick": 3
     },
     "#ruralroutes:currency"
   ],
-  "theme_specialties": [
-    "minecraft:spruce_boat"
-  ],
+  "stock": {
+    "targets": {
+      "ruralroutes:copper_coin": {
+        "buy": {
+          "max": 160,
+          "min": 100
+        },
+        "sell": {
+          "max": 56,
+          "min": 32
+        }
+      },
+      "ruralroutes:gold_coin": {
+        "buy": {
+          "max": 10,
+          "min": 4
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
+      },
+      "ruralroutes:iron_coin": {
+        "buy": {
+          "max": 44,
+          "min": 24
+        },
+        "sell": {
+          "max": 12,
+          "min": 6
+        }
+      }
+    }
+  },
   "trade_contracts": [
     {
       "type": "fixed",
@@ -55,7 +95,7 @@
       "composition": "largest_first",
       "items": [
         "#ruralroutes:pool/mineral",
-        "minecraft:iron_axe"
+        "@taiga_lumber/tools"
       ],
       "side": "buy_from_player"
     }

@@ -1,5 +1,5 @@
 {
-  "delta": 0.14,
+  "delta": 0.16,
   "id": "ruralroutes:biome/taiga/fur_demand",
   "name_key": "market.ruralroutes.biome.taiga.fur_demand",
   "rumor_family": "demand",
@@ -14,7 +14,7 @@
     }
   ],
   "stock": {
-    "buy": 0.24,
+    "buy": 0.26,
     "sell": -0.1
   },
   "target_ref": "#ruralroutes:pool/leather_fiber",

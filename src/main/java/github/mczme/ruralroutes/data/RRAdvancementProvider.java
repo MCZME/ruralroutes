@@ -8,6 +8,7 @@ import github.mczme.ruralroutes.register.RRBlocks;
 import github.mczme.ruralroutes.register.RRItems;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.LocationPredicate;
@@ -36,6 +37,9 @@ public class RRAdvancementProvider extends AdvancementProvider {
 
     private static class RRAdvancementSubProvider implements AdvancementProvider.AdvancementGenerator {
         private static final List<ResourceLocation> VILLAGE_THEME_IDS = ThemeDataProvider.collectBuiltinThemeIds();
+        private static final int ENTER_ALL_VILLAGE_THEMES_EXPERIENCE = 250;
+        private static final int TRADE_10_TIMES_EXPERIENCE = 75;
+        private static final int TRADE_100_TIMES_EXPERIENCE = 150;
 
         @Override
         public void generate(HolderLookup.Provider registries, Consumer<AdvancementHolder> saver,
@@ -218,7 +222,8 @@ public class RRAdvancementProvider extends AdvancementProvider {
                     true,
                     true,
                     false
-                );
+                )
+                .rewards(AdvancementRewards.Builder.experience(ENTER_ALL_VILLAGE_THEMES_EXPERIENCE));
 
             for (ResourceLocation themeId : VILLAGE_THEME_IDS) {
                 builder.addCriterion(
@@ -311,6 +316,7 @@ public class RRAdvancementProvider extends AdvancementProvider {
                     true,
                     false
                 )
+                .rewards(AdvancementRewards.Builder.experience(TRADE_10_TIMES_EXPERIENCE))
                 .addCriterion("trade_10_times", OpenTradeStationTrigger.trade10Times())
                 .save(saver, RRAdvancementKeys.TRADE_10_TIMES.toString());
         }
@@ -328,6 +334,7 @@ public class RRAdvancementProvider extends AdvancementProvider {
                     true,
                     false
                 )
+                .rewards(AdvancementRewards.Builder.experience(TRADE_100_TIMES_EXPERIENCE))
                 .addCriterion("trade_100_times", OpenTradeStationTrigger.trade100Times())
                 .save(saver, RRAdvancementKeys.TRADE_100_TIMES.toString());
         }

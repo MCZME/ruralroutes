@@ -1,5 +1,5 @@
 {
-  "delta": -0.12,
+  "delta": -0.16,
   "id": "ruralroutes:common/crop_surplus",
   "name_key": "market.ruralroutes.common.crop_surplus",
   "rumor_family": "surplus",
@@ -12,7 +12,7 @@
   ],
   "stock": {
     "buy": -0.1,
-    "sell": 0.25
+    "sell": 0.35
   },
   "target_ref": "#ruralroutes:pool/crop",
   "weight": 90

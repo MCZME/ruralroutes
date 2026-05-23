@@ -1,5 +1,5 @@
 {
-  "delta": -0.1,
+  "delta": -0.12,
   "id": "ruralroutes:common/leather_slump",
   "name_key": "market.ruralroutes.common.leather_slump",
   "rumor_family": "surplus",
@@ -12,7 +12,7 @@
   ],
   "stock": {
     "buy": -0.15,
-    "sell": 0.18
+    "sell": 0.25
   },
   "target_ref": "#ruralroutes:pool/leather_fiber",
   "weight": 75

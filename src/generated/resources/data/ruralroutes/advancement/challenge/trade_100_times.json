@@ -26,5 +26,8 @@
       "trade_100_times"
     ]
   ],
+  "rewards": {
+    "experience": 150
+  },
   "sends_telemetry_event": true
 }

@@ -1,5 +1,5 @@
 {
-  "delta": -0.22,
+  "delta": -0.24,
   "id": "ruralroutes:theme/taiga_lumber/fresh_cut",
   "name_key": "market.ruralroutes.theme.taiga_lumber.fresh_cut",
   "rumor_family": "release",
@@ -15,7 +15,7 @@
   ],
   "stock": {
     "buy": -0.08,
-    "sell": 0.38
+    "sell": 0.42
   },
   "target_ref": "#ruralroutes:pool/wood",
   "weight": 40

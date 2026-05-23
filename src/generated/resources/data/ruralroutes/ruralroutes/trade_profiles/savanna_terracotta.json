@@ -1,21 +1,33 @@
 {
   "buy_items": [
-    "minecraft:bread",
-    "minecraft:cooked_beef",
+    "minecraft:clay_ball",
+    "minecraft:charcoal",
+    "minecraft:cyan_dye",
+    "minecraft:green_dye",
+    "minecraft:coal",
+    "minecraft:red_sandstone",
     {
       "items": [
-        "minecraft:charcoal",
-        "minecraft:clay_ball",
-        "minecraft:acacia_log"
+        "minecraft:acacia_log",
+        "minecraft:glass",
+        "minecraft:sandstone",
+        "minecraft:yellow_dye",
+        "minecraft:bread",
+        "minecraft:cooked_beef"
       ],
       "key": "savanna_terracotta/supplies",
-      "pick": 2
+      "pick": 3
     },
     "#ruralroutes:currency"
   ],
   "name": "ruralroutes:savanna_terracotta",
   "sell_items": [
     "minecraft:terracotta",
+    "minecraft:brick",
+    "minecraft:yellow_glazed_terracotta",
+    "minecraft:orange_dye",
+    "minecraft:yellow_dye",
+    "minecraft:orange_terracotta",
     {
       "id": "#ruralroutes:candidate/biome/savanna/dye_decor",
       "pick": 2
@@ -26,9 +38,40 @@
     },
     "#ruralroutes:currency"
   ],
-  "theme_specialties": [
-    "minecraft:yellow_glazed_terracotta"
-  ],
+  "stock": {
+    "targets": {
+      "ruralroutes:copper_coin": {
+        "buy": {
+          "max": 140,
+          "min": 80
+        },
+        "sell": {
+          "max": 40,
+          "min": 20
+        }
+      },
+      "ruralroutes:gold_coin": {
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "ruralroutes:iron_coin": {
+        "buy": {
+          "max": 56,
+          "min": 32
+        },
+        "sell": {
+          "max": 14,
+          "min": 8
+        }
+      }
+    }
+  },
   "trade_contracts": [
     {
       "type": "fixed",
@@ -40,6 +83,10 @@
         {
           "count": 1,
           "item": "minecraft:charcoal"
+        },
+        {
+          "count": 1,
+          "item": "minecraft:yellow_dye"
         }
       ],
       "outputs": [
@@ -48,6 +95,44 @@
           "item": "minecraft:yellow_glazed_terracotta"
         }
       ]
+    },
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 1,
+          "item": "minecraft:yellow_glazed_terracotta"
+        },
+        {
+          "count": 4,
+          "item": "minecraft:cyan_dye"
+        },
+        {
+          "count": 1,
+          "item": "ruralroutes:gold_coin"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:ender_pearl"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "@savanna_terracotta/supplies",
+        "minecraft:clay_ball",
+        "minecraft:charcoal",
+        "minecraft:cyan_dye"
+      ],
+      "side": "buy_from_player"
     }
   ]
 }

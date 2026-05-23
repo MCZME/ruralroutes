@@ -1,5 +1,5 @@
 {
-  "delta": 0.18,
+  "delta": 0.22,
   "id": "ruralroutes:biome/snowy/cold_supply",
   "name_key": "market.ruralroutes.biome.snowy.cold_supply",
   "rumor_family": "shortage",
@@ -14,8 +14,8 @@
     }
   ],
   "stock": {
-    "buy": 0.05,
-    "sell": -0.35
+    "buy": 0.2,
+    "sell": -0.38
   },
   "target_ref": "#ruralroutes:pool/food",
   "weight": 60

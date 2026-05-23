@@ -1,5 +1,5 @@
 {
-  "delta": -0.1,
+  "delta": -0.12,
   "id": "ruralroutes:common/stone_glut",
   "name_key": "market.ruralroutes.common.stone_glut",
   "rumor_family": "surplus",
@@ -12,7 +12,7 @@
   ],
   "stock": {
     "buy": -0.15,
-    "sell": 0.15
+    "sell": 0.25
   },
   "target_ref": "#ruralroutes:pool/stone",
   "weight": 80

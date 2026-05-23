@@ -1,5 +1,5 @@
 {
-  "delta": -0.2,
+  "delta": -0.22,
   "id": "ruralroutes:theme/savanna_woodworks/timber_release",
   "name_key": "market.ruralroutes.theme.savanna_woodworks.timber_release",
   "rumor_family": "release",
@@ -15,7 +15,7 @@
   ],
   "stock": {
     "buy": -0.1,
-    "sell": 0.35
+    "sell": 0.4
   },
   "target_ref": "#ruralroutes:pool/wood",
   "weight": 35

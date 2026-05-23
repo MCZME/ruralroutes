@@ -1,5 +1,5 @@
 {
-  "delta": -0.2,
+  "delta": -0.22,
   "id": "ruralroutes:theme/taiga_berries/berry_season",
   "name_key": "market.ruralroutes.theme.taiga_berries.berry_season",
   "rumor_family": "release",
@@ -15,8 +15,8 @@
   ],
   "stock": {
     "buy": -0.05,
-    "sell": 0.28
+    "sell": 0.32
   },
-  "target_ref": "#ruralroutes:pool/food",
+  "target_ref": "@taiga_berries/produce",
   "weight": 35
 }

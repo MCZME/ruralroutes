@@ -3,59 +3,206 @@
   "name": "ruralroutes:plains_workshop",
   "price_modifiers": [
     {
-      "buy": 0.82,
-      "sell": 0.88,
+      "buy": 0.78,
+      "sell": 0.82,
       "target": "#ruralroutes:candidate/theme/plains_workshop/tool_goods"
     },
     {
-      "buy": 0.9,
-      "sell": 0.96,
-      "target": "#ruralroutes:candidate/biome/plains/wood"
+      "buy": 0.78,
+      "sell": 0.82,
+      "target": "@plains_workshop/basic_tools"
     },
     {
-      "buy": 1.16,
+      "buy": 0.82,
+      "sell": 0.88,
+      "target": "@plains_workshop/armor_goods"
+    },
+    {
+      "buy": 0.82,
+      "sell": 0.94,
+      "target": "@plains_workshop/rare_tools"
+    },
+    {
+      "buy": 1.24,
+      "sell": 1.08,
+      "target": "@plains_workshop/materials"
+    },
+    {
+      "buy": 1.24,
       "sell": 1.08,
       "target": "#ruralroutes:pool/mineral"
     },
     {
-      "buy": 0.82,
-      "sell": 1.15,
+      "buy": 0.78,
+      "sell": 1.12,
       "target": "minecraft:anvil"
+    },
+    {
+      "buy": 0.6,
+      "sell": 1.4,
+      "target": "minecraft:ender_pearl"
+    },
+    {
+      "buy": 0.55,
+      "sell": 1.45,
+      "target": "minecraft:blaze_rod"
     }
   ],
   "stock": {
     "default": {
-      "max": 12,
-      "min": 6
+      "max": 7,
+      "min": 3
     },
-    "specific": {
-      "#ruralroutes:candidate/biome/plains/wood": {
-        "max": 14,
-        "min": 8
-      },
+    "targets": {
       "#ruralroutes:candidate/theme/plains_workshop/tool_goods": {
-        "max": 14,
-        "min": 8
+        "buy": {
+          "max": 5,
+          "min": 2
+        },
+        "sell": {
+          "max": 12,
+          "min": 6
+        }
       },
       "minecraft:anvil": {
-        "max": 2,
-        "min": 1
+        "buy": {
+          "max": 1,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "minecraft:arrow": {
+        "buy": {
+          "max": 6,
+          "min": 2
+        },
+        "sell": {
+          "max": 32,
+          "min": 16
+        }
+      },
+      "minecraft:blaze_rod": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "minecraft:bow": {
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 6,
+          "min": 3
+        }
+      },
+      "minecraft:charcoal": {
+        "buy": {
+          "max": 24,
+          "min": 14
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
+      },
+      "minecraft:coal": {
+        "buy": {
+          "max": 24,
+          "min": 14
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       },
       "minecraft:diamond": {
-        "max": 4,
-        "min": 2
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "minecraft:ender_pearl": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
       },
       "minecraft:iron_ingot": {
-        "max": 18,
-        "min": 12
+        "buy": {
+          "max": 28,
+          "min": 16
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       },
-      "minecraft:iron_pickaxe": {
-        "max": 7,
-        "min": 4
+      "minecraft:raw_iron": {
+        "buy": {
+          "max": 24,
+          "min": 14
+        },
+        "sell": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "plains_workshop/armor_goods": {
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 7,
+          "min": 3
+        }
+      },
+      "plains_workshop/basic_tools": {
+        "buy": {
+          "max": 5,
+          "min": 2
+        },
+        "sell": {
+          "max": 12,
+          "min": 6
+        }
       },
       "plains_workshop/materials": {
-        "max": 16,
-        "min": 10
+        "buy": {
+          "max": 24,
+          "min": 14
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
+      },
+      "plains_workshop/rare_tools": {
+        "buy": {
+          "max": 1,
+          "min": 0
+        },
+        "sell": {
+          "max": 2,
+          "min": 1
+        }
       }
     }
   },

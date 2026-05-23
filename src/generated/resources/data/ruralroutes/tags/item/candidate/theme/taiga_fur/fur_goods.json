@@ -3,6 +3,8 @@
     "minecraft:leather",
     "minecraft:rabbit_hide",
     "minecraft:white_wool",
-    "minecraft:gray_wool"
+    "minecraft:gray_wool",
+    "minecraft:bow",
+    "minecraft:arrow"
   ]
 }

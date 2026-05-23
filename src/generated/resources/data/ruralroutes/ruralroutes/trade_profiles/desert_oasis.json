@@ -1,51 +1,102 @@
 {
   "buy_items": [
-    "minecraft:iron_ingot",
+    "minecraft:bucket",
+    "minecraft:ice",
+    "minecraft:packed_ice",
+    "minecraft:bone_meal",
+    "minecraft:apple",
     "minecraft:coal",
     {
       "items": [
         "minecraft:raw_iron",
-        "minecraft:bone_meal",
-        "minecraft:bucket"
+        "minecraft:coal",
+        "minecraft:bread",
+        "minecraft:baked_potato",
+        "minecraft:pumpkin_pie"
       ],
       "key": "desert_oasis/inputs",
-      "pick": 2
+      "pick": 3
     },
     "#ruralroutes:currency"
   ],
   "name": "ruralroutes:desert_oasis",
   "sell_items": [
-    "minecraft:wheat",
+    "minecraft:cactus",
+    "minecraft:rabbit_stew",
+    "minecraft:water_bucket",
+    "minecraft:dried_kelp",
     {
       "id": "#ruralroutes:candidate/biome/desert/crop",
       "pick": 3
     },
+    {
+      "items": [
+        "minecraft:bread",
+        "minecraft:apple",
+        "minecraft:melon",
+        "minecraft:glistering_melon_slice",
+        "minecraft:rabbit_stew"
+      ],
+      "key": "desert_oasis/supplies",
+      "pick": 2
+    },
     "#ruralroutes:currency"
   ],
-  "theme_specialties": [
-    "minecraft:golden_carrot"
-  ],
+  "stock": {
+    "targets": {
+      "ruralroutes:copper_coin": {
+        "buy": {
+          "max": 140,
+          "min": 80
+        },
+        "sell": {
+          "max": 48,
+          "min": 24
+        }
+      },
+      "ruralroutes:gold_coin": {
+        "buy": {
+          "max": 2,
+          "min": 0
+        },
+        "sell": {
+          "max": 0,
+          "min": 0
+        }
+      },
+      "ruralroutes:iron_coin": {
+        "buy": {
+          "max": 24,
+          "min": 12
+        },
+        "sell": {
+          "max": 5,
+          "min": 2
+        }
+      }
+    }
+  },
   "trade_contracts": [
     {
       "type": "fixed",
       "inputs": [
         {
-          "count": 4,
-          "item": "minecraft:melon"
+          "count": 2,
+          "item": "minecraft:glistering_melon_slice"
         },
         {
-          "count": 6,
-          "item": "minecraft:wheat"
+          "count": 1,
+          "item": "minecraft:golden_carrot"
         },
         {
-          "count": 8,
-          "item": "minecraft:carrot"
+          "count": 1,
+          "item": "ruralroutes:gold_coin"
         }
       ],
       "outputs": [
         {
           "count": 1,
-          "item": "minecraft:golden_carrot"
+          "item": "minecraft:ender_pearl"
         }
       ]
     },
@@ -58,6 +109,7 @@
       "composition": "largest_first",
       "items": [
         "#ruralroutes:pool/mineral",
+        "#ruralroutes:pool/ice_snow",
         "minecraft:bucket"
       ],
       "side": "buy_from_player"

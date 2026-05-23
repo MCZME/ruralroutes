@@ -1,21 +1,33 @@
 {
   "buy_items": [
     "minecraft:bread",
+    "minecraft:charcoal",
     "minecraft:spruce_log",
+    "minecraft:campfire",
+    "minecraft:coal",
+    "minecraft:iron_shovel",
     {
       "items": [
-        "minecraft:charcoal",
         "minecraft:cooked_beef",
+        "minecraft:baked_potato",
+        "minecraft:pumpkin_pie",
+        "minecraft:stone_pickaxe",
+        "minecraft:iron_pickaxe",
         "minecraft:oak_log"
       ],
       "key": "snowy_iceworks/supplies",
-      "pick": 2
+      "pick": 3
     },
     "#ruralroutes:currency"
   ],
   "name": "ruralroutes:snowy_iceworks",
   "sell_items": [
+    "minecraft:snow_block",
     "minecraft:ice",
+    "minecraft:packed_ice",
+    "minecraft:blue_ice",
+    "minecraft:bucket",
+    "minecraft:glass_bottle",
     {
       "id": "#ruralroutes:candidate/biome/snowy/ice_snow",
       "pick": 2
@@ -26,9 +38,40 @@
     },
     "#ruralroutes:currency"
   ],
-  "theme_specialties": [
-    "minecraft:blue_ice"
-  ],
+  "stock": {
+    "targets": {
+      "ruralroutes:copper_coin": {
+        "buy": {
+          "max": 140,
+          "min": 80
+        },
+        "sell": {
+          "max": 40,
+          "min": 20
+        }
+      },
+      "ruralroutes:gold_coin": {
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "ruralroutes:iron_coin": {
+        "buy": {
+          "max": 56,
+          "min": 32
+        },
+        "sell": {
+          "max": 14,
+          "min": 8
+        }
+      }
+    }
+  },
   "trade_contracts": [
     {
       "type": "fixed",
@@ -39,7 +82,7 @@
         },
         {
           "count": 1,
-          "item": "minecraft:cooked_beef"
+          "item": "minecraft:charcoal"
         }
       ],
       "outputs": [
@@ -48,6 +91,39 @@
           "item": "minecraft:blue_ice"
         }
       ]
+    },
+    {
+      "type": "fixed",
+      "inputs": [
+        {
+          "count": 1,
+          "item": "minecraft:blue_ice"
+        },
+        {
+          "count": 1,
+          "item": "ruralroutes:gold_coin"
+        }
+      ],
+      "outputs": [
+        {
+          "count": 1,
+          "item": "minecraft:ender_pearl"
+        }
+      ]
+    },
+    {
+      "type": "currency_basket_dynamic",
+      "accepted_currencies": [
+        "ruralroutes:iron_coin",
+        "ruralroutes:copper_coin"
+      ],
+      "composition": "largest_first",
+      "items": [
+        "@snowy_iceworks/supplies",
+        "#ruralroutes:pool/food",
+        "#ruralroutes:pool/wood"
+      ],
+      "side": "buy_from_player"
     }
   ]
 }

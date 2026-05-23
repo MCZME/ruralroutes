@@ -1,5 +1,5 @@
 {
-  "delta": -0.12,
+  "delta": -0.16,
   "id": "ruralroutes:biome/savanna/ceramic_shipment",
   "name_key": "market.ruralroutes.biome.savanna.ceramic_shipment",
   "rumor_family": "release",
@@ -15,7 +15,7 @@
   ],
   "stock": {
     "buy": -0.05,
-    "sell": 0.28
+    "sell": 0.32
   },
   "target_ref": "#ruralroutes:pool/dye_decor",
   "weight": 50

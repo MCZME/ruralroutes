@@ -3,46 +3,131 @@
   "name": "ruralroutes:snowy_hunter",
   "price_modifiers": [
     {
-      "buy": 0.8,
-      "sell": 0.86,
+      "buy": 0.76,
+      "sell": 0.82,
       "target": "#ruralroutes:candidate/theme/snowy_hunter/hunter_goods"
     },
     {
-      "buy": 0.74,
-      "sell": 0.8,
+      "buy": 0.72,
+      "sell": 0.78,
       "target": "#ruralroutes:candidate/biome/snowy/leather_fiber"
     },
     {
-      "buy": 0.88,
-      "sell": 1.08,
+      "buy": 1.32,
+      "sell": 1.12,
+      "target": "@snowy_hunter/tools"
+    },
+    {
+      "buy": 0.82,
+      "sell": 0.94,
       "target": "minecraft:bone_block"
+    },
+    {
+      "buy": 0.6,
+      "sell": 1.4,
+      "target": "minecraft:ender_pearl"
+    },
+    {
+      "buy": 0.55,
+      "sell": 1.45,
+      "target": "minecraft:blaze_rod"
     }
   ],
   "stock": {
     "default": {
-      "max": 13,
-      "min": 7
+      "max": 7,
+      "min": 3
     },
-    "specific": {
+    "targets": {
+      "#ruralroutes:candidate/theme/snowy_hunter/hunter_goods": {
+        "buy": {
+          "max": 6,
+          "min": 3
+        },
+        "sell": {
+          "max": 18,
+          "min": 10
+        }
+      },
+      "minecraft:arrow": {
+        "buy": {
+          "max": 6,
+          "min": 2
+        },
+        "sell": {
+          "max": 24,
+          "min": 12
+        }
+      },
+      "minecraft:blaze_rod": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "minecraft:bone": {
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 24,
+          "min": 12
+        }
+      },
       "minecraft:bone_block": {
-        "max": 3,
-        "min": 1
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       },
-      "minecraft:iron_sword": {
-        "max": 10,
-        "min": 6
+      "minecraft:bow": {
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 5,
+          "min": 2
+        }
       },
-      "minecraft:spruce_log": {
-        "max": 14,
-        "min": 8
+      "minecraft:ender_pearl": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
       },
       "snowy_hunter/game_goods": {
-        "max": 22,
-        "min": 14
+        "buy": {
+          "max": 6,
+          "min": 3
+        },
+        "sell": {
+          "max": 18,
+          "min": 10
+        }
       },
       "snowy_hunter/tools": {
-        "max": 14,
-        "min": 8
+        "buy": {
+          "max": 24,
+          "min": 14
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       }
     }
   },

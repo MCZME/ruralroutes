@@ -1,5 +1,5 @@
 {
-  "delta": -0.22,
+  "delta": -0.24,
   "id": "ruralroutes:theme/plains_granary/bumper_crop",
   "name_key": "market.ruralroutes.theme.plains_granary.bumper_crop",
   "rumor_family": "surplus",
@@ -15,8 +15,8 @@
   ],
   "stock": {
     "buy": -0.12,
-    "sell": 0.4
+    "sell": 0.45
   },
-  "target_ref": "#ruralroutes:pool/crop",
+  "target_ref": "@plains_granary/staples",
   "weight": 40
 }

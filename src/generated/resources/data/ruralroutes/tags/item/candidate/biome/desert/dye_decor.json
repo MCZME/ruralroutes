@@ -5,6 +5,8 @@
     "minecraft:yellow_terracotta",
     "minecraft:glass",
     "minecraft:orange_stained_glass",
-    "minecraft:yellow_stained_glass"
+    "minecraft:yellow_stained_glass",
+    "minecraft:green_dye",
+    "minecraft:cyan_dye"
   ]
 }

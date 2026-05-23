@@ -2,8 +2,13 @@
   "values": [
     "minecraft:beef",
     "minecraft:rabbit",
+    "minecraft:cooked_rabbit",
     "minecraft:leather",
     "minecraft:rabbit_hide",
-    "minecraft:feather"
+    "minecraft:feather",
+    "minecraft:bone",
+    "minecraft:bone_block",
+    "minecraft:bow",
+    "minecraft:arrow"
   ]
 }

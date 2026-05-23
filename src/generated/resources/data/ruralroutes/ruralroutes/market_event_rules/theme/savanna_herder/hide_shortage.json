@@ -14,7 +14,7 @@
     }
   ],
   "stock": {
-    "buy": 0.1,
+    "buy": 0.12,
     "sell": -0.32
   },
   "target_ref": "#ruralroutes:pool/leather_fiber",

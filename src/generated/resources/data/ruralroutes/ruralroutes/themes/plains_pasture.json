@@ -3,46 +3,156 @@
   "name": "ruralroutes:plains_pasture",
   "price_modifiers": [
     {
-      "buy": 0.76,
-      "sell": 0.82,
+      "buy": 0.66,
+      "sell": 0.72,
       "target": "#ruralroutes:candidate/biome/plains/leather_fiber"
     },
     {
-      "buy": 0.88,
-      "sell": 0.94,
+      "buy": 0.78,
+      "sell": 0.86,
       "target": "#ruralroutes:candidate/biome/plains/food"
     },
     {
+      "buy": 1.28,
+      "sell": 1.08,
+      "target": "@plains_pasture/tools"
+    },
+    {
+      "buy": 0.82,
+      "sell": 0.9,
+      "target": "@plains_pasture/leather_armor"
+    },
+    {
       "buy": 0.84,
-      "sell": 1.15,
+      "sell": 1.08,
+      "target": "minecraft:lead"
+    },
+    {
+      "buy": 0.78,
+      "sell": 1.16,
+      "target": "minecraft:name_tag"
+    },
+    {
+      "buy": 0.78,
+      "sell": 1.16,
       "target": "minecraft:saddle"
+    },
+    {
+      "buy": 0.6,
+      "sell": 1.4,
+      "target": "minecraft:ender_pearl"
+    },
+    {
+      "buy": 0.55,
+      "sell": 1.45,
+      "target": "minecraft:blaze_rod"
     }
   ],
   "stock": {
     "default": {
-      "max": 14,
-      "min": 8
+      "max": 8,
+      "min": 4
     },
-    "specific": {
+    "targets": {
       "#ruralroutes:candidate/biome/plains/food": {
-        "max": 20,
-        "min": 12
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 16,
+          "min": 8
+        }
       },
       "#ruralroutes:candidate/biome/plains/leather_fiber": {
-        "max": 24,
-        "min": 16
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 24,
+          "min": 14
+        }
       },
-      "minecraft:leather": {
-        "max": 20,
-        "min": 14
+      "minecraft:blaze_rod": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "minecraft:ender_pearl": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "minecraft:lead": {
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "minecraft:name_tag": {
+        "buy": {
+          "max": 1,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
       },
       "minecraft:saddle": {
-        "max": 2,
-        "min": 1
+        "buy": {
+          "max": 1,
+          "min": 0
+        },
+        "sell": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "plains_pasture/leather_armor": {
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 8,
+          "min": 4
+        }
       },
       "plains_pasture/tools": {
-        "max": 14,
-        "min": 8
+        "buy": {
+          "max": 20,
+          "min": 12
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
+      },
+      "plains_pasture/travel_goods": {
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 2,
+          "min": 1
+        }
       }
     }
   },

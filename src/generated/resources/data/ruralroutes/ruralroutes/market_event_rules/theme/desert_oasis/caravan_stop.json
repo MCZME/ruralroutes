@@ -1,0 +1,22 @@
+{
+  "delta": 0.2,
+  "id": "ruralroutes:theme/desert_oasis/caravan_stop",
+  "name_key": "market.ruralroutes.theme.desert_oasis.caravan_stop",
+  "rumor_family": "shortage",
+  "rumor_target_key": "rumor.target.food",
+  "scopes": [
+    {
+      "type": "theme",
+      "selector": "list",
+      "targets": [
+        "ruralroutes:desert_oasis"
+      ]
+    }
+  ],
+  "stock": {
+    "buy": 0.35,
+    "sell": -0.25
+  },
+  "target_ref": "@desert_oasis/inputs",
+  "weight": 40
+}

@@ -1,5 +1,5 @@
 {
-  "delta": 0.15,
+  "delta": 0.16,
   "id": "ruralroutes:biome/savanna/kiln_season",
   "name_key": "market.ruralroutes.biome.savanna.kiln_season",
   "rumor_family": "demand",
@@ -14,7 +14,7 @@
     }
   ],
   "stock": {
-    "buy": 0.26,
+    "buy": 0.28,
     "sell": -0.08
   },
   "target_ref": "#ruralroutes:pool/wood",

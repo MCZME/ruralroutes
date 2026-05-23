@@ -1,0 +1,19 @@
+{
+  "delta": 0.4,
+  "id": "ruralroutes:rare/blaze_rod_import",
+  "name_key": "market.ruralroutes.rare.blaze_rod_import",
+  "rumor_family": "release",
+  "rumor_target_key": "rumor.target.nether_goods",
+  "scopes": [
+    {
+      "type": "global",
+      "selector": "all"
+    }
+  ],
+  "stock": {
+    "buy": -0.25,
+    "sell": 0.35
+  },
+  "target_ref": "minecraft:blaze_rod",
+  "weight": 6
+}

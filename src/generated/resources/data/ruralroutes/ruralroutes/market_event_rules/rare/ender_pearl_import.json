@@ -1,0 +1,19 @@
+{
+  "delta": 0.35,
+  "id": "ruralroutes:rare/ender_pearl_import",
+  "name_key": "market.ruralroutes.rare.ender_pearl_import",
+  "rumor_family": "release",
+  "rumor_target_key": "rumor.target.end_goods",
+  "scopes": [
+    {
+      "type": "global",
+      "selector": "all"
+    }
+  ],
+  "stock": {
+    "buy": -0.25,
+    "sell": 0.45
+  },
+  "target_ref": "minecraft:ender_pearl",
+  "weight": 8
+}

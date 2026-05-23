@@ -4,41 +4,185 @@
   "price_modifiers": [
     {
       "buy": 0.78,
-      "sell": 0.84,
+      "sell": 0.82,
       "target": "#ruralroutes:candidate/biome/desert/crop"
     },
     {
-      "buy": 1.16,
+      "buy": 1.12,
+      "sell": 0.92,
+      "target": "@desert_oasis/supplies"
+    },
+    {
+      "buy": 1.32,
+      "sell": 1.12,
+      "target": "@desert_oasis/inputs"
+    },
+    {
+      "buy": 1.36,
+      "sell": 1.1,
+      "target": "#ruralroutes:pool/ice_snow"
+    },
+    {
+      "buy": 1.22,
       "sell": 1.08,
       "target": "#ruralroutes:pool/mineral"
     },
     {
       "buy": 0.84,
-      "sell": 1.12,
-      "target": "minecraft:golden_carrot"
+      "sell": 0.96,
+      "target": "minecraft:water_bucket"
+    },
+    {
+      "buy": 0.84,
+      "sell": 0.96,
+      "target": "minecraft:dried_kelp"
+    },
+    {
+      "buy": 0.82,
+      "sell": 0.96,
+      "target": "minecraft:glistering_melon_slice"
+    },
+    {
+      "buy": 0.82,
+      "sell": 0.92,
+      "target": "minecraft:rabbit_stew"
+    },
+    {
+      "buy": 0.6,
+      "sell": 1.4,
+      "target": "minecraft:ender_pearl"
+    },
+    {
+      "buy": 0.55,
+      "sell": 1.45,
+      "target": "minecraft:blaze_rod"
     }
   ],
   "stock": {
     "default": {
-      "max": 16,
-      "min": 8
+      "max": 7,
+      "min": 3
     },
-    "specific": {
+    "targets": {
       "#ruralroutes:candidate/biome/desert/crop": {
-        "max": 30,
-        "min": 20
+        "buy": {
+          "max": 8,
+          "min": 4
+        },
+        "sell": {
+          "max": 16,
+          "min": 8
+        }
       },
       "desert_oasis/inputs": {
-        "max": 14,
-        "min": 8
+        "buy": {
+          "max": 24,
+          "min": 14
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
       },
-      "minecraft:golden_carrot": {
-        "max": 3,
-        "min": 1
+      "desert_oasis/supplies": {
+        "buy": {
+          "max": 18,
+          "min": 10
+        },
+        "sell": {
+          "max": 8,
+          "min": 4
+        }
       },
-      "minecraft:wheat": {
-        "max": 26,
-        "min": 16
+      "minecraft:blaze_rod": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "minecraft:bucket": {
+        "buy": {
+          "max": 14,
+          "min": 8
+        },
+        "sell": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "minecraft:dried_kelp": {
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 4,
+          "min": 2
+        }
+      },
+      "minecraft:ender_pearl": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
+      },
+      "minecraft:glistering_melon_slice": {
+        "buy": {
+          "max": 4,
+          "min": 1
+        },
+        "sell": {
+          "max": 3,
+          "min": 1
+        }
+      },
+      "minecraft:ice": {
+        "buy": {
+          "max": 18,
+          "min": 10
+        },
+        "sell": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "minecraft:packed_ice": {
+        "buy": {
+          "max": 14,
+          "min": 8
+        },
+        "sell": {
+          "max": 2,
+          "min": 1
+        }
+      },
+      "minecraft:rabbit_stew": {
+        "buy": {
+          "max": 3,
+          "min": 1
+        },
+        "sell": {
+          "max": 4,
+          "min": 2
+        }
+      },
+      "minecraft:water_bucket": {
+        "buy": {
+          "max": 0,
+          "min": 0
+        },
+        "sell": {
+          "max": 1,
+          "min": 1
+        }
       }
     }
   },
