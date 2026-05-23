@@ -15,6 +15,7 @@ import github.mczme.ruralroutes.core.theme.StockRange;
 import github.mczme.ruralroutes.core.theme.StockTarget;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.core.trade.TradeItemKey;
+import github.mczme.ruralroutes.core.trade.TradeTargetRef;
 import github.mczme.ruralroutes.core.util.TagLookupCache;
 import github.mczme.ruralroutes.register.RRAttachments;
 import com.google.gson.JsonElement;
@@ -134,14 +135,9 @@ public class CommercialNodeManager {
         List<SelectedTradeItem> selectedBuyItems = selectTradeItems(template.buyItems());
         List<NodeTradeEntry> sellItems = toTradeEntries(selectedSellItems);
         List<NodeTradeEntry> buyItems = toTradeEntries(selectedBuyItems);
-        List<NodeTradeEntry> specialties = generateSpecialties(template);
         MarketState marketState = getCurrentMarketState(level);
         Map<TradeItemKey, NodeStockEntry> stocks = initializeStocks(
             template, selectedSellItems, selectedBuyItems, marketState);
-
-        // 将特产加入出售列表和库存
-        addSpecialtiesToSellItems(sellItems, specialties);
-        addSpecialtiesToStocks(stocks, template, specialties, marketState);
 
         long timestamp = level instanceof ServerLevel serverLevel 
             ? CycleManager.getEffectiveTime(serverLevel) 
@@ -152,7 +148,6 @@ public class CommercialNodeManager {
             themeName,
             sellItems,
             buyItems,
-            specialties,
             stocks,
             timestamp
         );
@@ -165,110 +160,6 @@ public class CommercialNodeManager {
             tradeNodeId, themeName, pos);
 
         return data;
-    }
-
-    /**
-     * 生成特产列表
-     * @param template 主题模板
-     * @return 特产ID列表（主题特产 + 随机特产）
-     */
-    private static List<NodeTradeEntry> generateSpecialties(ResolvedTheme template) {
-        List<NodeTradeEntry> specialties = new ArrayList<>();
-        Set<ResourceLocation> seen = new LinkedHashSet<>();
-
-        // 1. 主题特产
-        if (template.themeSpecialtyItems().isPresent()) {
-            List<ItemReference> themeSpecialties = template.themeSpecialtyItems().get();
-            for (ItemReference specialtyRef : themeSpecialties) {
-                if (!specialtyRef.isExactItem()) {
-                    RuralRoutes.LOGGER.warn("Theme specialty must resolve to an exact item, got {}", specialtyRef.debugLabel());
-                    continue;
-                }
-                ResourceLocation specialtyId = ResourceLocation.parse(specialtyRef.itemId());
-                ItemStack displayStack = createItemStack(specialtyRef.itemEntries().get(0));
-                if (seen.add(specialtyId)) {
-                    specialties.add(NodeTradeEntry.of(
-                        specialtyRef.sourceKey(),
-                        specialtyId,
-                        displayStack
-                    ));
-                }
-            }
-        }
-
-        // 2. 随机特产
-        Set<Item> poolItems = TagLookupCache.getItems("#ruralroutes:pool/specialty");
-        if (!poolItems.isEmpty()) {
-            List<Item> poolList = new ArrayList<>(poolItems);
-            Collections.shuffle(poolList);
-
-            // 随机抽取 1-3 种
-            int count = 1 + new Random().nextInt(3);
-            int added = 0;
-            for (Item item : poolList) {
-                if (added >= count) break;
-
-                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
-                if (seen.add(itemId)) {
-                    specialties.add(NodeTradeEntry.of(itemId.toString(), itemId));
-                    added++;
-                }
-            }
-        }
-
-        return specialties;
-    }
-
-    /**
-     * 将特产加入出售列表
-     */
-    private static void addSpecialtiesToSellItems(List<NodeTradeEntry> sellItems,
-            List<NodeTradeEntry> specialties) {
-        for (NodeTradeEntry specialty : specialties) {
-            boolean exists = sellItems.stream().anyMatch(entry -> entry.itemId().equals(specialty.itemId()));
-            if (!exists) {
-                sellItems.add(NodeTradeEntry.of(
-                    specialty.sourceKey(),
-                    specialty.stockKey()
-                ));
-            }
-        }
-    }
-
-    /**
-     * 将特产加入库存（作为出售物品，初始满库存）
-     */
-    private static void addSpecialtiesToStocks(Map<TradeItemKey, NodeStockEntry> stocks,
-            ResolvedTheme template, List<NodeTradeEntry> specialties, MarketState marketState) {
-
-        // 默认库存范围
-        int defaultMin = 8;
-        int defaultMax = 16;
-        MarketContext marketContext = MarketContext.fromTheme(template);
-
-        if (template.stock().isPresent()) {
-            StockConfig stockConfig = template.stock().get();
-            if (stockConfig.defaultRange().isPresent()) {
-                StockRange range = stockConfig.defaultRange().get();
-                defaultMin = range.min();
-                defaultMax = range.max();
-            }
-        }
-
-        for (NodeTradeEntry specialty : specialties) {
-            ResourceLocation specialtyId = specialty.itemId();
-            TradeItemKey stockKey = specialty.tradeItemKey();
-            if (!stocks.containsKey(stockKey)) {
-                int baseMax = getBaseStockMax(template, specialtyId.toString(), specialtyId, defaultMin, defaultMax, true);
-                MarketStockAdjustment stockAdjustment = resolveStockAdjustment(
-                    marketState,
-                    marketContext,
-                    specialty.tradeItemKey(),
-                    Optional.of(specialty.sourceKey()));
-                int sellBase = stockAdjustment.applySellBase(baseMax);
-                stocks.put(stockKey, NodeStockEntry.full(specialty.displayStackOrDefault(), sellBase));
-            }
-        }
     }
 
     /**
@@ -436,7 +327,7 @@ public class CommercialNodeManager {
         if (template.stock().isPresent()) {
             StockConfig stockConfig = template.stock().get();
             if (stockConfig.targetEntries().isPresent()) {
-                StockTarget target = stockConfig.resolveTarget(itemRefId, itemId).orElse(null);
+                StockTarget target = resolvePreferredStockTarget(stockConfig, itemRefId, itemId).orElse(null);
                 if (target != null) {
                     StockRange range = target.shared().orElse(null);
                     if (range == null) {
@@ -450,7 +341,7 @@ public class CommercialNodeManager {
                 }
             }
             if (stockConfig.specific().isPresent()) {
-                Optional<StockRange> resolved = stockConfig.resolveSpecific(itemRefId, itemId);
+                Optional<StockRange> resolved = resolvePreferredSpecific(stockConfig, itemRefId, itemId);
                 if (resolved.isPresent()) {
                     return randomInRange(resolved.get());
                 }
@@ -468,14 +359,34 @@ public class CommercialNodeManager {
         return range.min() + (int)(Math.random() * (range.max() - range.min() + 1));
     }
 
-    private static ItemStack createItemStack(ItemEntry itemEntry) {
-        if (itemEntry.isTag()) {
-            RuralRoutes.LOGGER.warn("Cannot create a display stack directly from tag reference: {}", itemEntry.ref());
-            return ItemStack.EMPTY;
+    /**
+     * 当交易候选是标签展开结果时，允许精确物品库存覆盖标签级配置。
+     * 这样 profile 里的 #currency 仍能为铜/铁/金币分别设置库存。
+     */
+    private static Optional<StockTarget> resolvePreferredStockTarget(
+            StockConfig stockConfig,
+            String itemRefId,
+            ResourceLocation itemId) {
+        if (itemRefId != null && itemRefId.startsWith("#")) {
+            Optional<StockTarget> exactItem = stockConfig.resolveTarget(TradeTargetRef.item(itemId.toString()));
+            if (exactItem.isPresent()) {
+                return exactItem;
+            }
         }
+        return stockConfig.resolveTarget(itemRefId, itemId);
+    }
 
-        Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemEntry.ref()));
-        return createItemStack(item, itemEntry);
+    private static Optional<StockRange> resolvePreferredSpecific(
+            StockConfig stockConfig,
+            String itemRefId,
+            ResourceLocation itemId) {
+        if (itemRefId != null && itemRefId.startsWith("#")) {
+            Optional<StockRange> exactItem = stockConfig.resolveSpecific(TradeTargetRef.item(itemId.toString()));
+            if (exactItem.isPresent()) {
+                return exactItem;
+            }
+        }
+        return stockConfig.resolveSpecific(itemRefId, itemId);
     }
 
     private static ItemStack createItemStack(Item item, ItemEntry itemEntry) {
@@ -585,7 +496,7 @@ public class CommercialNodeManager {
 
     /**
      * 刷新节点数据
-     * 恢复库存到基准值，重新生成特产，更新刷新时间戳
+     * 恢复库存到基准值，更新刷新时间戳
      */
     private static CommercialNodeData refreshNodeData(ServerLevel level, BlockPos pos,
             CommercialNodeData oldData, long currentTimestamp) {
@@ -606,20 +517,12 @@ public class CommercialNodeManager {
         Map<TradeItemKey, NodeStockEntry> newStocks = initializeStocks(
             template, selectedSellItems, selectedBuyItems, marketState);
 
-        // 重新生成特产
-        List<NodeTradeEntry> newSpecialties = generateSpecialties(template);
-
-        // 重新生成出售列表（包含新特产）
-        addSpecialtiesToSellItems(newSellItems, newSpecialties);
-        addSpecialtiesToStocks(newStocks, template, newSpecialties, marketState);
-
         // 创建新数据，更新时间戳
         CommercialNodeData newData = CommercialNodeData.create(
             oldData.tradeNodeId(),
             oldData.themeName(),
             newSellItems,
             newBuyItems,
-            newSpecialties,
             newStocks,
             currentTimestamp
         );
@@ -628,8 +531,8 @@ public class CommercialNodeManager {
         ChunkAccess chunk = level.getChunk(pos);
         chunk.setData(RRAttachments.COMMERCIAL_NODE.get(), newData);
 
-        RuralRoutes.LOGGER.debug("Refreshed node {} with {} stock entries and {} specialties",
-                newData.tradeNodeId(), newStocks.size(), newSpecialties.size());
+        RuralRoutes.LOGGER.debug("Refreshed node {} with {} stock entries",
+                newData.tradeNodeId(), newStocks.size());
 
         return newData;
     }

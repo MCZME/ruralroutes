@@ -16,7 +16,6 @@ public final class ResolvedTheme {
     private final ResourceLocation biome;
     private final List<ItemReference> sellItems;
     private final List<ItemReference> buyItems;
-    private final Optional<List<ItemReference>> themeSpecialtyItems;
     private final Optional<StockConfig> stock;
     private final Optional<List<PriceModifier>> priceModifiers;
     private final Optional<List<TradeContractEntry>> tradeContracts;
@@ -27,7 +26,6 @@ public final class ResolvedTheme {
         ResourceLocation biome,
         List<ItemReference> sellItems,
         List<ItemReference> buyItems,
-        Optional<List<ItemReference>> themeSpecialtyItems,
         Optional<StockConfig> stock,
         Optional<List<PriceModifier>> priceModifiers,
         Optional<List<TradeContractEntry>> tradeContracts,
@@ -37,7 +35,6 @@ public final class ResolvedTheme {
         this.biome = Objects.requireNonNull(biome, "biome");
         this.sellItems = List.copyOf(Objects.requireNonNull(sellItems, "sellItems"));
         this.buyItems = List.copyOf(Objects.requireNonNull(buyItems, "buyItems"));
-        this.themeSpecialtyItems = Objects.requireNonNull(themeSpecialtyItems, "themeSpecialtyItems").map(List::copyOf);
         this.stock = Objects.requireNonNull(stock, "stock");
         this.priceModifiers = Objects.requireNonNull(priceModifiers, "priceModifiers").map(List::copyOf);
         this.tradeContracts = Objects.requireNonNull(tradeContracts, "tradeContracts").map(List::copyOf);
@@ -58,18 +55,6 @@ public final class ResolvedTheme {
 
     public List<ItemReference> buyItems() {
         return buyItems;
-    }
-
-    public Optional<List<ItemReference>> themeSpecialtyItems() {
-        return themeSpecialtyItems;
-    }
-
-    public Optional<List<ResourceLocation>> themeSpecialties() {
-        return themeSpecialtyItems.map(items -> items.stream()
-            .filter(ItemReference::isExactItem)
-            .map(ItemReference::itemId)
-            .map(ResourceLocation::parse)
-            .toList());
     }
 
     public Optional<StockConfig> stock() {

@@ -23,7 +23,6 @@ class TradeProfileThemeResolutionTest {
             "ruralroutes:first",
             List.of(ItemReference.single("minecraft:apple")),
             List.of(),
-            List.of(ItemReference.single("minecraft:bread")),
             targetsOnlyStockConfig(Map.of("minecraft:apple", StockTarget.shared(stockRangeValue(3, 4)))),
             List.of(new FixedTradeEntry(List.of(), List.of())),
             null
@@ -32,7 +31,6 @@ class TradeProfileThemeResolutionTest {
             "ruralroutes:second",
             List.of(ItemReference.single("minecraft:carrot")),
             List.of(ItemReference.single("minecraft:potato")),
-            List.of(ItemReference.single("minecraft:wheat")),
             targetsOnlyStockConfig(Map.of("minecraft:carrot", StockTarget.shared(stockRangeValue(7, 8)))),
             List.of(new CurrencyBasketEntry(TradeSide.SELL_TO_PLAYER, List.of("*"), List.of("#ruralroutes:currency"), CompositionStrategy.LARGEST_FIRST)),
             null
@@ -67,13 +65,6 @@ class TradeProfileThemeResolutionTest {
             resolved.buyItems()
         );
         assertEquals(
-            List.of(
-                ResourceLocation.fromNamespaceAndPath("minecraft", "bread"),
-                ResourceLocation.fromNamespaceAndPath("minecraft", "wheat")
-            ),
-            resolved.themeSpecialties().orElseThrow()
-        );
-        assertEquals(
             List.of(PriceModifier.of(TradeTargetRef.item("minecraft:melon"), 1.5f, 1.6f)),
             resolved.priceModifiers().orElseThrow()
         );
@@ -86,7 +77,6 @@ class TradeProfileThemeResolutionTest {
     void themeStockTargetsOverrideProfileTargetsAndDefaultStaysThemeOnly() throws Exception {
         TradeProfile profile = profile(
             "ruralroutes:profile",
-            List.of(),
             List.of(),
             List.of(),
             targetsOnlyStockConfig(Map.of("minecraft:apple", StockTarget.shared(stockRangeValue(3, 4)))),
@@ -118,7 +108,6 @@ class TradeProfileThemeResolutionTest {
             "ruralroutes:profile",
             List.of(),
             List.of(),
-            List.of(),
             targetsOnlyStockConfig(Map.of("minecraft:apple", StockTarget.shared(stockRangeValue(3, 4)))),
             List.of(),
             null
@@ -147,7 +136,6 @@ class TradeProfileThemeResolutionTest {
             ResourceLocation.parse("ruralroutes:profile"),
             List.of(),
             List.of(),
-            Optional.empty(),
             Optional.of(stockConfig(1, 2, Map.of())),
             Optional.empty()
         ));
@@ -157,7 +145,6 @@ class TradeProfileThemeResolutionTest {
         String name,
         List<ItemReference> sellItems,
         List<ItemReference> buyItems,
-        List<ItemReference> specialties,
         StockConfig stock,
         List<TradeContractEntry> tradeContracts,
         List<ResourceLocation> ignoredThemeProfiles
@@ -166,7 +153,6 @@ class TradeProfileThemeResolutionTest {
             ResourceLocation.parse(name),
             sellItems,
             buyItems,
-            Optional.of(specialties),
             Optional.ofNullable(stock),
             tradeContracts.isEmpty() ? Optional.empty() : Optional.of(tradeContracts)
         );

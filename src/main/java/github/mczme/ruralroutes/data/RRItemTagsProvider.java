@@ -79,7 +79,13 @@ public class RRItemTagsProvider extends ItemTagsProvider {
                         Items.COOKED_COD,
                         Items.SALMON,
                         Items.COOKED_SALMON,
-                        Items.GOLDEN_CARROT);
+                        Items.BAKED_POTATO,
+                        Items.PUMPKIN_PIE,
+                        Items.APPLE,
+                        Items.RABBIT_STEW,
+                        Items.GLISTERING_MELON_SLICE,
+                        Items.GOLDEN_CARROT,
+                        Items.GOLDEN_APPLE);
 
         tag(RRItemTags.POOL_MINERAL)
                 .add(Items.COAL)
@@ -175,7 +181,17 @@ public class RRItemTagsProvider extends ItemTagsProvider {
                         Items.SPRUCE_BOAT,
                         Items.GLOW_BERRIES,
                         Items.CAMPFIRE,
-                        Items.BLUE_ICE);
+                        Items.GLISTERING_MELON_SLICE,
+                        Items.RABBIT_STEW,
+                        Items.GOLDEN_APPLE,
+                        Items.LEAD,
+                        Items.NAME_TAG,
+                        Items.DIAMOND_PICKAXE,
+                        Items.DIAMOND_AXE,
+                        Items.DIAMOND_SWORD,
+                        Items.BLUE_ICE,
+                        Items.ENDER_PEARL,
+                        Items.BLAZE_ROD);
 
         // ===== 群系候选标签 =====
 
@@ -192,11 +208,15 @@ public class RRItemTagsProvider extends ItemTagsProvider {
                         Items.POTATO,
                         Items.BEETROOT,
                         Items.PUMPKIN,
-                        Items.MELON);
+                        Items.MELON,
+                        Items.SUGAR_CANE);
 
         tag(RRItemTags.CANDIDATE_BIOME_PLAINS_FOOD)
                 .add(
                         Items.BREAD,
+                        Items.BAKED_POTATO,
+                        Items.PUMPKIN_PIE,
+                        Items.APPLE,
                         Items.BEEF,
                         Items.COOKED_BEEF,
                         Items.MUTTON,
@@ -232,7 +252,9 @@ public class RRItemTagsProvider extends ItemTagsProvider {
                         Items.YELLOW_TERRACOTTA,
                         Items.GLASS,
                         Items.ORANGE_STAINED_GLASS,
-                        Items.YELLOW_STAINED_GLASS);
+                        Items.YELLOW_STAINED_GLASS,
+                        Items.GREEN_DYE,
+                        Items.CYAN_DYE);
 
         tag(RRItemTags.CANDIDATE_BIOME_SAVANNA_WOOD)
                 .add(
@@ -247,7 +269,9 @@ public class RRItemTagsProvider extends ItemTagsProvider {
                         Items.ORANGE_TERRACOTTA,
                         Items.YELLOW_TERRACOTTA,
                         Items.GLASS,
-                        Items.ORANGE_STAINED_GLASS);
+                        Items.ORANGE_STAINED_GLASS,
+                        Items.YELLOW_GLAZED_TERRACOTTA,
+                        Items.CYAN_DYE);
 
         tag(RRItemTags.CANDIDATE_BIOME_SAVANNA_LEATHER_FIBER)
                 .add(
@@ -273,6 +297,9 @@ public class RRItemTagsProvider extends ItemTagsProvider {
         tag(RRItemTags.CANDIDATE_BIOME_TAIGA_FOOD)
                 .add(
                         Items.SWEET_BERRIES,
+                        Items.CARROT,
+                        Items.POTATO,
+                        Items.BEETROOT,
                         Items.RABBIT,
                         Items.COOKED_RABBIT,
                         Items.SALMON,
@@ -290,7 +317,8 @@ public class RRItemTagsProvider extends ItemTagsProvider {
                         Items.SNOWBALL,
                         Items.SNOW_BLOCK,
                         Items.ICE,
-                        Items.PACKED_ICE);
+                        Items.PACKED_ICE,
+                        Items.BLUE_ICE);
 
         tag(RRItemTags.CANDIDATE_BIOME_SNOWY_FOOD)
                 .add(
@@ -315,8 +343,24 @@ public class RRItemTagsProvider extends ItemTagsProvider {
                         Items.IRON_PICKAXE,
                         Items.IRON_AXE,
                         Items.IRON_SWORD,
+                        Items.IRON_SHOVEL,
+                        Items.IRON_HOE,
+                        Items.STONE_PICKAXE,
+                        Items.STONE_AXE,
+                        Items.STONE_SWORD,
+                        Items.STONE_SHOVEL,
+                        Items.STONE_HOE,
                         Items.BOW,
-                        Items.CROSSBOW);
+                        Items.CROSSBOW,
+                        Items.ARROW,
+                        Items.CHAINMAIL_HELMET,
+                        Items.CHAINMAIL_CHESTPLATE,
+                        Items.CHAINMAIL_LEGGINGS,
+                        Items.CHAINMAIL_BOOTS,
+                        Items.IRON_HELMET,
+                        Items.IRON_CHESTPLATE,
+                        Items.IRON_LEGGINGS,
+                        Items.IRON_BOOTS);
 
         tag(RRItemTags.CANDIDATE_THEME_DESERT_QUARRY_STONEWORK)
                 .add(
@@ -331,6 +375,8 @@ public class RRItemTagsProvider extends ItemTagsProvider {
                 .add(
                         Items.ORANGE_DYE,
                         Items.YELLOW_DYE,
+                        Items.GREEN_DYE,
+                        Items.CYAN_DYE,
                         Items.GLASS,
                         Items.ORANGE_STAINED_GLASS,
                         Items.TERRACOTTA);
@@ -341,34 +387,46 @@ public class RRItemTagsProvider extends ItemTagsProvider {
                         Items.ORANGE_TERRACOTTA,
                         Items.YELLOW_TERRACOTTA,
                         Items.GLASS,
-                        Items.BRICK);
+                        Items.BRICK,
+                        Items.YELLOW_GLAZED_TERRACOTTA);
 
         tag(RRItemTags.CANDIDATE_THEME_TAIGA_FUR_FUR_GOODS)
                 .add(
                         Items.LEATHER,
                         Items.RABBIT_HIDE,
                         Items.WHITE_WOOL,
-                        Items.GRAY_WOOL);
+                        Items.GRAY_WOOL,
+                        Items.BOW,
+                        Items.ARROW);
 
         tag(RRItemTags.CANDIDATE_THEME_SNOWY_ICEWORKS_ICE_GOODS)
                 .add(
                         Items.ICE,
                         Items.PACKED_ICE,
-                        Items.SNOW_BLOCK);
+                        Items.SNOW_BLOCK,
+                        Items.BLUE_ICE);
 
         tag(RRItemTags.CANDIDATE_THEME_SNOWY_WAYSTATION_SUPPLIES)
                 .add(
                         Items.BREAD,
+                        Items.BAKED_POTATO,
+                        Items.PUMPKIN_PIE,
                         Items.OAK_LOG,
                         Items.SPRUCE_LOG,
-                        Items.CHARCOAL);
+                        Items.CHARCOAL,
+                        Items.CAMPFIRE);
 
         tag(RRItemTags.CANDIDATE_THEME_SNOWY_HUNTER_HUNTER_GOODS)
                 .add(
                         Items.BEEF,
                         Items.RABBIT,
+                        Items.COOKED_RABBIT,
                         Items.LEATHER,
                         Items.RABBIT_HIDE,
-                        Items.FEATHER);
+                        Items.FEATHER,
+                        Items.BONE,
+                        Items.BONE_BLOCK,
+                        Items.BOW,
+                        Items.ARROW);
     }
 }

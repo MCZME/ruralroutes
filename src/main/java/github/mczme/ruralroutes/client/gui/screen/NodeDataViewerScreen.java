@@ -108,9 +108,7 @@ public class NodeDataViewerScreen extends Screen {
         int summaryHeight = getSummaryPanelHeight();
         int columnWidth = (panelAreaWidth - COLUMN_GAP) / 2;
 
-        int leftHeight = getListPanelHeight(nodeData.sellItems().size())
-            + PANEL_GAP
-            + getListPanelHeight(nodeData.specialties().size());
+        int leftHeight = getListPanelHeight(nodeData.sellItems().size());
         int rightHeight = getListPanelHeight(nodeData.buyItems().size())
             + PANEL_GAP
             + getStockPanelHeight(nodeData.stocks().size());
@@ -180,13 +178,9 @@ public class NodeDataViewerScreen extends Screen {
         int rightX = areaX + columnWidth + COLUMN_GAP;
 
         int leftY = columnsTop;
-        leftY = renderItemPanel(guiGraphics, leftX, leftY, columnWidth,
+        renderItemPanel(guiGraphics, leftX, leftY, columnWidth,
             Component.translatable("gui.ruralroutes.node_data_viewer.section.sell_items"),
             nodeData.sellItems(), false);
-        leftY += PANEL_GAP;
-        renderItemPanel(guiGraphics, leftX, leftY, columnWidth,
-            Component.translatable("gui.ruralroutes.node_data_viewer.section.specialties"),
-            nodeData.specialties(), false);
 
         int rightY = columnsTop;
         rightY = renderItemPanel(guiGraphics, rightX, rightY, columnWidth,

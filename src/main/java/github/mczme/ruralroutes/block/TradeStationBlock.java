@@ -7,8 +7,6 @@ import github.mczme.ruralroutes.advancement.trigger.OpenTradeStationTrigger.Trad
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.node.NodeTradeEntry;
-import github.mczme.ruralroutes.core.node.NodeStockEntry;
-import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import github.mczme.ruralroutes.core.theme.ThemeManager;
 import github.mczme.ruralroutes.core.theme.ResolvedTheme;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
@@ -46,7 +44,6 @@ import net.minecraft.core.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -215,50 +212,26 @@ public class TradeStationBlock extends BaseEntityBlock {
 
     /**
      * 为展示柜分配展示物品
-     * 前 N 个展示柜分配特产，多余的从库存随机选取
+     * 从当前出售商品中随机分配展示物品
      */
     private void assignDisplayItems(List<DisplayCaseBlockEntity> displayCases, CommercialNodeData nodeData) {
-        List<NodeTradeEntry> specialties = nodeData.specialties();
-        Map<TradeItemKey, NodeStockEntry> stocks = nodeData.stocks();
+        List<NodeTradeEntry> sellItems = nodeData.sellItems();
         Random random = new Random();
-
-        int specialtyCount = specialties.size();
 
         for (int i = 0; i < displayCases.size(); i++) {
             DisplayCaseBlockEntity displayCase = displayCases.get(i);
-            ItemStack displayItem;
-
-            if (i < specialtyCount) {
-                // 分配特产
-                NodeTradeEntry specialty = specialties.get(i);
-                displayItem = specialty.displayStackOrDefault();
-            } else {
-                // 从库存随机选取有库存的物品
-                displayItem = getRandomItemFromStocks(stocks, random);
-            }
-
-            displayCase.setDisplayItem(displayItem);
+            displayCase.setDisplayItem(getRandomSellItem(sellItems, random));
         }
     }
 
     /**
-     * 从库存中随机选取一个有库存的物品
+     * 从出售列表中随机选取一个物品
      */
-    private ItemStack getRandomItemFromStocks(Map<TradeItemKey, NodeStockEntry> stocks, Random random) {
-        List<TradeItemKey> availableItems = new ArrayList<>();
-
-        for (Map.Entry<TradeItemKey, NodeStockEntry> entry : stocks.entrySet()) {
-            if (entry.getValue().current() > 0) {
-                availableItems.add(entry.getKey());
-            }
-        }
-
-        if (availableItems.isEmpty()) {
+    private ItemStack getRandomSellItem(List<NodeTradeEntry> sellItems, Random random) {
+        if (sellItems.isEmpty()) {
             return ItemStack.EMPTY;
         }
-
-        TradeItemKey randomId = availableItems.get(random.nextInt(availableItems.size()));
-        return randomId.asItemStack();
+        return sellItems.get(random.nextInt(sellItems.size())).displayStackOrDefault();
     }
 
     /**

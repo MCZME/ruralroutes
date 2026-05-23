@@ -55,7 +55,6 @@ class TradeTargetRefCodecTest {
             List.of(),
             List.of(),
             Optional.empty(),
-            Optional.empty(),
             Optional.of(List.of(exact, source, item, tag)),
             Optional.empty(),
             Optional.empty()

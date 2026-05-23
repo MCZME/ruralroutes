@@ -234,10 +234,6 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("advancements.ruralroutes.side.open_rumor_board.description", "查看村庄中的传闻板");
         add("advancements.ruralroutes.side.open_display_case.title", "打开展示柜");
         add("advancements.ruralroutes.side.open_display_case.description", "查看村庄中的展示柜");
-        add("advancements.ruralroutes.side.buy_specialty.title", "购买特产");
-        add("advancements.ruralroutes.side.buy_specialty.description", "从村庄买到一件特产");
-        add("advancements.ruralroutes.side.collector.title", "收藏家");
-        add("advancements.ruralroutes.side.collector.description", "购买 3 种不同的村庄特产");
         add("advancements.ruralroutes.travel.enter_different_village_styles.title", "走南闯北");
         add("advancements.ruralroutes.travel.enter_different_village_styles.description", "在五种不同风格的村庄中找到贸易站");
         add("advancements.ruralroutes.travel.enter_all_village_themes.title", "识遍乡野");

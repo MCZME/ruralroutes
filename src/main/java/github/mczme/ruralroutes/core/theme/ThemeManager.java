@@ -104,7 +104,6 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
     private ResolvedTheme resolveTheme(ThemeTemplate template, Map<ResourceLocation, TradeProfile> profileMap) {
         List<ItemReference> sellItems = new ArrayList<>();
         List<ItemReference> buyItems = new ArrayList<>();
-        List<ItemReference> specialties = new ArrayList<>();
         List<TradeContractEntry> tradeContracts = new ArrayList<>();
         List<PriceModifier> priceModifiers = new ArrayList<>();
         StockConfig themeStock = template.stock().orElse(null);
@@ -119,7 +118,6 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
             }
             sellItems.addAll(profile.sellItems());
             buyItems.addAll(profile.buyItems());
-            profile.themeSpecialties().ifPresent(specialties::addAll);
             profile.tradeContracts().ifPresent(tradeContracts::addAll);
             if (profile.stock().isPresent()) {
                 StockConfig profileStock = profile.stock().get();
@@ -152,7 +150,6 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
             template.biome(),
             List.copyOf(sellItems),
             List.copyOf(buyItems),
-            specialties.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(specialties)),
             resolvedStock,
             priceModifiers.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(priceModifiers)),
             tradeContracts.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(tradeContracts)),

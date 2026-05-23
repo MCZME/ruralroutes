@@ -19,8 +19,6 @@ public class OpenTradeStationTrigger extends SimpleCriterionTrigger<OpenTradeSta
         COIN_EXCHANGE("coin_exchange"),
         OPEN_RUMOR_BOARD("open_rumor_board"),
         OPEN_DISPLAY_CASE("open_display_case"),
-        BUY_SPECIALTY("buy_specialty"),
-        COLLECTOR("collector"),
         DISCOVER_VILLAGE_STYLE("discover_village_style"),
         DISCOVER_VILLAGE_THEME("discover_village_theme"),
         TRADE_10_TIMES("trade_10_times"),
@@ -90,16 +88,6 @@ public class OpenTradeStationTrigger extends SimpleCriterionTrigger<OpenTradeSta
     public static Criterion<TriggerInstance> openDisplayCase() {
         return RRCriteriaTriggers.OPEN_TRADE_STATION.get()
             .createCriterion(new TriggerInstance(Optional.empty(), Optional.of(TradeStationEvent.OPEN_DISPLAY_CASE), Optional.empty(), Optional.empty()));
-    }
-
-    public static Criterion<TriggerInstance> buySpecialty() {
-        return RRCriteriaTriggers.OPEN_TRADE_STATION.get()
-            .createCriterion(new TriggerInstance(Optional.empty(), Optional.of(TradeStationEvent.BUY_SPECIALTY), Optional.empty(), Optional.empty()));
-    }
-
-    public static Criterion<TriggerInstance> collector() {
-        return RRCriteriaTriggers.OPEN_TRADE_STATION.get()
-            .createCriterion(new TriggerInstance(Optional.empty(), Optional.of(TradeStationEvent.COLLECTOR), Optional.empty(), Optional.empty()));
     }
 
     public static Criterion<TriggerInstance> discoverVillageStyle(String villageStyle) {

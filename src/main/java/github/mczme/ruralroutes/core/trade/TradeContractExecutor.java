@@ -109,7 +109,6 @@ public final class TradeContractExecutor {
             nodeData.themeName(),
             nodeData.sellItems(),
             nodeData.buyItems(),
-            nodeData.specialties(),
             stocks,
             nodeData.refreshTimestamp()
         );
@@ -387,7 +386,6 @@ public final class TradeContractExecutor {
             nodeData.themeName(),
             nodeData.sellItems(),
             nodeData.buyItems(),
-            nodeData.specialties(),
             stocks,
             nodeData.refreshTimestamp()
         );

@@ -16,8 +16,6 @@ public final class RRAdvancementKeys {
 
     public static final ResourceLocation OPEN_RUMOR_BOARD = id("side/open_rumor_board");
     public static final ResourceLocation OPEN_DISPLAY_CASE = id("side/open_display_case");
-    public static final ResourceLocation BUY_SPECIALTY = id("side/buy_specialty");
-    public static final ResourceLocation COLLECTOR = id("side/collector");
     public static final ResourceLocation ENTER_DIFFERENT_VILLAGE_STYLES = id("travel/enter_different_village_styles");
     public static final ResourceLocation ENTER_ALL_VILLAGE_THEMES = id("travel/enter_all_village_themes");
 

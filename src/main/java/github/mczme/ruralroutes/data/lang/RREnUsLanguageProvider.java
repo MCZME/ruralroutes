@@ -234,10 +234,6 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("advancements.ruralroutes.side.open_rumor_board.description", "Read the rumor board in a village");
         add("advancements.ruralroutes.side.open_display_case.title", "Open the Display Case");
         add("advancements.ruralroutes.side.open_display_case.description", "Inspect the display case in a village");
-        add("advancements.ruralroutes.side.buy_specialty.title", "Buy a Specialty");
-        add("advancements.ruralroutes.side.buy_specialty.description", "Buy a specialty from a village");
-        add("advancements.ruralroutes.side.collector.title", "Collector");
-        add("advancements.ruralroutes.side.collector.description", "Purchase 3 different village specialties");
         add("advancements.ruralroutes.travel.enter_different_village_styles.title", "Far and Wide");
         add("advancements.ruralroutes.travel.enter_different_village_styles.description", "Find trade stations in villages of all five styles");
         add("advancements.ruralroutes.travel.enter_all_village_themes.title", "Know Every Road");

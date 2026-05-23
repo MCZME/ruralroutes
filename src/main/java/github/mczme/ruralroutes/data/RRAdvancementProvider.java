@@ -46,9 +46,7 @@ public class RRAdvancementProvider extends AdvancementProvider {
             buildBarterTrade(firstTrade, saver);
             buildCoinExchange(firstTrade, saver);
             buildOpenRumorBoard(firstTradeStation, saver);
-            AdvancementHolder openDisplayCase = buildOpenDisplayCase(firstTradeStation, saver);
-            AdvancementHolder buySpecialty = buildBuySpecialty(openDisplayCase, saver);
-            buildCollector(buySpecialty, saver);
+            buildOpenDisplayCase(firstTradeStation, saver);
             AdvancementHolder differentVillageStyles = buildEnterDifferentVillageStyles(root, saver);
             buildEnterAllVillageThemes(differentVillageStyles, saver);
 
@@ -182,40 +180,6 @@ public class RRAdvancementProvider extends AdvancementProvider {
                 )
                 .addCriterion("open_display_case", OpenTradeStationTrigger.openDisplayCase())
                 .save(saver, RRAdvancementKeys.OPEN_DISPLAY_CASE.toString());
-        }
-
-        private static AdvancementHolder buildBuySpecialty(AdvancementHolder parent, Consumer<AdvancementHolder> saver) {
-            return Advancement.Builder.advancement()
-                .parent(parent)
-                .display(
-                    Items.ITEM_FRAME,
-                    Component.translatable(titleKey(RRAdvancementKeys.BUY_SPECIALTY)),
-                    Component.translatable(descKey(RRAdvancementKeys.BUY_SPECIALTY)),
-                    null,
-                    AdvancementType.TASK,
-                    true,
-                    true,
-                    false
-                )
-                .addCriterion("buy_specialty", OpenTradeStationTrigger.buySpecialty())
-                .save(saver, RRAdvancementKeys.BUY_SPECIALTY.toString());
-        }
-
-        private static AdvancementHolder buildCollector(AdvancementHolder parent, Consumer<AdvancementHolder> saver) {
-            return Advancement.Builder.advancement()
-                .parent(parent)
-                .display(
-                    Items.CHEST,
-                    Component.translatable(titleKey(RRAdvancementKeys.COLLECTOR)),
-                    Component.translatable(descKey(RRAdvancementKeys.COLLECTOR)),
-                    null,
-                    AdvancementType.GOAL,
-                    true,
-                    true,
-                    false
-                )
-                .addCriterion("collector", OpenTradeStationTrigger.collector())
-                .save(saver, RRAdvancementKeys.COLLECTOR.toString());
         }
 
         private static AdvancementHolder buildEnterDifferentVillageStyles(AdvancementHolder parent, Consumer<AdvancementHolder> saver) {
