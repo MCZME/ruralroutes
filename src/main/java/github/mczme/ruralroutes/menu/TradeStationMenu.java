@@ -73,6 +73,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
 
     private final BlockPos blockPos;
     private final Player player;
+    private final ResourceLocation themeName;
     private TradeDisplayContainer sellContainer;
     private TradeDisplayContainer buyContainer;
     private final List<TradeSlot> sellSlots;
@@ -112,6 +113,7 @@ public class TradeStationMenu extends AbstractContainerMenu {
         super(RRMenuTypes.TRADE_STATION.get(), containerId);
         this.blockPos = blockPos;
         this.player = playerInventory.player;
+        this.themeName = resolveThemeName(playerInventory.player.level(), blockPos);
 
         // 初始化槽位列表
         this.sellSlots = new ArrayList<>();
@@ -128,6 +130,16 @@ public class TradeStationMenu extends AbstractContainerMenu {
             // 客户端：使用服务端传递的槽位数量创建空槽位
             initializeEmptySlots(sellSlotCount, buySlotCount);
         }
+    }
+
+    private static ResourceLocation resolveThemeName(Level level, BlockPos blockPos) {
+        if (level == null) {
+            return null;
+        }
+        if (level.getBlockEntity(blockPos) instanceof TradeStationBlockEntity station) {
+            return station.getVillageTheme();
+        }
+        return null;
     }
 
     /**
@@ -1221,6 +1233,10 @@ public class TradeStationMenu extends AbstractContainerMenu {
 
     public ClientCurrencyWallet getVillageCurrencyWallet() {
         return villageCurrencyWallet;
+    }
+
+    public ResourceLocation getThemeName() {
+        return themeName;
     }
 
     public record ClientCurrencyWallet(int copperCount, int ironCount, int goldCount) {

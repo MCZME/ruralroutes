@@ -215,7 +215,9 @@ public class TradeStationBlock extends BaseEntityBlock {
      * 从当前出售商品中随机分配展示物品
      */
     private void assignDisplayItems(List<DisplayCaseBlockEntity> displayCases, CommercialNodeData nodeData) {
-        List<NodeTradeEntry> sellItems = nodeData.sellItems();
+        List<NodeTradeEntry> sellItems = nodeData.sellItems().stream()
+            .filter(entry -> !TradeStationMenu.isCurrencyItem(entry.displayStackOrDefault()))
+            .toList();
         Random random = new Random();
 
         for (int i = 0; i < displayCases.size(); i++) {

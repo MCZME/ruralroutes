@@ -39,8 +39,10 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
     private static final int GUI_WIDTH = 384;
     private static final int GUI_HEIGHT = 256;
     private static final int TITLE_CENTER_X = GUI_WIDTH / 2;
-    private static final int TITLE_Y = 16;
+    private static final int TITLE_Y = 10;
+    private static final int THEME_Y = 20;
     private static final int TITLE_COLOR = 0xFF46461E;
+    private static final int THEME_COLOR = 0xFF6A5A3A;
     private static final int TRADE_SECTION_HEIGHT = ScrollableSectionWidget.getRequiredHeight();
 
     private static final int SELL_X = 35;
@@ -173,6 +175,12 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
         guiGraphics.drawCenteredString(font,
             GuiTextStyles.uniform(this.title),
             leftPos + TITLE_CENTER_X, topPos + TITLE_Y, TITLE_COLOR);
+        Component themeLabel = getThemeLabel();
+        if (themeLabel != null) {
+            guiGraphics.drawCenteredString(font,
+                GuiTextStyles.uniform(themeLabel),
+                leftPos + TITLE_CENTER_X, topPos + THEME_Y, THEME_COLOR);
+        }
     }
 
     @Override
@@ -493,5 +501,16 @@ public class TradeStationScreen extends AbstractContainerScreen<TradeStationMenu
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    private Component getThemeLabel() {
+        ResourceLocation themeName = menu.getThemeName();
+        if (themeName == null) {
+            return null;
+        }
+        return Component.translatable(
+            "gui.ruralroutes.trade_station.theme",
+            Component.translatable("ruralroutes.theme." + themeName.getPath())
+        );
     }
 }
