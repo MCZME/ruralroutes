@@ -153,8 +153,7 @@ public class CommercialNodeManager {
         );
 
         // 存储到区块
-        ChunkAccess chunk = level.getChunk(pos);
-        chunk.setData(RRAttachments.COMMERCIAL_NODE.get(), data);
+        updateNodeData(level, pos, data);
 
         RuralRoutes.LOGGER.debug("Created commercial node {} with theme {} at {}",
             tradeNodeId, themeName, pos);
@@ -445,6 +444,7 @@ public class CommercialNodeManager {
     public static void updateNodeData(Level level, BlockPos pos, CommercialNodeData newData) {
         ChunkAccess chunk = level.getChunk(pos);
         chunk.setData(RRAttachments.COMMERCIAL_NODE.get(), newData);
+        chunk.setUnsaved(true);
     }
 
     /**
@@ -509,32 +509,22 @@ public class CommercialNodeManager {
 
         List<SelectedTradeItem> selectedSellItems = selectTradeItems(template.sellItems());
         List<SelectedTradeItem> selectedBuyItems = selectTradeItems(template.buyItems());
-        List<NodeTradeEntry> newSellItems = toTradeEntries(selectedSellItems);
-        List<NodeTradeEntry> newBuyItems = toTradeEntries(selectedBuyItems);
         MarketState marketState = CycleManager.get(level).getOrInitMarketState();
 
         // 重新初始化库存（全量恢复）
         Map<TradeItemKey, NodeStockEntry> newStocks = initializeStocks(
             template, selectedSellItems, selectedBuyItems, marketState);
 
-        // 创建新数据，更新时间戳
-        CommercialNodeData newData = CommercialNodeData.create(
-            oldData.tradeNodeId(),
-            oldData.themeName(),
-            newSellItems,
-            newBuyItems,
-            newStocks,
-            currentTimestamp
-        );
+        oldData.replaceStocks(newStocks);
+        oldData.setRefreshTimestamp(currentTimestamp);
 
         // 存储到区块
-        ChunkAccess chunk = level.getChunk(pos);
-        chunk.setData(RRAttachments.COMMERCIAL_NODE.get(), newData);
+        updateNodeData(level, pos, oldData);
 
         RuralRoutes.LOGGER.debug("Refreshed node {} with {} stock entries",
-                newData.tradeNodeId(), newStocks.size());
+                oldData.tradeNodeId(), newStocks.size());
 
-        return newData;
+        return oldData;
     }
 
     private static MarketState getCurrentMarketState(Level level) {

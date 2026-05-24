@@ -51,6 +51,24 @@ public record NodeStockEntry(
         return current <= 0;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof NodeStockEntry that)) {
+            return false;
+        }
+        return current == that.current
+            && max == that.max
+            && stockKey().equals(that.stockKey());
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(stockKey(), current, max);
+    }
+
     /** 减少库存 */
     public NodeStockEntry decrease(int amount) {
         int newCurrent = Math.max(0, current - amount);
@@ -59,7 +77,14 @@ public record NodeStockEntry(
 
     /** 增加库存 */
     public NodeStockEntry increase(int amount) {
-        int newCurrent = Math.min(max, current + amount);
+        return increase(amount, false);
+    }
+
+    /** 增加库存，允许超过上限 */
+    public NodeStockEntry increase(int amount, boolean allowOverflow) {
+        int newCurrent = allowOverflow
+            ? current + amount
+            : Math.min(max, current + amount);
         return new NodeStockEntry(stack, newCurrent, max);
     }
 

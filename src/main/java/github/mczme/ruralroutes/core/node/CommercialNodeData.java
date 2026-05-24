@@ -5,6 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import github.mczme.ruralroutes.core.trade.TradeItemKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,14 +19,14 @@ import java.util.UUID;
  * - 展示层使用 NodeTradeEntry，支持带组件物品的稳定展示和同步
  * - 库存使用 NodeStockEntry 保存物品栈原型和库存数量，TradeItemKey 只作为稳定地址
  */
-public record CommercialNodeData(
-    UUID tradeNodeId,
-    ResourceLocation themeName,
-    List<NodeTradeEntry> sellItems,
-    List<NodeTradeEntry> buyItems,
-    Map<TradeItemKey, NodeStockEntry> stocks,
-    long refreshTimestamp
-) {
+public class CommercialNodeData {
+    private final UUID tradeNodeId;
+    private final ResourceLocation themeName;
+    private final List<NodeTradeEntry> sellItems;
+    private final List<NodeTradeEntry> buyItems;
+    private final Map<TradeItemKey, NodeStockEntry> stocks;
+    private long refreshTimestamp;
+
     public static final Codec<CommercialNodeData> CODEC = RecordCodecBuilder.create(
         instance -> instance.group(
             Codec.STRING.xmap(UUID::fromString, UUID::toString)
@@ -48,12 +50,15 @@ public record CommercialNodeData(
         ).apply(instance, CommercialNodeData::new)
     );
 
-    public CommercialNodeData {
-        tradeNodeId = Objects.requireNonNull(tradeNodeId, "tradeNodeId");
-        themeName = Objects.requireNonNull(themeName, "themeName");
-        sellItems = List.copyOf(Objects.requireNonNull(sellItems, "sellItems"));
-        buyItems = List.copyOf(Objects.requireNonNull(buyItems, "buyItems"));
-        stocks = normalizeStocks(Objects.requireNonNull(stocks, "stocks"));
+    public CommercialNodeData(UUID tradeNodeId, ResourceLocation themeName,
+            List<NodeTradeEntry> sellItems, List<NodeTradeEntry> buyItems,
+            Map<TradeItemKey, NodeStockEntry> stocks, long refreshTimestamp) {
+        this.tradeNodeId = Objects.requireNonNull(tradeNodeId, "tradeNodeId");
+        this.themeName = Objects.requireNonNull(themeName, "themeName");
+        this.sellItems = List.copyOf(Objects.requireNonNull(sellItems, "sellItems"));
+        this.buyItems = List.copyOf(Objects.requireNonNull(buyItems, "buyItems"));
+        this.stocks = normalizeStocks(Objects.requireNonNull(stocks, "stocks"));
+        this.refreshTimestamp = refreshTimestamp;
     }
 
     /** 创建空的默认实例（用于 Attachment 默认值） */
@@ -72,9 +77,31 @@ public record CommercialNodeData(
     public static CommercialNodeData create(UUID tradeNodeId, ResourceLocation themeName,
             List<NodeTradeEntry> sellItems, List<NodeTradeEntry> buyItems,
             Map<TradeItemKey, NodeStockEntry> stocks, long timestamp) {
-        return new CommercialNodeData(tradeNodeId, themeName,
-            List.copyOf(sellItems), List.copyOf(buyItems),
-            Map.copyOf(stocks), timestamp);
+        return new CommercialNodeData(tradeNodeId, themeName, sellItems, buyItems, stocks, timestamp);
+    }
+
+    public UUID tradeNodeId() {
+        return tradeNodeId;
+    }
+
+    public ResourceLocation themeName() {
+        return themeName;
+    }
+
+    public List<NodeTradeEntry> sellItems() {
+        return sellItems;
+    }
+
+    public List<NodeTradeEntry> buyItems() {
+        return buyItems;
+    }
+
+    public Map<TradeItemKey, NodeStockEntry> stocks() {
+        return Collections.unmodifiableMap(stocks);
+    }
+
+    public long refreshTimestamp() {
+        return refreshTimestamp;
     }
 
     /** 获取指定库存键对应的库存项 */
@@ -122,25 +149,63 @@ public record CommercialNodeData(
         return buyItems.stream().map(NodeTradeEntry::itemId).toList();
     }
 
-    /** 更新单个物品库存 */
-    public CommercialNodeData withStock(TradeItemKey itemKey, NodeStockEntry newStock) {
-        Map<TradeItemKey, NodeStockEntry> newStocks = new java.util.HashMap<>(stocks);
-        newStocks.put(itemKey, newStock);
-        return new CommercialNodeData(tradeNodeId, themeName, sellItems, buyItems, Map.copyOf(newStocks), refreshTimestamp);
+    /** 原地更新单个物品库存 */
+    public void putStock(NodeStockEntry newStock) {
+        NodeStockEntry normalized = Objects.requireNonNull(newStock, "newStock");
+        stocks.put(normalized.stockKey(), normalized);
     }
 
-    /** 更新刷新时间戳 */
-    public CommercialNodeData withTimestamp(long newTimestamp) {
-        return new CommercialNodeData(tradeNodeId, themeName, sellItems, buyItems, stocks, newTimestamp);
+    /** 原地替换全部库存 */
+    public void replaceStocks(Map<TradeItemKey, NodeStockEntry> newStocks) {
+        stocks.clear();
+        stocks.putAll(normalizeStocks(Objects.requireNonNull(newStocks, "newStocks")));
+    }
+
+    /** 原地更新刷新时间戳 */
+    public void setRefreshTimestamp(long newTimestamp) {
+        refreshTimestamp = newTimestamp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof CommercialNodeData that)) {
+            return false;
+        }
+        return refreshTimestamp == that.refreshTimestamp
+            && tradeNodeId.equals(that.tradeNodeId)
+            && themeName.equals(that.themeName)
+            && sellItems.equals(that.sellItems)
+            && buyItems.equals(that.buyItems)
+            && stocks.equals(that.stocks);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(tradeNodeId, themeName, sellItems, buyItems, stocks, refreshTimestamp);
+    }
+
+    @Override
+    public String toString() {
+        return "CommercialNodeData["
+            + "tradeNodeId=" + tradeNodeId
+            + ", themeName=" + themeName
+            + ", sellItems=" + sellItems
+            + ", buyItems=" + buyItems
+            + ", stocks=" + stocks
+            + ", refreshTimestamp=" + refreshTimestamp
+            + "]";
     }
 
     private static Map<TradeItemKey, NodeStockEntry> normalizeStocks(Map<TradeItemKey, NodeStockEntry> stocks) {
-        Map<TradeItemKey, NodeStockEntry> normalized = new java.util.HashMap<>();
+        Map<TradeItemKey, NodeStockEntry> normalized = new LinkedHashMap<>();
         for (Map.Entry<TradeItemKey, NodeStockEntry> entry : stocks.entrySet()) {
             NodeStockEntry stockEntry = Objects.requireNonNull(entry.getValue(), "stock entry");
             normalized.put(stockEntry.stockKey(), stockEntry);
         }
-        return Map.copyOf(normalized);
+        return normalized;
     }
 
 }

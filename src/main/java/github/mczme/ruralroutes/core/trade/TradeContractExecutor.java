@@ -5,6 +5,7 @@ import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.node.NodeStockEntry;
 import github.mczme.ruralroutes.menu.slot.PendingTradeSlot;
+import github.mczme.ruralroutes.menu.TradeStationMenu;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
@@ -12,7 +13,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,41 +78,31 @@ public final class TradeContractExecutor {
             TradeResult result,
             net.minecraft.core.BlockPos blockPos) {
 
-        Map<TradeItemKey, NodeStockEntry> stocks = new HashMap<>(nodeData.stocks());
-
         // 玩家消耗的物品加入村庄库存
         for (ItemStack item : result.consumed()) {
             TradeItemKey itemKey = TradeItemKey.from(item);
-            NodeStockEntry current = stocks.get(itemKey);
+            NodeStockEntry current = nodeData.getStock(itemKey);
             if (current == null && itemKey.hasComponents()) {
-                current = stocks.get(TradeItemKey.of(itemKey.itemId()));
+                current = nodeData.getStock(TradeItemKey.of(itemKey.itemId()));
             }
             if (current != null) {
-                stocks.put(itemKey, current.increase(item.getCount()));
+                nodeData.putStock(increaseStock(current, item.getCount()));
             }
         }
 
         // 玩家获得的物品从村庄库存扣除
         for (ItemStack item : result.outputs()) {
             TradeItemKey itemKey = TradeItemKey.from(item);
-            NodeStockEntry current = stocks.get(itemKey);
+            NodeStockEntry current = nodeData.getStock(itemKey);
             if (current == null && itemKey.hasComponents()) {
-                current = stocks.get(TradeItemKey.of(itemKey.itemId()));
+                current = nodeData.getStock(TradeItemKey.of(itemKey.itemId()));
             }
             if (current != null) {
-                stocks.put(itemKey, current.decrease(item.getCount()));
+                nodeData.putStock(current.decrease(item.getCount()));
             }
         }
 
-        CommercialNodeData newData = new CommercialNodeData(
-            nodeData.tradeNodeId(),
-            nodeData.themeName(),
-            nodeData.sellItems(),
-            nodeData.buyItems(),
-            stocks,
-            nodeData.refreshTimestamp()
-        );
-        CommercialNodeManager.updateNodeData(level, blockPos, newData);
+        CommercialNodeManager.updateNodeData(level, blockPos, nodeData);
     }
 
     /**
@@ -355,41 +345,31 @@ public final class TradeContractExecutor {
             TradePaymentPlan plan,
             net.minecraft.core.BlockPos blockPos) {
 
-        Map<TradeItemKey, NodeStockEntry> stocks = new HashMap<>(nodeData.stocks());
-
         // 村庄输入：扣除库存（村庄卖出的商品 + 村庄支付的货币）
         for (ItemStack item : plan.villageInputs()) {
             TradeItemKey itemKey = TradeItemKey.from(item);
-            NodeStockEntry current = stocks.get(itemKey);
+            NodeStockEntry current = nodeData.getStock(itemKey);
             if (current == null && itemKey.hasComponents()) {
-                current = stocks.get(TradeItemKey.of(itemKey.itemId()));
+                current = nodeData.getStock(TradeItemKey.of(itemKey.itemId()));
             }
             if (current != null) {
-                stocks.put(itemKey, current.decrease(item.getCount()));
+                nodeData.putStock(current.decrease(item.getCount()));
             }
         }
 
         // 村庄输出：增加库存（村庄买入的商品 + 村庄收到的货币）
         for (ItemStack item : plan.villageOutputs()) {
             TradeItemKey itemKey = TradeItemKey.from(item);
-            NodeStockEntry current = stocks.get(itemKey);
+            NodeStockEntry current = nodeData.getStock(itemKey);
             if (current == null && itemKey.hasComponents()) {
-                current = stocks.get(TradeItemKey.of(itemKey.itemId()));
+                current = nodeData.getStock(TradeItemKey.of(itemKey.itemId()));
             }
             if (current != null) {
-                stocks.put(itemKey, current.increase(item.getCount()));
+                nodeData.putStock(increaseStock(current, item.getCount()));
             }
         }
 
-        CommercialNodeData newData = new CommercialNodeData(
-            nodeData.tradeNodeId(),
-            nodeData.themeName(),
-            nodeData.sellItems(),
-            nodeData.buyItems(),
-            stocks,
-            nodeData.refreshTimestamp()
-        );
-        CommercialNodeManager.updateNodeData(level, blockPos, newData);
+        CommercialNodeManager.updateNodeData(level, blockPos, nodeData);
     }
 
     private void removeItemFromPlayer(ServerPlayer player, ItemStack toRemove) {
@@ -442,6 +422,11 @@ public final class TradeContractExecutor {
         ItemStack copy = stack.copy();
         copy.setCount(1);
         return copy;
+    }
+
+    private static NodeStockEntry increaseStock(NodeStockEntry current, int amount) {
+        boolean allowOverflow = TradeStationMenu.isCurrencyItem(current.stack());
+        return current.increase(amount, allowOverflow);
     }
 
     private static boolean matchesRequiredStack(ItemStack candidate, TradeItemKey requiredKey, Item requiredItem) {
