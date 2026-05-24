@@ -37,32 +37,32 @@
     "targets": {
       "ruralroutes:copper_coin": {
         "buy": {
-          "max": 160,
-          "min": 100
+          "max": 220,
+          "min": 140
         },
         "sell": {
-          "max": 56,
-          "min": 32
+          "max": 420,
+          "min": 320
         }
       },
       "ruralroutes:gold_coin": {
         "buy": {
-          "max": 10,
+          "max": 8,
           "min": 4
         },
         "sell": {
-          "max": 3,
-          "min": 1
+          "max": 6,
+          "min": 4
         }
       },
       "ruralroutes:iron_coin": {
         "buy": {
-          "max": 44,
-          "min": 24
+          "max": 64,
+          "min": 40
         },
         "sell": {
-          "max": 12,
-          "min": 6
+          "max": 104,
+          "min": 80
         }
       }
     }

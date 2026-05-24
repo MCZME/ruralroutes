@@ -15,26 +15,26 @@ public final class CurrencyStockTiers {
     }
 
     public static final CurrencyStockConfig PETTY = CurrencyStockConfig.of(
-        24, 48, 80, 140,
-        2, 5, 12, 24,
-        0, 0, 0, 2
+        300, 360, 120, 180,
+        80, 96, 32, 48,
+        4, 4, 2, 4
     );
 
     public static final CurrencyStockConfig BULK = CurrencyStockConfig.of(
-        48, 80, 120, 200,
-        4, 8, 20, 36,
-        0, 1, 2, 4
+        360, 480, 160, 240,
+        80, 112, 48, 72,
+        4, 6, 4, 8
     );
 
     public static final CurrencyStockConfig CARAVAN = CurrencyStockConfig.of(
-        32, 56, 100, 160,
-        6, 12, 24, 44,
-        1, 3, 4, 10
+        320, 420, 140, 220,
+        80, 104, 40, 64,
+        4, 6, 4, 8
     );
 
     public static final CurrencyStockConfig WORKSHOP = CurrencyStockConfig.of(
-        20, 40, 80, 140,
-        8, 14, 32, 56,
-        1, 2, 4, 8
+        300, 400, 120, 200,
+        80, 120, 64, 96,
+        4, 8, 6, 12
     );
 }
