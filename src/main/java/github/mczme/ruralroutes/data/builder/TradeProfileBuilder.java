@@ -34,7 +34,6 @@ public class TradeProfileBuilder {
     private final List<ItemReference> buyItems = new ArrayList<>();
     private final List<TradeContractEntry> tradeContracts = new ArrayList<>();
     private final Map<String, StockTarget> stockTargets = new LinkedHashMap<>();
-    private final Map<String, StockRange> stockSpecific = new LinkedHashMap<>();
     private boolean withCurrency = false;
     private BiConsumer<ResourceLocation, TradeProfile> registrar;
 
@@ -167,11 +166,6 @@ public class TradeProfileBuilder {
         return this;
     }
 
-    public TradeProfileBuilder stockSpecific(String key, int min, int max) {
-        stockSpecific.put(key, new StockRange(min, max));
-        return this;
-    }
-
     public TradeProfileBuilder stockTarget(String key, int min, int max) {
         stockTargets.put(key, StockTarget.shared(new StockRange(min, max)));
         return this;
@@ -198,12 +192,11 @@ public class TradeProfileBuilder {
             finalBuyItems.add(ItemReference.single("#ruralroutes:currency"));
         }
 
-        Optional<StockConfig> stock = stockTargets.isEmpty() && stockSpecific.isEmpty()
+        Optional<StockConfig> stock = stockTargets.isEmpty()
             ? Optional.empty()
             : Optional.of(new StockConfig(
                 Optional.empty(),
-                stockTargets.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(stockTargets)),
-                stockSpecific.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(stockSpecific))
+                stockTargets.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(stockTargets))
             ));
 
         return new TradeProfile(

@@ -12,33 +12,22 @@ import java.util.Optional;
 
 /**
  * 库存配置。
- * targets 支持共享范围或按 sell/buy 分向范围；specific 保留旧的精确覆盖映射。
+ * targets 支持共享范围或按 sell/buy 分向范围。
  */
 public record StockConfig(
     Optional<StockRange> defaultRange,
-    Optional<Map<String, StockTarget>> targetEntries,
-    Optional<Map<String, StockRange>> specific
+    Optional<Map<String, StockTarget>> targetEntries
 ) {
     public static final Codec<StockConfig> CODEC = RecordCodecBuilder.create(
         instance -> instance.group(
             StockRange.CODEC.optionalFieldOf("default").forGetter(StockConfig::defaultRange),
-            Codec.unboundedMap(Codec.STRING, StockTarget.CODEC).optionalFieldOf("targets").forGetter(StockConfig::targetEntries),
-            Codec.unboundedMap(Codec.STRING, StockRange.CODEC).optionalFieldOf("specific").forGetter(StockConfig::specific)
-        ).apply(instance, (defaultRange, targets, specific) -> new StockConfig(
-            defaultRange,
-            targets,
-            specific.isPresent() ? specific : targets.map(StockConfig::projectSharedTargets)
-        ))
+            Codec.unboundedMap(Codec.STRING, StockTarget.CODEC).optionalFieldOf("targets").forGetter(StockConfig::targetEntries)
+        ).apply(instance, StockConfig::new)
     );
 
     public StockConfig {
         defaultRange = Objects.requireNonNull(defaultRange, "defaultRange");
         targetEntries = targetEntries.map(Map::copyOf);
-        specific = specific.map(Map::copyOf);
-    }
-
-    public StockConfig(Optional<StockRange> defaultRange, Optional<Map<String, StockRange>> targets) {
-        this(defaultRange, targets.map(StockConfig::toTargetEntries), targets);
     }
 
     public Optional<Map<String, StockRange>> targets() {
@@ -47,10 +36,6 @@ public record StockConfig(
 
     public Optional<Map<String, StockTarget>> targetEntries() {
         return targetEntries;
-    }
-
-    public Optional<Map<String, StockRange>> specific() {
-        return specific;
     }
 
     /**
@@ -90,44 +75,6 @@ public record StockConfig(
         return resolveTarget(toTradeTargetRef(rawRef, itemId));
     }
 
-    public Optional<StockRange> resolveSpecific(TradeTargetRef targetRef) {
-        if (targetRef == null || specific.isEmpty()) {
-            return Optional.empty();
-        }
-
-        Map<String, StockRange> map = specific.get();
-        String canonical = targetRef.asString();
-        if (map.containsKey(canonical)) {
-            return Optional.of(map.get(canonical));
-        }
-        if (targetRef.isItem()) {
-            String itemKey = targetRef.itemId().orElseThrow();
-            if (map.containsKey(itemKey)) {
-                return Optional.of(map.get(itemKey));
-            }
-        }
-        if (targetRef.isSourceKey()) {
-            String key = targetRef.sourceKey().orElseThrow();
-            if (map.containsKey(key)) {
-                return Optional.of(map.get(key));
-            }
-        }
-        if (targetRef.isTag()) {
-            String tagKey = targetRef.tagId().orElseThrow();
-            if (map.containsKey(tagKey)) {
-                return Optional.of(map.get(tagKey));
-            }
-            if (map.containsKey("#" + tagKey)) {
-                return Optional.of(map.get("#" + tagKey));
-            }
-        }
-        return Optional.empty();
-    }
-
-    public Optional<StockRange> resolveSpecific(String rawRef, ResourceLocation itemId) {
-        return resolveSpecific(toTradeTargetRef(rawRef, itemId));
-    }
-
     private static TradeTargetRef toTradeTargetRef(String rawRef, ResourceLocation itemId) {
         if (rawRef == null || rawRef.isBlank()) {
             return TradeTargetRef.item(itemId.toString());
@@ -150,14 +97,6 @@ public record StockConfig(
             .collect(java.util.stream.Collectors.toUnmodifiableMap(
                 Map.Entry::getKey,
                 entry -> entry.getValue().toLegacyRange()
-            ));
-    }
-
-    private static Map<String, StockTarget> toTargetEntries(Map<String, StockRange> targets) {
-        return targets.entrySet().stream()
-            .collect(java.util.stream.Collectors.toUnmodifiableMap(
-                Map.Entry::getKey,
-                entry -> StockTarget.shared(entry.getValue())
             ));
     }
 }

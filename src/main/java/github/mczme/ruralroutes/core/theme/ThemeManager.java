@@ -108,8 +108,7 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
         List<PriceModifier> priceModifiers = new ArrayList<>();
         StockConfig themeStock = template.stock().orElse(null);
         Map<String, StockTarget> targetEntries = new LinkedHashMap<>();
-        Map<String, StockRange> stockTargets = new LinkedHashMap<>();
-
+        
         for (ResourceLocation profileId : template.tradeProfiles().orElse(List.of())) {
             TradeProfile profile = profileMap.get(profileId);
             if (profile == null) {
@@ -122,26 +121,21 @@ public class ThemeManager extends SimpleJsonResourceReloadListener {
             if (profile.stock().isPresent()) {
                 StockConfig profileStock = profile.stock().get();
                 profileStock.targetEntries().ifPresent(targetEntries::putAll);
-                profileStock.targets().ifPresent(stockTargets::putAll);
-                profileStock.specific().ifPresent(stockTargets::putAll);
             }
         }
 
         template.priceModifiers().ifPresent(priceModifiers::addAll);
         template.stock().ifPresent(stock -> {
             stock.targetEntries().ifPresent(targetEntries::putAll);
-            stock.targets().ifPresent(stockTargets::putAll);
-            stock.specific().ifPresent(stockTargets::putAll);
         });
 
         Optional<StockConfig> resolvedStock;
-        if (themeStock == null && stockTargets.isEmpty() && targetEntries.isEmpty()) {
+        if (themeStock == null && targetEntries.isEmpty()) {
             resolvedStock = Optional.empty();
         } else {
             resolvedStock = Optional.of(new StockConfig(
                 themeStock != null ? themeStock.defaultRange() : Optional.empty(),
-                targetEntries.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(targetEntries)),
-                stockTargets.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(stockTargets))
+                targetEntries.isEmpty() ? Optional.empty() : Optional.of(Map.copyOf(targetEntries))
             ));
         }
 

@@ -47,7 +47,7 @@ public class CommercialNodeManager {
 
     /**
      * 当前周期内实际入选的交易物品。
-     * sourceRefId 保留来源键，便于 stock.specific 等规则继续按原引用或候选组匹配。
+     * sourceRefId 保留来源键，便于 stock.targets 等规则继续按原引用或候选组匹配。
      */
     private record SelectedTradeItem(
         String sourceRefId,
@@ -339,12 +339,6 @@ public class CommercialNodeManager {
                     }
                 }
             }
-            if (stockConfig.specific().isPresent()) {
-                Optional<StockRange> resolved = resolvePreferredSpecific(stockConfig, itemRefId, itemId);
-                if (resolved.isPresent()) {
-                    return randomInRange(resolved.get());
-                }
-            }
         }
 
         // 使用默认范围随机
@@ -373,19 +367,6 @@ public class CommercialNodeManager {
             }
         }
         return stockConfig.resolveTarget(itemRefId, itemId);
-    }
-
-    private static Optional<StockRange> resolvePreferredSpecific(
-            StockConfig stockConfig,
-            String itemRefId,
-            ResourceLocation itemId) {
-        if (itemRefId != null && itemRefId.startsWith("#")) {
-            Optional<StockRange> exactItem = stockConfig.resolveSpecific(TradeTargetRef.item(itemId.toString()));
-            if (exactItem.isPresent()) {
-                return exactItem;
-            }
-        }
-        return stockConfig.resolveSpecific(itemRefId, itemId);
     }
 
     private static ItemStack createItemStack(Item item, ItemEntry itemEntry) {

@@ -24,34 +24,11 @@ class CommercialNodeManagerStockResolutionTest {
                 "ruralroutes:copper_coin", StockTarget.shared(new StockRange(3, 3)),
                 "#ruralroutes:currency", StockTarget.shared(new StockRange(7, 7)),
                 "wallet/group", StockTarget.shared(new StockRange(9, 9))
-            )),
-            Optional.empty()
-        ));
-
-        assertEquals(
-            3,
-            invokeBaseStock(theme, "#ruralroutes:currency", "ruralroutes:copper_coin", true)
-        );
-        assertEquals(
-            9,
-            invokeBaseStock(theme, "wallet/group", "ruralroutes:copper_coin", true)
-        );
-    }
-
-    @Test
-    void tagExpandedItemUsesExactSpecificOverrideWhenPresent() throws Exception {
-        ResolvedTheme theme = themeWithStock(new StockConfig(
-            Optional.of(new StockRange(8, 16)),
-            Optional.empty(),
-            Optional.of(Map.of(
-                "ruralroutes:copper_coin", new StockRange(4, 4),
-                "#ruralroutes:currency", new StockRange(7, 7),
-                "wallet/group", new StockRange(9, 9)
             ))
         ));
 
         assertEquals(
-            4,
+            3,
             invokeBaseStock(theme, "#ruralroutes:currency", "ruralroutes:copper_coin", true)
         );
         assertEquals(

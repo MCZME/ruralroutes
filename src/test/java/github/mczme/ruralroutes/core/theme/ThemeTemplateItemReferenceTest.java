@@ -27,7 +27,7 @@ class ThemeTemplateItemReferenceTest {
 
     @Test
     void groupedReferenceUsesStableDerivedSourceKey() {
-        // group 来源键会参与库存 specific 匹配，因此必须是稳定且可预测的。
+        // group 来源键会参与库存目标匹配，因此必须是稳定且可预测的。
         ItemReference reference = ItemReference.group(
                 List.of("#ruralroutes:pool/crop", "minecraft:bread"),
                 1,

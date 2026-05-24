@@ -70,7 +70,7 @@ class TradeProfileThemeResolutionTest {
         );
         assertTrue(resolved.stock().isPresent());
         assertEquals(9, resolved.stock().orElseThrow().defaultRange().orElseThrow().min());
-        assertEquals(11, resolved.stock().orElseThrow().specific().orElseThrow().get("minecraft:melon").min());
+        assertEquals(11, resolved.stock().orElseThrow().targets().orElseThrow().get("minecraft:melon").min());
     }
 
     @Test
@@ -97,9 +97,9 @@ class TradeProfileThemeResolutionTest {
         ResolvedTheme resolved = (ResolvedTheme) method.invoke(ThemeManager.INSTANCE, theme, Map.of(profile.name(), profile));
 
         assertEquals(9, resolved.stock().orElseThrow().defaultRange().orElseThrow().min());
-        assertEquals(11, resolved.stock().orElseThrow().specific().orElseThrow().get("minecraft:apple").min());
-        assertEquals(13, resolved.stock().orElseThrow().specific().orElseThrow().get("minecraft:carrot").min());
-        assertFalse(resolved.stock().orElseThrow().specific().orElseThrow().containsKey("minecraft:missing"));
+        assertEquals(11, resolved.stock().orElseThrow().targets().orElseThrow().get("minecraft:apple").min());
+        assertEquals(13, resolved.stock().orElseThrow().targets().orElseThrow().get("minecraft:carrot").min());
+        assertFalse(resolved.stock().orElseThrow().targets().orElseThrow().containsKey("minecraft:missing"));
     }
 
     @Test
@@ -127,7 +127,7 @@ class TradeProfileThemeResolutionTest {
 
         assertTrue(resolved.stock().isPresent());
         assertTrue(resolved.stock().orElseThrow().defaultRange().isEmpty());
-        assertEquals(3, resolved.stock().orElseThrow().specific().orElseThrow().get("minecraft:apple").min());
+        assertEquals(3, resolved.stock().orElseThrow().targets().orElseThrow().get("minecraft:apple").min());
     }
 
     @Test
@@ -175,14 +175,24 @@ class TradeProfileThemeResolutionTest {
     }
 
     private static StockConfig stockConfig(int min, int max, Map<String, StockRange> specific) {
-        return new StockConfig(Optional.of(new StockRange(min, max)), Optional.empty(), Optional.of(specific));
+        return new StockConfig(Optional.of(new StockRange(min, max)), Optional.of(toTargetEntries(specific)));
     }
 
     private static StockConfig targetsOnlyStockConfig(Map<String, StockTarget> targets) {
-        return new StockConfig(Optional.empty(), Optional.of(targets), Optional.empty());
+        return new StockConfig(Optional.empty(), Optional.of(targets));
     }
 
     private static StockRange stockRangeValue(int min, int max) {
         return new StockRange(min, max);
+    }
+
+    private static Map<String, StockTarget> toTargetEntries(Map<String, StockRange> specific) {
+        return specific.entrySet().stream()
+            .collect(java.util.stream.Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> StockTarget.shared(entry.getValue()),
+                (left, right) -> left,
+                java.util.LinkedHashMap::new
+            ));
     }
 }

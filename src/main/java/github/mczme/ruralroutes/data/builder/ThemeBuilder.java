@@ -27,7 +27,6 @@ public class ThemeBuilder {
     private final java.util.List<ResourceLocation> tradeProfiles = new java.util.ArrayList<>();
     private StockRange defaultStock;
     private final Map<String, StockTarget> stockTargets = new LinkedHashMap<>();
-    private final Map<String, StockRange> stockSpecific = new LinkedHashMap<>();
     private final java.util.List<PriceModifier> priceModifiers = new java.util.ArrayList<>();
     private BiConsumer<ResourceLocation, ThemeTemplate> registrar;
 
@@ -61,11 +60,6 @@ public class ThemeBuilder {
 
     public ThemeBuilder stock(int min, int max) {
         this.defaultStock = new StockRange(min, max);
-        return this;
-    }
-
-    public ThemeBuilder stockSpecific(String key, int min, int max) {
-        stockSpecific.put(key, new StockRange(min, max));
         return this;
     }
 
@@ -104,14 +98,12 @@ public class ThemeBuilder {
         return new ThemeTemplate(
             getId(),
             ResourceLocation.parse(biome),
-            defaultStock == null && stockTargets.isEmpty() && stockSpecific.isEmpty()
+            defaultStock == null && stockTargets.isEmpty()
                 ? Optional.empty()
                 : Optional.of(new StockConfig(
                     Optional.ofNullable(defaultStock),
                     stockTargets.isEmpty() ? Optional.empty()
-                        : Optional.of(Collections.unmodifiableMap(new LinkedHashMap<>(stockTargets))),
-                    stockSpecific.isEmpty() ? Optional.empty()
-                        : Optional.of(Collections.unmodifiableMap(new LinkedHashMap<>(stockSpecific)))
+                        : Optional.of(Collections.unmodifiableMap(new LinkedHashMap<>(stockTargets)))
                 )),
             priceModifiers.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(priceModifiers)),
             tradeProfiles.isEmpty() ? Optional.empty() : Optional.of(List.copyOf(tradeProfiles))
