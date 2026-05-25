@@ -300,19 +300,20 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("ruralroutes.tag.minecraft.crops", "Crop items");
 
         // Rumor target aliases
-        add("rumor.target.food", "provisions");
-        add("rumor.target.crop", "farm produce");
-        add("rumor.target.wood", "timber");
+        add("rumor.target.food", "food");
+        add("rumor.target.crop", "crops");
+        add("rumor.target.wood", "wood");
+        add("rumor.target.tool", "tools");
         add("rumor.target.stone", "stone goods");
-        add("rumor.target.mineral", "ore");
+        add("rumor.target.mineral", "minerals");
         add("rumor.target.dye", "dyes");
         add("rumor.target.decor", "decor goods");
         add("rumor.target.paper", "paper stock");
         add("rumor.target.terracotta", "terracotta wares");
-        add("rumor.target.leather_fiber", "hides");
-        add("rumor.target.ice_snow", "ice goods");
+        add("rumor.target.leather_fiber", "leather goods");
+        add("rumor.target.ice_snow", "ice and snow goods");
         add("rumor.target.nether_goods", "Nether goods");
-        add("rumor.target.ocean_goods", "sea goods");
+        add("rumor.target.ocean_goods", "ocean goods");
         add("rumor.target.end_goods", "End goods");
         add("rumor.target.precious", "valuables");
 

@@ -300,20 +300,21 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("ruralroutes.tag.minecraft.crops", "农作物类");
 
         // 传闻目标别名
-        add("rumor.target.food", "吃食");
-        add("rumor.target.crop", "庄稼");
-        add("rumor.target.wood", "木料");
+        add("rumor.target.food", "食物");
+        add("rumor.target.crop", "农作物");
+        add("rumor.target.wood", "木材");
+        add("rumor.target.tool", "工具");
         add("rumor.target.stone", "石料");
-        add("rumor.target.mineral", "矿料");
+        add("rumor.target.mineral", "矿物");
         add("rumor.target.dye", "染料");
         add("rumor.target.decor", "染色商品");
         add("rumor.target.paper", "纸张");
-        add("rumor.target.terracotta", "彩陶");
-        add("rumor.target.leather_fiber", "皮货");
-        add("rumor.target.ice_snow", "冰货");
-        add("rumor.target.nether_goods", "下界货");
-        add("rumor.target.ocean_goods", "海货");
-        add("rumor.target.end_goods", "末地货");
+        add("rumor.target.terracotta", "陶瓦");
+        add("rumor.target.leather_fiber", "皮制品");
+        add("rumor.target.ice_snow", "冰雪商品");
+        add("rumor.target.nether_goods", "下界商品");
+        add("rumor.target.ocean_goods", "海洋商品");
+        add("rumor.target.end_goods", "末地商品");
         add("rumor.target.precious", "稀罕货");
 
         // 主题翻译

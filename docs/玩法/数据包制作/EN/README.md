@@ -1,6 +1,6 @@
 ---
 创建日期: 2026-05-24
-最后更新: 2026-05-24
+最后更新: 2026-05-25
 版本: v1.9
 状态: 已确定
 关联系统: 标签, 价值表, 村庄资源身份, 市场波动, 贸易周期
@@ -43,6 +43,10 @@ Fix: remove that trading post from the structure template, configure it again wi
 
 Temporary workaround: break the trading post, place a new one, and configure it again. This only fixes that one post and does not help for future generated copies, so the first approach is preferred.
 
+### Why does nothing happen when I right-click a trading post?
+
+The trading post must be near a village environment before it can open. If it is too far from a village, right-clicking it may not trigger anything.
+
 ### What is the difference between "structure" and "structure template"?
 
 "Structure" means the building generated in-game.
@@ -50,4 +54,3 @@ Temporary workaround: break the trading post, place a new one, and configure it 
 "Structure template" means the building body that gets exported as a `.nbt` file.
 
 For more detail, see Minecraft's structure block documentation.
-
