@@ -1,6 +1,6 @@
 # Rural Routes / 乡野商路
 
-**A village-centered item trading system for Minecraft.**
+**A village-centered item-trading experience for Minecraft.**
 
 <p align="center">
   <a href="README.md">中文</a> | <a href="README-EN.md">English</a>
@@ -62,6 +62,7 @@ These changes may be global, or they may affect only certain biomes or village t
 ## Datapack-Driven
 
 Most of the mod can be configured through datapacks, so you can customize almost everything.
+See the [Datapack Creation](docs/玩法/数据包制作/EN/README.md) guide for details.
 
 ## Is This Mod for You?
 

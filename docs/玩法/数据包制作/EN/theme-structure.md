@@ -98,9 +98,9 @@ Each object inside `elements` contains:
 Because this uses the vanilla jigsaw structure generation logic, the theme structure needs a jigsaw block placed on the edge and set correctly in order to generate properly.
 If you are not sure how to set it up, the images below may help.
 
-![Theme structure jigsaw block setup](E:/MinecraftMod/ruralroutes/docs/图片/主题结构拼图方块设置.png)
+![Theme structure jigsaw block setup](../../../图片/主题结构拼图方块设置.png)
 
-![Theme structure placement](E:/MinecraftMod/ruralroutes/docs/图片/主题结构拼图结构放置.png)
+![Theme structure placement](../../../图片/主题结构拼图结构放置.png)
 
 ## Related Docs
 

@@ -1,6 +1,6 @@
 # Rural Routes / 乡野商路
 
-**A village-centered item trading system for Minecraft.**
+**一个以村庄为中心的《我的世界》物品交易玩法。**
 
 <p align="center">
   <a href="README.md">中文</a> | <a href="README-EN.md">English</a>
@@ -62,6 +62,7 @@
 ## 数据包驱动
 
 本模组的绝大多数内容都可以通过数据包设置，你可以完全自定义其内容。
+详细制作说明见 [数据包制作索引](docs/玩法/数据包制作/中文/README.md)。
 
 ## 这个模组适合你吗？
 
