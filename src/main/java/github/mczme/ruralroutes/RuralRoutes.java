@@ -16,6 +16,7 @@ import github.mczme.ruralroutes.data.RRAdvancementProvider;
 import github.mczme.ruralroutes.data.MarketRuleDataProvider;
 import github.mczme.ruralroutes.data.RRBlockTagsProvider;
 import github.mczme.ruralroutes.data.RRItemTagsProvider;
+import github.mczme.ruralroutes.data.RRRecipeProvider;
 import github.mczme.ruralroutes.data.ThemeDataProvider;
 import github.mczme.ruralroutes.data.TradeProfileDataProvider;
 import github.mczme.ruralroutes.data.ValueDataProvider;
@@ -108,6 +109,7 @@ public class RuralRoutes {
         RRBlockTagsProvider blockTagsProvider = new RRBlockTagsProvider(output, lookupProvider, existingFileHelper);
         generator.addProvider(event.includeServer(), blockTagsProvider);
         generator.addProvider(event.includeServer(), new RRItemTagsProvider(output, lookupProvider, blockTagsProvider.contentsGetter(), existingFileHelper));
+        generator.addProvider(event.includeServer(), new RRRecipeProvider(output, lookupProvider));
         generator.addProvider(event.includeServer(), new ValueDataProvider(output, lookupProvider));
         generator.addProvider(event.includeServer(), new ThemeDataProvider(output, lookupProvider, existingFileHelper));
         generator.addProvider(event.includeServer(), new TradeProfileDataProvider(output, lookupProvider, existingFileHelper));
