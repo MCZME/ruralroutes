@@ -13,6 +13,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,6 +100,7 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
 
         MapMetrics metrics = calculateMapMetrics(areaWidth, areaHeight);
         guiGraphics.enableScissor(areaX, areaY, areaX + areaWidth, areaY + areaHeight);
+        renderPlayerMarker(guiGraphics, metrics, areaX, areaY, areaWidth, areaHeight);
         for (TradeAtlasNode node : state.nodes()) {
             int nodeX = metrics.screenX(areaX, areaWidth, node, mapOffsetX);
             int nodeY = metrics.screenY(areaY, areaHeight, node, mapOffsetY);
@@ -155,6 +157,20 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
         }
     }
 
+    private void renderPlayerMarker(GuiGraphics guiGraphics, MapMetrics metrics, int areaX, int areaY,
+            int areaWidth, int areaHeight) {
+        BlockPos playerPos = playerPosition();
+        if (playerPos == null) {
+            return;
+        }
+
+        int x = metrics.screenX(areaX, areaWidth, playerPos, mapOffsetX);
+        int y = metrics.screenY(areaY, areaHeight, playerPos, mapOffsetY);
+        guiGraphics.fill(x - 1, y - 4, x + 2, y + 5, TradeAtlasUi.PLAYER_COLOR);
+        guiGraphics.fill(x - 4, y - 1, x + 5, y + 2, TradeAtlasUi.PLAYER_COLOR);
+        guiGraphics.fill(x - 1, y - 1, x + 2, y + 2, TradeAtlasUi.PLAYER_CORE_COLOR);
+    }
+
     private void renderLocatePanel(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         var font = Minecraft.getInstance().font;
         int panelX = getX() + 8;
@@ -185,6 +201,20 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
 
     public void renderHoveredTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         var font = Minecraft.getInstance().font;
+        if (isHoveringPlayerMarker(mouseX, mouseY)) {
+            BlockPos playerPos = playerPosition();
+            if (playerPos != null) {
+                guiGraphics.renderTooltip(font,
+                    List.of(
+                        Component.translatable("gui.ruralroutes.trade_atlas.map.player"),
+                        Component.literal(TradeAtlasUi.formatPosition(playerPos))
+                    ),
+                    Optional.empty(),
+                    mouseX,
+                    mouseY);
+                return;
+            }
+        }
         findMapNodeAt(mouseX, mouseY).ifPresent(node -> guiGraphics.renderTooltip(font,
             List.of(
                 Component.translatable(node.style().translationKey()),
@@ -295,7 +325,7 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
     }
 
     private boolean canLocate() {
-        return !state.locating() && !state.hasClueNodes();
+        return !state.locating() && !state.hasPendingClue();
     }
 
     private boolean isCurrentTarget(TradeAtlasNode node) {
@@ -303,7 +333,8 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
     }
 
     private MapMetrics calculateMapMetrics(int areaWidth, int areaHeight) {
-        if (state.nodes().isEmpty()) {
+        BlockPos playerPos = playerPosition();
+        if (state.nodes().isEmpty() && playerPos == null) {
             return new MapMetrics(0.0D, 0.0D, 1.0D);
         }
 
@@ -317,6 +348,16 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
             maxX = Math.max(maxX, position.getX());
             minZ = Math.min(minZ, position.getZ());
             maxZ = Math.max(maxZ, position.getZ());
+        }
+        if (playerPos != null) {
+            minX = Math.min(minX, playerPos.getX());
+            maxX = Math.max(maxX, playerPos.getX());
+            minZ = Math.min(minZ, playerPos.getZ());
+            maxZ = Math.max(maxZ, playerPos.getZ());
+        }
+        if (minX == Integer.MAX_VALUE) {
+            minX = maxX = playerPos.getX();
+            minZ = maxZ = playerPos.getZ();
         }
 
         double rangeX = Math.max(1.0D, maxX - minX);
@@ -347,6 +388,23 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
         narration.add(NarratedElementType.TITLE, getMessage());
     }
 
+    private boolean isHoveringPlayerMarker(double mouseX, double mouseY) {
+        BlockPos playerPos = playerPosition();
+        if (playerPos == null || !isInsideMap(mouseX, mouseY)) {
+            return false;
+        }
+
+        MapMetrics metrics = calculateMapMetrics(areaWidth(), areaHeight());
+        int x = metrics.screenX(areaX(), areaWidth(), playerPos, mapOffsetX);
+        int y = metrics.screenY(areaY(), areaHeight(), playerPos, mapOffsetY);
+        return Math.abs(mouseX - x) <= 6 && Math.abs(mouseY - y) <= 6;
+    }
+
+    private BlockPos playerPosition() {
+        Player player = Minecraft.getInstance().player;
+        return player == null ? null : player.blockPosition();
+    }
+
     private static final class MapMetrics {
         private final double centerX;
         private final double centerZ;
@@ -364,6 +422,14 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
 
         private int screenY(int areaY, int areaHeight, TradeAtlasNode node, double offsetY) {
             return areaY + areaHeight / 2 + (int) Math.round((node.position().getZ() - centerZ) * scale + offsetY);
+        }
+
+        private int screenX(int areaX, int areaWidth, BlockPos position, double offsetX) {
+            return areaX + areaWidth / 2 + (int) Math.round((position.getX() - centerX) * scale + offsetX);
+        }
+
+        private int screenY(int areaY, int areaHeight, BlockPos position, double offsetY) {
+            return areaY + areaHeight / 2 + (int) Math.round((position.getZ() - centerZ) * scale + offsetY);
         }
     }
 }

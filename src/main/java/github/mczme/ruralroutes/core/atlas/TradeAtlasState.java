@@ -22,24 +22,27 @@ public final class TradeAtlasState {
     private final List<TradeAtlasNode> nodes;
     private boolean firstEntryUsed;
     private boolean locating;
+    private Optional<UUID> pendingClueNodeId;
     private Optional<UUID> currentTargetNodeId;
 
     public static TradeAtlasState empty() {
-        return new TradeAtlasState(List.of(), false, false, Optional.empty());
+        return new TradeAtlasState(List.of(), false, false, Optional.empty(), Optional.empty());
     }
 
     public static final Codec<TradeAtlasState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         TradeAtlasNode.CODEC.listOf().fieldOf("nodes").forGetter(TradeAtlasState::nodes),
         Codec.BOOL.optionalFieldOf("first_entry_used", false).forGetter(TradeAtlasState::firstEntryUsed),
         Codec.BOOL.optionalFieldOf("locating", false).forGetter(TradeAtlasState::locating),
+        UUIDUtil.CODEC.optionalFieldOf("pending_clue_node_id").forGetter(TradeAtlasState::pendingClueNodeId),
         UUIDUtil.CODEC.optionalFieldOf("current_target_node_id").forGetter(TradeAtlasState::currentTargetNodeId)
     ).apply(instance, TradeAtlasState::new));
 
     public TradeAtlasState(List<TradeAtlasNode> nodes, boolean firstEntryUsed, boolean locating,
-            Optional<UUID> currentTargetNodeId) {
+            Optional<UUID> pendingClueNodeId, Optional<UUID> currentTargetNodeId) {
         this.nodes = new ArrayList<>(Objects.requireNonNull(nodes, "nodes"));
         this.firstEntryUsed = firstEntryUsed;
         this.locating = locating;
+        this.pendingClueNodeId = pendingClueNodeId == null ? Optional.empty() : pendingClueNodeId;
         this.currentTargetNodeId = currentTargetNodeId == null ? Optional.empty() : currentTargetNodeId;
     }
 
@@ -55,6 +58,10 @@ public final class TradeAtlasState {
         return locating;
     }
 
+    public Optional<UUID> pendingClueNodeId() {
+        return pendingClueNodeId;
+    }
+
     public Optional<UUID> currentTargetNodeId() {
         return currentTargetNodeId;
     }
@@ -63,13 +70,10 @@ public final class TradeAtlasState {
         return !nodes.isEmpty();
     }
 
-    public boolean hasClueNodes() {
-        for (TradeAtlasNode node : nodes) {
-            if (node.status() == AtlasNodeStatus.CLUE) {
-                return true;
-            }
-        }
-        return false;
+    public boolean hasPendingClue() {
+        return pendingClueNodeId.flatMap(this::findNodeById)
+            .map(node -> node.status() == AtlasNodeStatus.CLUE)
+            .orElse(false);
     }
 
     public Optional<TradeAtlasNode> findNodeById(UUID nodeId) {
@@ -114,12 +118,24 @@ public final class TradeAtlasState {
         return currentTargetNodeId.flatMap(this::findNodeById);
     }
 
+    public Optional<TradeAtlasNode> pendingClue() {
+        return pendingClueNodeId.flatMap(this::findNodeById);
+    }
+
     public void setFirstEntryUsed(boolean firstEntryUsed) {
         this.firstEntryUsed = firstEntryUsed;
     }
 
     public void setLocating(boolean locating) {
         this.locating = locating;
+    }
+
+    public void setPendingClueNodeId(UUID nodeId) {
+        this.pendingClueNodeId = Optional.ofNullable(nodeId);
+    }
+
+    public void clearPendingClue() {
+        this.pendingClueNodeId = Optional.empty();
     }
 
     public void setCurrentTarget(UUID nodeId) {
@@ -149,6 +165,9 @@ public final class TradeAtlasState {
         }
 
         nodes.add(node);
+        if (node.status() == AtlasNodeStatus.CLUE) {
+            setPendingClueNodeId(node.id());
+        }
         setCurrentTargetIfAbsent(node.id());
         return true;
     }
@@ -172,6 +191,11 @@ public final class TradeAtlasState {
             nodes.set(index, node);
         } else {
             nodes.add(node);
+        }
+
+        if (pendingClueNodeId.isPresent() && pendingClueNodeId.get().equals(node.id())
+            && node.status() != AtlasNodeStatus.CLUE) {
+            clearPendingClue();
         }
 
         if (selectIfEmpty) {

@@ -36,6 +36,8 @@ public final class TradeAtlasUi {
     public static final int RECORDED_COLOR = 0xFF93D17F;
     public static final int INVALID_COLOR = 0xFF9DA7B4;
     public static final int TARGET_COLOR = 0xFFE5BE73;
+    public static final int PLAYER_COLOR = 0xFF73C1F2;
+    public static final int PLAYER_CORE_COLOR = 0xFFF3F5F7;
 
     private TradeAtlasUi() {
     }

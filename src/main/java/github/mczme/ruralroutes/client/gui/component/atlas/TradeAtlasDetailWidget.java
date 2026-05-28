@@ -21,11 +21,13 @@ public final class TradeAtlasDetailWidget extends AbstractWidget {
     private final TradeAtlasState state;
     private final TradeAtlasViewState viewState;
     private final Consumer<TradeAtlasNode> onSetTarget;
+    private final Runnable onCancelPendingClue;
     private final Runnable onClearTarget;
     private final Runnable onCenterSelected;
     private final Runnable onToggleLocate;
     private final List<Button> buttons;
     private final Button setTargetButton;
+    private final Button cancelPendingClueButton;
     private final Button clearTargetButton;
     private final Button centerButton;
     private final Button locateToggleButton;
@@ -34,6 +36,7 @@ public final class TradeAtlasDetailWidget extends AbstractWidget {
             TradeAtlasState state,
             TradeAtlasViewState viewState,
             Consumer<TradeAtlasNode> onSetTarget,
+            Runnable onCancelPendingClue,
             Runnable onClearTarget,
             Runnable onCenterSelected,
             Runnable onToggleLocate) {
@@ -41,31 +44,36 @@ public final class TradeAtlasDetailWidget extends AbstractWidget {
         this.state = state;
         this.viewState = viewState;
         this.onSetTarget = onSetTarget;
+        this.onCancelPendingClue = onCancelPendingClue;
         this.onClearTarget = onClearTarget;
         this.onCenterSelected = onCenterSelected;
         this.onToggleLocate = onToggleLocate;
 
         int buttonX = getX() + 8;
         int buttonWidth = getWidth() - 16;
-        int buttonY = getY() + getHeight() - 86;
+        int buttonY = getY() + getHeight() - 108;
 
         setTargetButton = Button.builder(
             Component.translatable("gui.ruralroutes.trade_atlas.action.set_target"),
             pressed -> viewState.selectedNode(state).ifPresent(onSetTarget)
         ).bounds(buttonX, buttonY, buttonWidth, 18).build();
+        cancelPendingClueButton = Button.builder(
+            Component.translatable("gui.ruralroutes.trade_atlas.action.cancel_pending_clue"),
+            pressed -> onCancelPendingClue.run()
+        ).bounds(buttonX, buttonY + 22, buttonWidth, 18).build();
         clearTargetButton = Button.builder(
             Component.translatable("gui.ruralroutes.trade_atlas.action.clear_target"),
             pressed -> onClearTarget.run()
-        ).bounds(buttonX, buttonY + 22, buttonWidth, 18).build();
+        ).bounds(buttonX, buttonY + 44, buttonWidth, 18).build();
         centerButton = Button.builder(
             Component.translatable("gui.ruralroutes.trade_atlas.action.center_selected"),
             pressed -> onCenterSelected.run()
-        ).bounds(buttonX, buttonY + 44, buttonWidth, 18).build();
+        ).bounds(buttonX, buttonY + 66, buttonWidth, 18).build();
         locateToggleButton = Button.builder(
             Component.translatable("gui.ruralroutes.trade_atlas.action.locate"),
             pressed -> onToggleLocate.run()
-        ).bounds(buttonX, buttonY + 66, buttonWidth, 18).build();
-        buttons = List.of(setTargetButton, clearTargetButton, centerButton, locateToggleButton);
+        ).bounds(buttonX, buttonY + 88, buttonWidth, 18).build();
+        buttons = List.of(setTargetButton, cancelPendingClueButton, clearTargetButton, centerButton, locateToggleButton);
     }
 
     @Override
@@ -146,6 +154,7 @@ public final class TradeAtlasDetailWidget extends AbstractWidget {
         setTargetButton.setMessage(Component.translatable(selectedIsTarget
             ? "gui.ruralroutes.trade_atlas.action.current_target"
             : "gui.ruralroutes.trade_atlas.action.set_target"));
+        cancelPendingClueButton.active = state.hasPendingClue();
         clearTargetButton.active = state.currentTargetNodeId().isPresent();
         centerButton.active = hasSelected;
         locateToggleButton.active = !state.locating();

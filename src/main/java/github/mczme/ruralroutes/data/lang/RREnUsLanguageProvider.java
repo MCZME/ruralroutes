@@ -151,6 +151,7 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_atlas.empty", "No village nodes yet");
         add("gui.ruralroutes.trade_atlas.action.locate", "Locate");
         add("gui.ruralroutes.trade_atlas.action.close_locate", "Close Locate");
+        add("gui.ruralroutes.trade_atlas.action.cancel_pending_clue", "Cancel Current Clue");
         add("gui.ruralroutes.trade_atlas.action.set_target", "Target");
         add("gui.ruralroutes.trade_atlas.action.current_target", "Current Target");
         add("gui.ruralroutes.trade_atlas.action.clear_target", "Clear Target");
@@ -165,11 +166,13 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_atlas.detail.no", "No");
         add("gui.ruralroutes.trade_atlas.detail.theme", "Theme");
         add("gui.ruralroutes.trade_atlas.detail.invalid_hint", "Needs reconfirmation");
+        add("gui.ruralroutes.trade_atlas.map.player", "Player Position");
         add("gui.ruralroutes.trade_atlas.map.zoom", "Zoom %s%%");
         add("gui.ruralroutes.trade_atlas.locate.choose_style", "Choose a style");
         add("gui.ruralroutes.trade_atlas.locate.cost_pending", "Cost: pending");
         add("gui.ruralroutes.trade_atlas.locate.no_style", "Choose a village style first.");
         add("gui.ruralroutes.trade_atlas.locate.busy", "A locate is already running.");
+        add("gui.ruralroutes.trade_atlas.locate.cancelled", "Current clue search cancelled. You can locate a new village now.");
         add("gui.ruralroutes.trade_atlas.locate.pending_clue", "Confirm or clear the existing clue first.");
         add("gui.ruralroutes.trade_atlas.locate.failed", "No matching village structure was found.");
         add("gui.ruralroutes.trade_atlas.locate.duplicate", "That village is already known.");

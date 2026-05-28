@@ -25,6 +25,7 @@ public record TradeAtlasActionPayload(
 
     public enum Action {
         REQUEST_LOCATE,
+        CANCEL_PENDING_CLUE,
         SET_TARGET,
         CLEAR_TARGET
     }
@@ -42,6 +43,8 @@ public record TradeAtlasActionPayload(
 
                 switch (action) {
                     case REQUEST_LOCATE -> style = VillageStyle.values()[buf.readInt()];
+                    case CANCEL_PENDING_CLUE -> {
+                    }
                     case SET_TARGET -> nodeId = UUIDUtil.STREAM_CODEC.decode(buf);
                     case CLEAR_TARGET -> {
                     }
@@ -55,6 +58,8 @@ public record TradeAtlasActionPayload(
                 buf.writeInt(payload.action().ordinal());
                 switch (payload.action()) {
                     case REQUEST_LOCATE -> buf.writeInt(payload.style().ordinal());
+                    case CANCEL_PENDING_CLUE -> {
+                    }
                     case SET_TARGET -> UUIDUtil.STREAM_CODEC.encode(buf, payload.nodeId());
                     case CLEAR_TARGET -> {
                     }
@@ -68,6 +73,10 @@ public record TradeAtlasActionPayload(
 
     public static TradeAtlasActionPayload setTarget(UUID nodeId) {
         return new TradeAtlasActionPayload(Action.SET_TARGET, null, nodeId);
+    }
+
+    public static TradeAtlasActionPayload cancelPendingClue() {
+        return new TradeAtlasActionPayload(Action.CANCEL_PENDING_CLUE, null, null);
     }
 
     public static TradeAtlasActionPayload clearTarget() {

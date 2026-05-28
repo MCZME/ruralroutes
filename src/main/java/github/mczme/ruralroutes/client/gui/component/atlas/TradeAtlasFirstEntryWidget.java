@@ -70,7 +70,7 @@ public final class TradeAtlasFirstEntryWidget extends AbstractWidget {
             TradeAtlasUi.TEXT_WARN,
             false);
 
-        boolean canLocate = !state.locating() && !state.hasClueNodes();
+        boolean canLocate = !state.locating() && !state.hasPendingClue();
         for (Button button : buttons) {
             button.active = canLocate;
             button.render(guiGraphics, mouseX, mouseY, partialTick);

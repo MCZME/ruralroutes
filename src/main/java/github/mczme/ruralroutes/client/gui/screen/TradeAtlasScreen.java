@@ -92,6 +92,7 @@ public class TradeAtlasScreen extends Screen {
             state,
             viewState,
             this::setTarget,
+            this::cancelPendingClue,
             this::clearTarget,
             () -> mapWidget.centerOnSelected(),
             viewState::toggleLocateSelection
@@ -172,6 +173,11 @@ public class TradeAtlasScreen extends Screen {
     private void clearTarget() {
         state.clearCurrentTarget();
         PacketDistributor.sendToServer(TradeAtlasActionPayload.clearTarget());
+    }
+
+    private void cancelPendingClue() {
+        state.clearPendingClue();
+        PacketDistributor.sendToServer(TradeAtlasActionPayload.cancelPendingClue());
     }
 
     private void sendLocate(VillageStyle style) {

@@ -151,6 +151,7 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_atlas.empty", "当前还没有村庄节点");
         add("gui.ruralroutes.trade_atlas.action.locate", "定位");
         add("gui.ruralroutes.trade_atlas.action.close_locate", "收起定位");
+        add("gui.ruralroutes.trade_atlas.action.cancel_pending_clue", "取消当前线索");
         add("gui.ruralroutes.trade_atlas.action.set_target", "设为目标");
         add("gui.ruralroutes.trade_atlas.action.current_target", "当前目标");
         add("gui.ruralroutes.trade_atlas.action.clear_target", "取消目标");
@@ -165,11 +166,13 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_atlas.detail.no", "否");
         add("gui.ruralroutes.trade_atlas.detail.theme", "主题");
         add("gui.ruralroutes.trade_atlas.detail.invalid_hint", "需要现场重新确认");
+        add("gui.ruralroutes.trade_atlas.map.player", "玩家当前位置");
         add("gui.ruralroutes.trade_atlas.map.zoom", "缩放 %s%%");
         add("gui.ruralroutes.trade_atlas.locate.choose_style", "选择风格");
         add("gui.ruralroutes.trade_atlas.locate.cost_pending", "成本：待接入");
         add("gui.ruralroutes.trade_atlas.locate.no_style", "请先选择村庄风格。");
         add("gui.ruralroutes.trade_atlas.locate.busy", "正在进行一次定位，请稍候。");
+        add("gui.ruralroutes.trade_atlas.locate.cancelled", "已取消当前线索搜索，可以继续定位新的村庄。");
         add("gui.ruralroutes.trade_atlas.locate.pending_clue", "请先确认或放弃当前未确认线索。");
         add("gui.ruralroutes.trade_atlas.locate.failed", "没有找到对应的村庄结构。");
         add("gui.ruralroutes.trade_atlas.locate.duplicate", "这个村庄已经记录过了。");

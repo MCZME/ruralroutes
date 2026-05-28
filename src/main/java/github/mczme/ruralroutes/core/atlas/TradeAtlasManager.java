@@ -42,6 +42,7 @@ public final class TradeAtlasManager {
             @Nullable VillageStyle style, @Nullable UUID nodeId) {
         switch (action) {
             case REQUEST_LOCATE -> handleLocateRequest(player, style);
+            case CANCEL_PENDING_CLUE -> handleCancelPendingClue(player);
             case SET_TARGET -> handleSetTarget(player, nodeId);
             case CLEAR_TARGET -> handleClearTarget(player);
         }
@@ -50,7 +51,7 @@ public final class TradeAtlasManager {
     }
 
     public static boolean canRequestLocate(TradeAtlasState state) {
-        return state != null && !state.locating() && !state.hasClueNodes();
+        return state != null && !state.locating() && !state.hasPendingClue();
     }
 
     public static void recordTradeStationVisit(ServerPlayer player, BlockPos stationPos, VillageStyle style,
@@ -58,9 +59,9 @@ public final class TradeAtlasManager {
         ServerLevel level = player.serverLevel();
         ResourceLocation dimensionId = level.dimension().location();
         TradeAtlasState state = getState(player);
-        // 结构线索位置通常不是贸易站方块位置；交互贸易站时优先把同风格线索升级。
+        // 结构线索位置通常不是贸易站方块位置；交互贸易站时优先把最近的同风格线索升级。
         TradeAtlasNode existing = state.findNodeAt(dimensionId, stationPos)
-            .or(() -> state.findClueByStyle(dimensionId, style))
+            .or(() -> findNearestClueByStyle(state, dimensionId, style, stationPos))
             .orElse(null);
 
         TradeAtlasNode updatedNode;
@@ -122,7 +123,7 @@ public final class TradeAtlasManager {
             );
             return;
         }
-        if (currentState.hasClueNodes()) {
+        if (currentState.hasPendingClue()) {
             player.displayClientMessage(
                 Component.translatable("gui.ruralroutes.trade_atlas.locate.pending_clue"),
                 true
@@ -239,9 +240,32 @@ public final class TradeAtlasManager {
         setState(player, state);
     }
 
+    private static void handleCancelPendingClue(ServerPlayer player) {
+        TradeAtlasState state = getState(player);
+        if (!state.hasPendingClue()) {
+            return;
+        }
+
+        state.clearPendingClue();
+        setState(player, state);
+        player.displayClientMessage(
+            Component.translatable("gui.ruralroutes.trade_atlas.locate.cancelled"),
+            true
+        );
+    }
+
     private static void handleClearTarget(ServerPlayer player) {
         TradeAtlasState state = getState(player);
         state.clearCurrentTarget();
         setState(player, state);
+    }
+
+    private static java.util.Optional<TradeAtlasNode> findNearestClueByStyle(TradeAtlasState state,
+            ResourceLocation dimensionId, VillageStyle style, BlockPos anchorPos) {
+        return state.nodes().stream()
+            .filter(node -> node.dimensionId().equals(dimensionId))
+            .filter(node -> node.style() == style)
+            .filter(node -> node.status() == AtlasNodeStatus.CLUE)
+            .min(java.util.Comparator.comparingDouble(node -> node.position().distSqr(anchorPos)));
     }
 }
