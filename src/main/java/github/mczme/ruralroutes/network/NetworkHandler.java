@@ -10,6 +10,7 @@ import github.mczme.ruralroutes.network.packet.PendingTradeSyncPayload;
 import github.mczme.ruralroutes.network.packet.TradeAtlasActionPayload;
 import github.mczme.ruralroutes.network.packet.TradeFeedbackPayload;
 import github.mczme.ruralroutes.network.packet.TradeRequestPayload;
+import github.mczme.ruralroutes.network.packet.TradeRouteActionPayload;
 import github.mczme.ruralroutes.network.packet.TradeSlotSyncPayload;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -67,5 +68,9 @@ public class NetworkHandler {
         // 商路图册操作（客户端→服务端）
         registrar.playToServer(TradeAtlasActionPayload.TYPE, TradeAtlasActionPayload.STREAM_CODEC,
             TradeAtlasActionPayload::handleServer);
+
+        // 商路图层编辑（客户端→服务端）
+        registrar.playToServer(TradeRouteActionPayload.TYPE, TradeRouteActionPayload.STREAM_CODEC,
+            TradeRouteActionPayload::handleServer);
     }
 }

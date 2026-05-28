@@ -20,34 +20,50 @@ import java.util.UUID;
 public final class TradeAtlasState {
 
     private final List<TradeAtlasNode> nodes;
+    private final List<TradeRoute> routes;
+    private final List<UUID> visibleRouteIds;
     private boolean firstEntryUsed;
     private boolean locating;
     private Optional<UUID> pendingClueNodeId;
     private Optional<UUID> currentTargetNodeId;
 
     public static TradeAtlasState empty() {
-        return new TradeAtlasState(List.of(), false, false, Optional.empty(), Optional.empty());
+        return new TradeAtlasState(List.of(), List.of(), List.of(), false, false, Optional.empty(), Optional.empty());
     }
 
     public static final Codec<TradeAtlasState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         TradeAtlasNode.CODEC.listOf().fieldOf("nodes").forGetter(TradeAtlasState::nodes),
+        TradeRoute.CODEC.listOf().optionalFieldOf("routes", List.of()).forGetter(TradeAtlasState::routes),
+        UUIDUtil.CODEC.listOf().optionalFieldOf("visible_route_ids", List.of()).forGetter(TradeAtlasState::visibleRouteIds),
         Codec.BOOL.optionalFieldOf("first_entry_used", false).forGetter(TradeAtlasState::firstEntryUsed),
         Codec.BOOL.optionalFieldOf("locating", false).forGetter(TradeAtlasState::locating),
         UUIDUtil.CODEC.optionalFieldOf("pending_clue_node_id").forGetter(TradeAtlasState::pendingClueNodeId),
         UUIDUtil.CODEC.optionalFieldOf("current_target_node_id").forGetter(TradeAtlasState::currentTargetNodeId)
     ).apply(instance, TradeAtlasState::new));
 
-    public TradeAtlasState(List<TradeAtlasNode> nodes, boolean firstEntryUsed, boolean locating,
+    public TradeAtlasState(List<TradeAtlasNode> nodes, List<TradeRoute> routes, List<UUID> visibleRouteIds,
+            boolean firstEntryUsed, boolean locating,
             Optional<UUID> pendingClueNodeId, Optional<UUID> currentTargetNodeId) {
         this.nodes = new ArrayList<>(Objects.requireNonNull(nodes, "nodes"));
+        this.routes = new ArrayList<>(Objects.requireNonNull(routes, "routes"));
+        this.visibleRouteIds = new ArrayList<>(Objects.requireNonNull(visibleRouteIds, "visibleRouteIds"));
         this.firstEntryUsed = firstEntryUsed;
         this.locating = locating;
         this.pendingClueNodeId = pendingClueNodeId == null ? Optional.empty() : pendingClueNodeId;
         this.currentTargetNodeId = currentTargetNodeId == null ? Optional.empty() : currentTargetNodeId;
+        pruneVisibleRoutes();
     }
 
     public List<TradeAtlasNode> nodes() {
         return Collections.unmodifiableList(nodes);
+    }
+
+    public List<TradeRoute> routes() {
+        return Collections.unmodifiableList(routes);
+    }
+
+    public List<UUID> visibleRouteIds() {
+        return Collections.unmodifiableList(visibleRouteIds);
     }
 
     public boolean firstEntryUsed() {
@@ -86,6 +102,25 @@ public final class TradeAtlasState {
             }
         }
         return Optional.empty();
+    }
+
+    public Optional<TradeRoute> findRouteById(UUID routeId) {
+        if (routeId == null) {
+            return Optional.empty();
+        }
+        for (TradeRoute route : routes) {
+            if (route.id().equals(routeId)) {
+                return Optional.of(route);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public List<TradeRoute> visibleRoutes() {
+        return visibleRouteIds.stream()
+            .map(this::findRouteById)
+            .flatMap(Optional::stream)
+            .toList();
     }
 
     public Optional<TradeAtlasNode> findNodeAt(ResourceLocation dimensionId, BlockPos position) {
@@ -151,6 +186,71 @@ public final class TradeAtlasState {
             return;
         }
         currentTargetNodeId = Optional.of(nodeId);
+    }
+
+    public boolean addRoute(TradeRoute route, boolean showImmediately) {
+        if (route == null || !route.isValid()) {
+            return false;
+        }
+        if (!routeReferencesKnownNodes(route)) {
+            return false;
+        }
+        if (findRouteById(route.id()).isPresent()) {
+            return false;
+        }
+
+        routes.add(route);
+        if (showImmediately) {
+            setRouteVisible(route.id(), true);
+        }
+        return true;
+    }
+
+    public boolean replaceRoute(TradeRoute route) {
+        if (route == null || !route.isValid() || !routeReferencesKnownNodes(route)) {
+            return false;
+        }
+        int index = findRouteIndex(route.id());
+        if (index < 0) {
+            return false;
+        }
+        routes.set(index, route);
+        return true;
+    }
+
+    public boolean removeRoute(UUID routeId) {
+        int index = findRouteIndex(routeId);
+        if (index < 0) {
+            return false;
+        }
+        routes.remove(index);
+        visibleRouteIds.removeIf(id -> id.equals(routeId));
+        return true;
+    }
+
+    public void setRouteVisible(UUID routeId, boolean visible) {
+        if (routeId == null || findRouteById(routeId).isEmpty()) {
+            return;
+        }
+        if (visible) {
+            if (!visibleRouteIds.contains(routeId)) {
+                visibleRouteIds.add(routeId);
+            }
+        } else {
+            visibleRouteIds.removeIf(id -> id.equals(routeId));
+        }
+    }
+
+    public void toggleRouteVisible(UUID routeId) {
+        if (visibleRouteIds.contains(routeId)) {
+            setRouteVisible(routeId, false);
+        } else {
+            setRouteVisible(routeId, true);
+        }
+    }
+
+    public boolean isRouteVisible(UUID routeId) {
+        return routeId != null && visibleRouteIds.contains(routeId);
     }
 
     public boolean addClueNode(TradeAtlasNode node) {
@@ -223,5 +323,30 @@ public final class TradeAtlasState {
             }
         }
         return -1;
+    }
+
+    private int findRouteIndex(UUID routeId) {
+        if (routeId == null) {
+            return -1;
+        }
+        for (int i = 0; i < routes.size(); i++) {
+            if (routes.get(i).id().equals(routeId)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private boolean routeReferencesKnownNodes(TradeRoute route) {
+        for (TradeRouteStop stop : route.stops()) {
+            if (findNodeById(stop.nodeId()).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void pruneVisibleRoutes() {
+        visibleRouteIds.removeIf(routeId -> findRouteById(routeId).isEmpty());
     }
 }

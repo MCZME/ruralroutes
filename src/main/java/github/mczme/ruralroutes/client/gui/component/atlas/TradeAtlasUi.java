@@ -82,6 +82,12 @@ public final class TradeAtlasUi {
             + formatXZ(node.position());
     }
 
+    public static String buildShortNodeLabel(TradeAtlasNode node) {
+        return Component.translatable(node.style().translationKey()).getString()
+            + " "
+            + formatXZ(node.position());
+    }
+
     public static String formatPosition(BlockPos position) {
         return position.getX() + ", " + position.getY() + ", " + position.getZ();
     }

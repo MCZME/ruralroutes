@@ -146,6 +146,7 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_atlas.first_entry.snowy", "雪地：远方驿路");
         add("gui.ruralroutes.trade_atlas.section.locate", "定位");
         add("gui.ruralroutes.trade_atlas.section.nodes", "节点");
+        add("gui.ruralroutes.trade_atlas.section.routes", "商路");
         add("gui.ruralroutes.trade_atlas.section.map", "节点图");
         add("gui.ruralroutes.trade_atlas.section.detail", "详情");
         add("gui.ruralroutes.trade_atlas.empty", "当前还没有村庄节点");
@@ -181,6 +182,30 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_atlas.status.clue", "线索");
         add("gui.ruralroutes.trade_atlas.status.recorded", "已记录");
         add("gui.ruralroutes.trade_atlas.status.invalid", "失效");
+        add("gui.ruralroutes.trade_atlas.route.empty", "还没有商路");
+        add("gui.ruralroutes.trade_atlas.route.no_start_hint", "先选节点作为起点");
+        add("gui.ruralroutes.trade_atlas.route.start_hint", "起点: %s");
+        add("gui.ruralroutes.trade_atlas.route.name", "商路名称");
+        add("gui.ruralroutes.trade_atlas.route.stop_role", "停靠点角色");
+        add("gui.ruralroutes.trade_atlas.route.stop_note", "停靠点备注");
+        add("gui.ruralroutes.trade_atlas.route.stops", "停靠点");
+        add("gui.ruralroutes.trade_atlas.route.segments", "路段");
+        add("gui.ruralroutes.trade_atlas.route.detail.status", "商路状态");
+        add("gui.ruralroutes.trade_atlas.route.action.mark_start", "设起点");
+        add("gui.ruralroutes.trade_atlas.route.action.create", "创建");
+        add("gui.ruralroutes.trade_atlas.route.action.add_stop", "加停靠");
+        add("gui.ruralroutes.trade_atlas.route.action.delete", "删除");
+        add("gui.ruralroutes.trade_atlas.route.action.rename", "改名");
+        add("gui.ruralroutes.trade_atlas.route.action.status", "切换状态");
+        add("gui.ruralroutes.trade_atlas.route.action.apply_role", "应用角色");
+        add("gui.ruralroutes.trade_atlas.route.action.apply_note", "应用备注");
+        add("gui.ruralroutes.trade_atlas.route.action.remove_stop", "删除停靠");
+        add("gui.ruralroutes.trade_atlas.route.action.direction", "切换方向");
+        add("gui.ruralroutes.trade_atlas.route.status.draft", "草图");
+        add("gui.ruralroutes.trade_atlas.route.status.regular", "常跑");
+        add("gui.ruralroutes.trade_atlas.route.status.paused", "暂停");
+        add("gui.ruralroutes.trade_atlas.route.direction.one_way", "单向");
+        add("gui.ruralroutes.trade_atlas.route.direction.bidirectional", "双向");
 
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "主题: %s");

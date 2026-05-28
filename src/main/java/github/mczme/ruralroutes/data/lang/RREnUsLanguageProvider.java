@@ -146,6 +146,7 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_atlas.first_entry.snowy", "Snowy: remote trail");
         add("gui.ruralroutes.trade_atlas.section.locate", "Locate");
         add("gui.ruralroutes.trade_atlas.section.nodes", "Nodes");
+        add("gui.ruralroutes.trade_atlas.section.routes", "Routes");
         add("gui.ruralroutes.trade_atlas.section.map", "Node Map");
         add("gui.ruralroutes.trade_atlas.section.detail", "Detail");
         add("gui.ruralroutes.trade_atlas.empty", "No village nodes yet");
@@ -181,6 +182,30 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.trade_atlas.status.clue", "Clue");
         add("gui.ruralroutes.trade_atlas.status.recorded", "Recorded");
         add("gui.ruralroutes.trade_atlas.status.invalid", "Invalid");
+        add("gui.ruralroutes.trade_atlas.route.empty", "No routes yet");
+        add("gui.ruralroutes.trade_atlas.route.no_start_hint", "Pick a node as start");
+        add("gui.ruralroutes.trade_atlas.route.start_hint", "Start: %s");
+        add("gui.ruralroutes.trade_atlas.route.name", "Route Name");
+        add("gui.ruralroutes.trade_atlas.route.stop_role", "Stop Role");
+        add("gui.ruralroutes.trade_atlas.route.stop_note", "Stop Note");
+        add("gui.ruralroutes.trade_atlas.route.stops", "Stops");
+        add("gui.ruralroutes.trade_atlas.route.segments", "Segments");
+        add("gui.ruralroutes.trade_atlas.route.detail.status", "Route Status");
+        add("gui.ruralroutes.trade_atlas.route.action.mark_start", "Set Start");
+        add("gui.ruralroutes.trade_atlas.route.action.create", "Create");
+        add("gui.ruralroutes.trade_atlas.route.action.add_stop", "Add Stop");
+        add("gui.ruralroutes.trade_atlas.route.action.delete", "Delete");
+        add("gui.ruralroutes.trade_atlas.route.action.rename", "Rename");
+        add("gui.ruralroutes.trade_atlas.route.action.status", "Cycle Status");
+        add("gui.ruralroutes.trade_atlas.route.action.apply_role", "Apply Role");
+        add("gui.ruralroutes.trade_atlas.route.action.apply_note", "Apply Note");
+        add("gui.ruralroutes.trade_atlas.route.action.remove_stop", "Remove Stop");
+        add("gui.ruralroutes.trade_atlas.route.action.direction", "Cycle Direction");
+        add("gui.ruralroutes.trade_atlas.route.status.draft", "Draft");
+        add("gui.ruralroutes.trade_atlas.route.status.regular", "Regular");
+        add("gui.ruralroutes.trade_atlas.route.status.paused", "Paused");
+        add("gui.ruralroutes.trade_atlas.route.direction.one_way", "One-way");
+        add("gui.ruralroutes.trade_atlas.route.direction.bidirectional", "Bidirectional");
 
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "Theme: %s");

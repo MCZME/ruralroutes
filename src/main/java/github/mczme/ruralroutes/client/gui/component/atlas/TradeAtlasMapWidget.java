@@ -3,6 +3,10 @@ package github.mczme.ruralroutes.client.gui.component.atlas;
 import github.mczme.ruralroutes.core.atlas.AtlasNodeStatus;
 import github.mczme.ruralroutes.core.atlas.TradeAtlasNode;
 import github.mczme.ruralroutes.core.atlas.TradeAtlasState;
+import github.mczme.ruralroutes.core.atlas.TradeRoute;
+import github.mczme.ruralroutes.core.atlas.TradeRouteDirection;
+import github.mczme.ruralroutes.core.atlas.TradeRouteSegment;
+import github.mczme.ruralroutes.core.atlas.TradeRouteStop;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -16,8 +20,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public final class TradeAtlasMapWidget extends AbstractWidget {
@@ -27,6 +35,7 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
     private final TradeAtlasState state;
     private final TradeAtlasViewState viewState;
     private final Consumer<TradeAtlasNode> onSelect;
+    private final BiConsumer<TradeRoute, TradeRouteStop> onSelectRouteStop;
     private final Consumer<VillageStyle> onLocate;
     private final List<Button> locateStyleButtons = new ArrayList<>();
 
@@ -37,11 +46,13 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
 
     public TradeAtlasMapWidget(int x, int y, int width, int height,
             TradeAtlasState state, TradeAtlasViewState viewState,
-            Consumer<TradeAtlasNode> onSelect, Consumer<VillageStyle> onLocate) {
+            Consumer<TradeAtlasNode> onSelect, BiConsumer<TradeRoute, TradeRouteStop> onSelectRouteStop,
+            Consumer<VillageStyle> onLocate) {
         super(x, y, width, height, Component.translatable("gui.ruralroutes.trade_atlas.section.map"));
         this.state = state;
         this.viewState = viewState;
         this.onSelect = onSelect;
+        this.onSelectRouteStop = onSelectRouteStop;
         this.onLocate = onLocate;
         buildLocateButtons();
     }
@@ -100,12 +111,14 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
 
         MapMetrics metrics = calculateMapMetrics(areaWidth, areaHeight);
         guiGraphics.enableScissor(areaX, areaY, areaX + areaWidth, areaY + areaHeight);
+        renderVisibleRoutes(guiGraphics, metrics, areaX, areaY, areaWidth, areaHeight);
         renderPlayerMarker(guiGraphics, metrics, areaX, areaY, areaWidth, areaHeight);
         for (TradeAtlasNode node : state.nodes()) {
             int nodeX = metrics.screenX(areaX, areaWidth, node, mapOffsetX);
             int nodeY = metrics.screenY(areaY, areaHeight, node, mapOffsetY);
             renderMapNode(guiGraphics, node, nodeX, nodeY);
         }
+        renderRouteStopBadges(guiGraphics, metrics, areaX, areaY, areaWidth, areaHeight);
         guiGraphics.disableScissor();
 
         guiGraphics.drawString(font,
@@ -154,6 +167,108 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
         if (isCurrentTarget(node)) {
             guiGraphics.renderOutline(x - half - 3, y - half - 3, NODE_MARK_SIZE + 6, NODE_MARK_SIZE + 6,
                 TradeAtlasUi.TARGET_COLOR);
+        }
+    }
+
+    private void renderVisibleRoutes(GuiGraphics guiGraphics, MapMetrics metrics, int areaX, int areaY,
+            int areaWidth, int areaHeight) {
+        List<RouteSegmentView> segmentViews = buildRouteSegmentViews(metrics, areaX, areaY, areaWidth, areaHeight);
+        Map<String, Integer> totals = new HashMap<>();
+        Map<String, Integer> seen = new HashMap<>();
+        for (RouteSegmentView view : segmentViews) {
+            totals.merge(view.overlapKey(), 1, Integer::sum);
+        }
+        for (RouteSegmentView view : segmentViews) {
+            int index = seen.merge(view.overlapKey(), 1, Integer::sum) - 1;
+            int count = totals.getOrDefault(view.overlapKey(), 1);
+            drawRouteSegment(guiGraphics, view, index, count);
+        }
+    }
+
+    private List<RouteSegmentView> buildRouteSegmentViews(MapMetrics metrics, int areaX, int areaY,
+            int areaWidth, int areaHeight) {
+        List<RouteSegmentView> views = new ArrayList<>();
+        for (TradeRoute route : state.visibleRoutes()) {
+            for (TradeRouteSegment segment : route.segments()) {
+                TradeRouteStop fromStop = route.findStop(segment.fromStopId()).orElse(null);
+                TradeRouteStop toStop = route.findStop(segment.toStopId()).orElse(null);
+                if (fromStop == null || toStop == null) {
+                    continue;
+                }
+                TradeAtlasNode fromNode = state.findNodeById(fromStop.nodeId()).orElse(null);
+                TradeAtlasNode toNode = state.findNodeById(toStop.nodeId()).orElse(null);
+                if (fromNode == null || toNode == null) {
+                    continue;
+                }
+                StopAnchor fromAnchor = stopAnchor(route, fromStop, metrics, areaX, areaY, areaWidth, areaHeight);
+                StopAnchor toAnchor = stopAnchor(route, toStop, metrics, areaX, areaY, areaWidth, areaHeight);
+                views.add(new RouteSegmentView(route, segment, fromAnchor.x(), fromAnchor.y(), toAnchor.x(),
+                    toAnchor.y(), overlapKey(fromNode.id(), toNode.id())));
+            }
+        }
+        return views;
+    }
+
+    private void drawRouteSegment(GuiGraphics guiGraphics, RouteSegmentView view, int overlapIndex,
+            int overlapCount) {
+        double dx = view.toX() - view.fromX();
+        double dy = view.toY() - view.fromY();
+        double length = Math.sqrt(dx * dx + dy * dy);
+        if (length < 1.0D) {
+            drawRouteLoop(guiGraphics, view.fromX(), view.fromY(), view.route().color());
+            return;
+        }
+
+        double offset = (overlapIndex - (overlapCount - 1) / 2.0D) * 4.0D;
+        int ox = (int) Math.round(-dy / length * offset);
+        int oy = (int) Math.round(dx / length * offset);
+        int x1 = view.fromX() + ox;
+        int y1 = view.fromY() + oy;
+        int x2 = view.toX() + ox;
+        int y2 = view.toY() + oy;
+        drawLine(guiGraphics, x1, y1, x2, y2, view.route().color());
+        drawSegmentDirection(guiGraphics, view.segment().direction(), x1, y1, x2, y2, view.route().color());
+    }
+
+    private void drawRouteLoop(GuiGraphics guiGraphics, int x, int y, int color) {
+        guiGraphics.renderOutline(x - 8, y - 8, 16, 16, color);
+    }
+
+    private void drawSegmentDirection(GuiGraphics guiGraphics, TradeRouteDirection direction,
+            int x1, int y1, int x2, int y2, int color) {
+        int midX = (x1 + x2) / 2;
+        int midY = (y1 + y2) / 2;
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        double length = Math.max(1.0D, Math.sqrt(dx * dx + dy * dy));
+        int ax = (int) Math.round(dx / length * 3.0D);
+        int ay = (int) Math.round(dy / length * 3.0D);
+        guiGraphics.fill(midX - 1, midY - 1, midX + 2, midY + 2, TradeAtlasUi.MAP_BG);
+        guiGraphics.fill(midX, midY, midX + ax + 1, midY + ay + 1, color);
+        if (direction == TradeRouteDirection.BIDIRECTIONAL) {
+            guiGraphics.fill(midX, midY, midX - ax + 1, midY - ay + 1, color);
+        }
+    }
+
+    private void renderRouteStopBadges(GuiGraphics guiGraphics, MapMetrics metrics, int areaX, int areaY,
+            int areaWidth, int areaHeight) {
+        var font = Minecraft.getInstance().font;
+        for (TradeRoute route : state.visibleRoutes()) {
+            for (int i = 0; i < route.stops().size(); i++) {
+                TradeRouteStop stop = route.stops().get(i);
+                if (!shouldRenderStopBadge(route, stop)) {
+                    continue;
+                }
+                StopAnchor anchor = stopAnchor(route, stop, metrics, areaX, areaY, areaWidth, areaHeight);
+                int x = anchor.x();
+                int y = anchor.y();
+                int bg = viewState.isRouteStopSelected(stop.id()) ? TradeAtlasUi.ROW_SELECTED_BG : 0xE0161A1E;
+                guiGraphics.fill(x - 5, y - 5, x + 6, y + 6, bg);
+                guiGraphics.renderOutline(x - 5, y - 5, 11, 11, route.color());
+                String label = String.valueOf(Math.min(9, i + 1));
+                guiGraphics.drawString(font, label, x - font.width(label) / 2, y - 4,
+                    TradeAtlasUi.TEXT_PRIMARY, false);
+            }
         }
     }
 
@@ -215,6 +330,22 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
                 return;
             }
         }
+        findRouteStopBadgeAt(mouseX, mouseY).ifPresent(hit -> {
+            TradeAtlasNode node = state.findNodeById(hit.stop().nodeId()).orElse(null);
+            String nodeLabel = node == null ? "?" : TradeAtlasUi.buildShortNodeLabel(node);
+            guiGraphics.renderTooltip(font,
+                List.of(
+                    Component.literal(hit.route().name()),
+                    Component.literal(nodeLabel),
+                    Component.literal(hit.stop().role().isBlank() ? "-" : hit.stop().role())
+                ),
+                Optional.empty(),
+                mouseX,
+                mouseY);
+        });
+        if (findRouteStopBadgeAt(mouseX, mouseY).isPresent()) {
+            return;
+        }
         findMapNodeAt(mouseX, mouseY).ifPresent(node -> guiGraphics.renderTooltip(font,
             List.of(
                 Component.translatable(node.style().translationKey()),
@@ -243,6 +374,13 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
         }
 
         Optional<TradeAtlasNode> mapNode = findMapNodeAt(mouseX, mouseY);
+        Optional<RouteStopHit> routeStopHit = findRouteStopBadgeAt(mouseX, mouseY);
+        if (routeStopHit.isPresent()) {
+            onSelectRouteStop.accept(routeStopHit.get().route(), routeStopHit.get().stop());
+            return true;
+        }
+
+        mapNode = findMapNodeAt(mouseX, mouseY);
         if (mapNode.isPresent()) {
             onSelect.accept(mapNode.get());
             return true;
@@ -310,6 +448,26 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
         return Optional.empty();
     }
 
+    private Optional<RouteStopHit> findRouteStopBadgeAt(double mouseX, double mouseY) {
+        if (!isInsideMap(mouseX, mouseY)) {
+            return Optional.empty();
+        }
+
+        MapMetrics metrics = calculateMapMetrics(areaWidth(), areaHeight());
+        for (TradeRoute route : state.visibleRoutes()) {
+            for (TradeRouteStop stop : route.stops()) {
+                if (!shouldRenderStopBadge(route, stop)) {
+                    continue;
+                }
+                StopAnchor anchor = stopAnchor(route, stop, metrics, areaX(), areaY(), areaWidth(), areaHeight());
+                if (Math.abs(mouseX - anchor.x()) <= 6 && Math.abs(mouseY - anchor.y()) <= 6) {
+                    return Optional.of(new RouteStopHit(route, stop));
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
     private boolean isInsideMap(double mouseX, double mouseY) {
         return mouseX >= areaX() && mouseX < areaX() + areaWidth()
             && mouseY >= areaY() && mouseY < areaY() + areaHeight();
@@ -330,6 +488,62 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
 
     private boolean isCurrentTarget(TradeAtlasNode node) {
         return state.currentTargetNodeId().isPresent() && state.currentTargetNodeId().get().equals(node.id());
+    }
+
+    private boolean shouldRenderStopBadge(TradeRoute route, TradeRouteStop stop) {
+        return viewState.isRouteSelected(route.id()) || countStopsReferencingNode(route, stop.nodeId()) > 1;
+    }
+
+    private StopAnchor stopAnchor(TradeRoute route, TradeRouteStop stop, MapMetrics metrics,
+            int areaX, int areaY, int areaWidth, int areaHeight) {
+        TradeAtlasNode node = state.findNodeById(stop.nodeId()).orElse(null);
+        if (node == null) {
+            return new StopAnchor(areaX + areaWidth / 2, areaY + areaHeight / 2);
+        }
+
+        int baseX = metrics.screenX(areaX, areaWidth, node, mapOffsetX);
+        int baseY = metrics.screenY(areaY, areaHeight, node, mapOffsetY);
+        int count = countStopsReferencingNode(route, stop.nodeId());
+        if (count <= 1 && !viewState.isRouteSelected(route.id())) {
+            return new StopAnchor(baseX, baseY);
+        }
+
+        int index = occurrenceIndex(route, stop);
+        double angle = (Math.PI * 2.0D * index / Math.max(1, count)) - Math.PI / 2.0D;
+        int radius = count <= 1 ? 9 : 11;
+        return new StopAnchor(
+            baseX + (int) Math.round(Math.cos(angle) * radius),
+            baseY + (int) Math.round(Math.sin(angle) * radius)
+        );
+    }
+
+    private int countStopsReferencingNode(TradeRoute route, UUID nodeId) {
+        int count = 0;
+        for (TradeRouteStop stop : route.stops()) {
+            if (stop.nodeId().equals(nodeId)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int occurrenceIndex(TradeRoute route, TradeRouteStop targetStop) {
+        int index = 0;
+        for (TradeRouteStop stop : route.stops()) {
+            if (stop.nodeId().equals(targetStop.nodeId())) {
+                if (stop.id().equals(targetStop.id())) {
+                    return index;
+                }
+                index++;
+            }
+        }
+        return 0;
+    }
+
+    private String overlapKey(UUID firstNodeId, UUID secondNodeId) {
+        String first = firstNodeId.toString();
+        String second = secondNodeId.toString();
+        return first.compareTo(second) <= 0 ? first + ":" + second : second + ":" + first;
     }
 
     private MapMetrics calculateMapMetrics(int areaWidth, int areaHeight) {
@@ -403,6 +617,38 @@ public final class TradeAtlasMapWidget extends AbstractWidget {
     private BlockPos playerPosition() {
         Player player = Minecraft.getInstance().player;
         return player == null ? null : player.blockPosition();
+    }
+
+    private static void drawLine(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int color) {
+        int dx = x2 - x1;
+        int dy = y2 - y1;
+        int steps = Math.max(Math.abs(dx), Math.abs(dy));
+        if (steps == 0) {
+            guiGraphics.fill(x1, y1, x1 + 1, y1 + 1, color);
+            return;
+        }
+        for (int i = 0; i <= steps; i++) {
+            int x = x1 + Math.round(dx * i / (float) steps);
+            int y = y1 + Math.round(dy * i / (float) steps);
+            guiGraphics.fill(x, y, x + 1, y + 1, color);
+        }
+    }
+
+    private record StopAnchor(int x, int y) {
+    }
+
+    private record RouteStopHit(TradeRoute route, TradeRouteStop stop) {
+    }
+
+    private record RouteSegmentView(
+        TradeRoute route,
+        TradeRouteSegment segment,
+        int fromX,
+        int fromY,
+        int toX,
+        int toY,
+        String overlapKey
+    ) {
     }
 
     private static final class MapMetrics {

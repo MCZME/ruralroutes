@@ -4,6 +4,7 @@ import github.mczme.ruralroutes.RuralRoutes;
 import github.mczme.ruralroutes.network.packet.TradeAtlasActionPayload;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.network.packet.OpenTradeAtlasPayload;
+import github.mczme.ruralroutes.network.packet.TradeRouteActionPayload;
 import github.mczme.ruralroutes.register.RRAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -22,6 +23,14 @@ import java.util.UUID;
 public final class TradeAtlasManager {
 
     private static final int STRUCTURE_SEARCH_RADIUS = 100;
+    private static final int[] ROUTE_COLORS = {
+        0xFF9BD2F7,
+        0xFFE5BE73,
+        0xFFA9DD82,
+        0xFFF08B7C,
+        0xFFC8A2FF,
+        0xFF7DD6C5
+    };
 
     private TradeAtlasManager() {
     }
@@ -47,6 +56,27 @@ public final class TradeAtlasManager {
             case CLEAR_TARGET -> handleClearTarget(player);
         }
 
+        openAtlas(player);
+    }
+
+    public static void handleRouteAction(ServerPlayer player, TradeRouteActionPayload payload) {
+        TradeAtlasState state = getState(player);
+        boolean changed = switch (payload.action()) {
+            case CREATE_ROUTE -> handleCreateRoute(state, payload.nodeId(), payload.stopId());
+            case DELETE_ROUTE -> state.removeRoute(payload.routeId());
+            case TOGGLE_ROUTE_VISIBLE -> handleToggleRouteVisible(state, payload.routeId());
+            case CYCLE_ROUTE_STATUS -> handleCycleRouteStatus(state, payload.routeId());
+            case RENAME_ROUTE -> handleRenameRoute(state, payload.routeId(), payload.text());
+            case ADD_STOP -> handleAddStop(state, payload.routeId(), payload.nodeId(), payload.stopId());
+            case REMOVE_STOP -> handleRemoveStop(state, payload.routeId(), payload.stopId());
+            case UPDATE_STOP_ROLE -> handleUpdateStopRole(state, payload.routeId(), payload.stopId(), payload.text());
+            case UPDATE_STOP_NOTE -> handleUpdateStopNote(state, payload.routeId(), payload.stopId(), payload.text());
+            case CYCLE_SEGMENT_DIRECTION -> handleCycleSegmentDirection(state, payload.routeId(), payload.segmentId());
+        };
+
+        if (changed) {
+            setState(player, state);
+        }
         openAtlas(player);
     }
 
@@ -258,6 +288,105 @@ public final class TradeAtlasManager {
         TradeAtlasState state = getState(player);
         state.clearCurrentTarget();
         setState(player, state);
+    }
+
+    private static boolean handleCreateRoute(TradeAtlasState state, @Nullable UUID firstNodeId,
+            @Nullable UUID secondNodeId) {
+        if (firstNodeId == null || secondNodeId == null) {
+            return false;
+        }
+        if (state.findNodeById(firstNodeId).isEmpty() || state.findNodeById(secondNodeId).isEmpty()) {
+            return false;
+        }
+
+        int routeNumber = state.routes().size() + 1;
+        int color = ROUTE_COLORS[state.routes().size() % ROUTE_COLORS.length];
+        TradeRoute route = TradeRoute.create("Route " + routeNumber, color, firstNodeId, secondNodeId);
+        return state.addRoute(route, false);
+    }
+
+    private static boolean handleToggleRouteVisible(TradeAtlasState state, @Nullable UUID routeId) {
+        if (routeId == null || state.findRouteById(routeId).isEmpty()) {
+            return false;
+        }
+        state.toggleRouteVisible(routeId);
+        return true;
+    }
+
+    private static boolean handleCycleRouteStatus(TradeAtlasState state, @Nullable UUID routeId) {
+        TradeRoute route = state.findRouteById(routeId).orElse(null);
+        if (route == null) {
+            return false;
+        }
+        return state.replaceRoute(route.withStatus(route.status().next()));
+    }
+
+    private static boolean handleRenameRoute(TradeAtlasState state, @Nullable UUID routeId, String text) {
+        TradeRoute route = state.findRouteById(routeId).orElse(null);
+        if (route == null) {
+            return false;
+        }
+        return state.replaceRoute(route.withName(text));
+    }
+
+    private static boolean handleAddStop(TradeAtlasState state, @Nullable UUID routeId, @Nullable UUID nodeId,
+            @Nullable UUID anchorStopId) {
+        TradeRoute route = state.findRouteById(routeId).orElse(null);
+        if (route == null || nodeId == null || state.findNodeById(nodeId).isEmpty()) {
+            return false;
+        }
+        return state.replaceRoute(route.withAddedStop(nodeId, anchorStopId));
+    }
+
+    private static boolean handleRemoveStop(TradeAtlasState state, @Nullable UUID routeId, @Nullable UUID stopId) {
+        TradeRoute route = state.findRouteById(routeId).orElse(null);
+        if (route == null || stopId == null) {
+            return false;
+        }
+        TradeRoute updated = route.withoutStop(stopId);
+        if (updated == route) {
+            return false;
+        }
+        return state.replaceRoute(updated);
+    }
+
+    private static boolean handleUpdateStopRole(TradeAtlasState state, @Nullable UUID routeId,
+            @Nullable UUID stopId, String text) {
+        TradeRoute route = state.findRouteById(routeId).orElse(null);
+        if (route == null || stopId == null) {
+            return false;
+        }
+        TradeRouteStop stop = route.findStop(stopId).orElse(null);
+        if (stop == null) {
+            return false;
+        }
+        return state.replaceRoute(route.withUpdatedStop(stop.withRole(text)));
+    }
+
+    private static boolean handleUpdateStopNote(TradeAtlasState state, @Nullable UUID routeId,
+            @Nullable UUID stopId, String text) {
+        TradeRoute route = state.findRouteById(routeId).orElse(null);
+        if (route == null || stopId == null) {
+            return false;
+        }
+        TradeRouteStop stop = route.findStop(stopId).orElse(null);
+        if (stop == null) {
+            return false;
+        }
+        return state.replaceRoute(route.withUpdatedStop(stop.withNote(text)));
+    }
+
+    private static boolean handleCycleSegmentDirection(TradeAtlasState state, @Nullable UUID routeId,
+            @Nullable UUID segmentId) {
+        TradeRoute route = state.findRouteById(routeId).orElse(null);
+        if (route == null || segmentId == null) {
+            return false;
+        }
+        TradeRouteSegment segment = route.findSegment(segmentId).orElse(null);
+        if (segment == null) {
+            return false;
+        }
+        return state.replaceRoute(route.withUpdatedSegment(segment.withDirection(segment.direction().next())));
     }
 
     private static java.util.Optional<TradeAtlasNode> findNearestClueByStyle(TradeAtlasState state,

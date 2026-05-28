@@ -6,8 +6,11 @@ import github.mczme.ruralroutes.client.gui.component.atlas.TradeAtlasFirstEntryW
 import github.mczme.ruralroutes.client.gui.component.atlas.TradeAtlasMapWidget;
 import github.mczme.ruralroutes.client.gui.component.atlas.TradeAtlasNodeListWidget;
 import github.mczme.ruralroutes.client.gui.component.atlas.TradeAtlasViewState;
+import github.mczme.ruralroutes.client.gui.component.atlas.TradeRouteListWidget;
 import github.mczme.ruralroutes.core.atlas.TradeAtlasNode;
 import github.mczme.ruralroutes.core.atlas.TradeAtlasState;
+import github.mczme.ruralroutes.core.atlas.TradeRoute;
+import github.mczme.ruralroutes.core.atlas.TradeRouteStop;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.network.packet.TradeAtlasActionPayload;
 import net.minecraft.client.gui.GuiGraphics;
@@ -43,6 +46,7 @@ public class TradeAtlasScreen extends Screen {
     private int topPos;
     private TradeAtlasFirstEntryWidget firstEntryWidget;
     private TradeAtlasNodeListWidget nodeListWidget;
+    private TradeRouteListWidget routeListWidget;
     private TradeAtlasMapWidget mapWidget;
     private TradeAtlasDetailWidget detailWidget;
 
@@ -69,10 +73,19 @@ public class TradeAtlasScreen extends Screen {
             listX(),
             contentY(),
             LIST_WIDTH,
-            contentHeight(),
+            nodeListHeight(),
             state,
             viewState,
             this::selectNode
+        );
+        routeListWidget = new TradeRouteListWidget(
+            listX(),
+            routeListY(),
+            LIST_WIDTH,
+            routeListHeight(),
+            state,
+            viewState,
+            this::selectRoute
         );
         mapWidget = new TradeAtlasMapWidget(
             mapX(),
@@ -82,6 +95,7 @@ public class TradeAtlasScreen extends Screen {
             state,
             viewState,
             this::selectNode,
+            this::selectRouteStop,
             this::sendLocate
         );
         detailWidget = new TradeAtlasDetailWidget(
@@ -108,6 +122,7 @@ public class TradeAtlasScreen extends Screen {
             firstEntryWidget.render(guiGraphics, mouseX, mouseY, partialTick);
         } else {
             nodeListWidget.render(guiGraphics, mouseX, mouseY, partialTick);
+            routeListWidget.render(guiGraphics, mouseX, mouseY, partialTick);
             mapWidget.render(guiGraphics, mouseX, mouseY, partialTick);
             detailWidget.render(guiGraphics, mouseX, mouseY, partialTick);
             mapWidget.renderHoveredTooltip(guiGraphics, mouseX, mouseY);
@@ -134,7 +149,18 @@ public class TradeAtlasScreen extends Screen {
         if (mapWidget.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
+        if (routeListWidget.mouseClicked(mouseX, mouseY, button)) {
+            return true;
+        }
         return nodeListWidget.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+        if (!firstEntrySelection && detailWidget.charTyped(codePoint, modifiers)) {
+            return true;
+        }
+        return super.charTyped(codePoint, modifiers);
     }
 
     @Override
@@ -163,6 +189,14 @@ public class TradeAtlasScreen extends Screen {
 
     private void selectNode(TradeAtlasNode node) {
         viewState.selectNode(node);
+    }
+
+    private void selectRoute(TradeRoute route) {
+        viewState.selectRoute(route);
+    }
+
+    private void selectRouteStop(TradeRoute route, TradeRouteStop stop) {
+        viewState.selectRouteStop(route, stop);
     }
 
     private void setTarget(TradeAtlasNode node) {
@@ -204,10 +238,25 @@ public class TradeAtlasScreen extends Screen {
         return GUI_HEIGHT - HEADER_HEIGHT - PADDING * 2;
     }
 
+    private int nodeListHeight() {
+        return (contentHeight() - PANEL_GAP) / 2;
+    }
+
+    private int routeListY() {
+        return contentY() + nodeListHeight() + PANEL_GAP;
+    }
+
+    private int routeListHeight() {
+        return contentHeight() - nodeListHeight() - PANEL_GAP;
+    }
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         InputConstants.Key inputKey = InputConstants.getKey(keyCode, scanCode);
         if (super.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
+        }
+        if (!firstEntrySelection && detailWidget.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         }
         if (this.minecraft != null && this.minecraft.options.keyInventory.isActiveAndMatches(inputKey)) {
