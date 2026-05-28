@@ -3,8 +3,10 @@ package github.mczme.ruralroutes.client;
 import github.mczme.ruralroutes.client.gui.screen.DisplayCaseScreen;
 import github.mczme.ruralroutes.client.gui.screen.NodeDataViewerScreen;
 import github.mczme.ruralroutes.client.gui.screen.RumorBoardScreen;
+import github.mczme.ruralroutes.client.gui.screen.TradeAtlasScreen;
 import github.mczme.ruralroutes.network.packet.OpenNodeDataViewerPayload;
 import github.mczme.ruralroutes.network.packet.OpenRumorBoardPayload;
+import github.mczme.ruralroutes.network.packet.OpenTradeAtlasPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
 
@@ -32,5 +34,9 @@ public final class ClientGuiHooks {
         Minecraft.getInstance().setScreen(
                 new RumorBoardScreen(payload.blockPos(), payload.marketState())
         );
+    }
+
+    public static void openTradeAtlasScreen(OpenTradeAtlasPayload payload) {
+        Minecraft.getInstance().setScreen(new TradeAtlasScreen(payload.state()));
     }
 }

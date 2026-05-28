@@ -1,6 +1,7 @@
 package github.mczme.ruralroutes.register;
 
 import github.mczme.ruralroutes.RuralRoutes;
+import github.mczme.ruralroutes.core.atlas.TradeAtlasState;
 import github.mczme.ruralroutes.advancement.RRPlayerProgressState;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import net.neoforged.bus.api.IEventBus;
@@ -32,6 +33,13 @@ public class RRAttachments {
         ATTACHMENTS.register("player_progress", () ->
             AttachmentType.builder(() -> RRPlayerProgressState.EMPTY)
                 .serialize(RRPlayerProgressState.CODEC)
+                .copyOnDeath()
+                .build());
+
+    public static final Supplier<AttachmentType<TradeAtlasState>> PLAYER_ATLAS =
+        ATTACHMENTS.register("player_atlas", () ->
+            AttachmentType.builder(TradeAtlasState::empty)
+                .serialize(TradeAtlasState.CODEC)
                 .copyOnDeath()
                 .build());
 

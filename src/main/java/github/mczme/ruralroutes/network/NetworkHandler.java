@@ -5,7 +5,9 @@ import github.mczme.ruralroutes.network.packet.CoinExchangeRequestPayload;
 import github.mczme.ruralroutes.network.packet.CoinExchangeStatePayload;
 import github.mczme.ruralroutes.network.packet.OpenNodeDataViewerPayload;
 import github.mczme.ruralroutes.network.packet.OpenRumorBoardPayload;
+import github.mczme.ruralroutes.network.packet.OpenTradeAtlasPayload;
 import github.mczme.ruralroutes.network.packet.PendingTradeSyncPayload;
+import github.mczme.ruralroutes.network.packet.TradeAtlasActionPayload;
 import github.mczme.ruralroutes.network.packet.TradeFeedbackPayload;
 import github.mczme.ruralroutes.network.packet.TradeRequestPayload;
 import github.mczme.ruralroutes.network.packet.TradeSlotSyncPayload;
@@ -57,5 +59,13 @@ public class NetworkHandler {
         // 打开节点数据查看器（服务端→客户端）
         registrar.playToClient(OpenNodeDataViewerPayload.TYPE, OpenNodeDataViewerPayload.STREAM_CODEC,
             OpenNodeDataViewerPayload::handleClient);
+
+        // 打开商路图册（服务端→客户端）
+        registrar.playToClient(OpenTradeAtlasPayload.TYPE, OpenTradeAtlasPayload.STREAM_CODEC,
+            OpenTradeAtlasPayload::handleClient);
+
+        // 商路图册操作（客户端→服务端）
+        registrar.playToServer(TradeAtlasActionPayload.TYPE, TradeAtlasActionPayload.STREAM_CODEC,
+            TradeAtlasActionPayload::handleServer);
     }
 }

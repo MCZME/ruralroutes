@@ -61,6 +61,8 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("item.ruralroutes.config_tool.tooltip", "开发者工具，用于设置贸易站主题和方块外观");
         addItem(RRItems.NODE_DATA_VIEWER, "节点数据查看器");
         add("item.ruralroutes.node_data_viewer.tooltip", "开发者工具，用于查看核心方块对应的节点数据快照");
+        addItem(RRItems.TRADE_ATLAS, "商路图册");
+        add("item.ruralroutes.trade_atlas.tooltip", "打开图册并管理已知的村庄节点");
 
         // 货币
         addItem(RRItems.COPPER_COIN, "铜板");
@@ -132,6 +134,50 @@ public class RRZhCnLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.node_data_viewer.status.missing_station", "当前方块还没有关联贸易站");
         add("gui.ruralroutes.node_data_viewer.status.missing_node_data", "目标还没有商业节点数据");
         add("gui.ruralroutes.node_data_viewer.missing_item", "缺失物品: %s");
+
+        // 商路图册 GUI
+        add("gui.ruralroutes.trade_atlas.title", "商路图册");
+        add("gui.ruralroutes.trade_atlas.first_entry_prompt", "请选择第一个村庄风格");
+        add("gui.ruralroutes.trade_atlas.first_entry_hint", "第一次线索定位是免费的。");
+        add("gui.ruralroutes.trade_atlas.first_entry.plains", "平原：稳定起步");
+        add("gui.ruralroutes.trade_atlas.first_entry.desert", "沙漠：稀疏路线");
+        add("gui.ruralroutes.trade_atlas.first_entry.savanna", "热带草原：开阔行程");
+        add("gui.ruralroutes.trade_atlas.first_entry.taiga", "针叶林：木材路径");
+        add("gui.ruralroutes.trade_atlas.first_entry.snowy", "雪地：远方驿路");
+        add("gui.ruralroutes.trade_atlas.section.locate", "定位");
+        add("gui.ruralroutes.trade_atlas.section.nodes", "节点");
+        add("gui.ruralroutes.trade_atlas.section.map", "节点图");
+        add("gui.ruralroutes.trade_atlas.section.detail", "详情");
+        add("gui.ruralroutes.trade_atlas.empty", "当前还没有村庄节点");
+        add("gui.ruralroutes.trade_atlas.action.locate", "定位");
+        add("gui.ruralroutes.trade_atlas.action.close_locate", "收起定位");
+        add("gui.ruralroutes.trade_atlas.action.set_target", "设为目标");
+        add("gui.ruralroutes.trade_atlas.action.current_target", "当前目标");
+        add("gui.ruralroutes.trade_atlas.action.clear_target", "取消目标");
+        add("gui.ruralroutes.trade_atlas.action.center_selected", "居中");
+        add("gui.ruralroutes.trade_atlas.detail.empty", "请选择一个节点查看");
+        add("gui.ruralroutes.trade_atlas.detail.status", "状态");
+        add("gui.ruralroutes.trade_atlas.detail.style", "风格");
+        add("gui.ruralroutes.trade_atlas.detail.dimension", "维度");
+        add("gui.ruralroutes.trade_atlas.detail.position", "坐标");
+        add("gui.ruralroutes.trade_atlas.detail.target", "目标");
+        add("gui.ruralroutes.trade_atlas.detail.yes", "是");
+        add("gui.ruralroutes.trade_atlas.detail.no", "否");
+        add("gui.ruralroutes.trade_atlas.detail.theme", "主题");
+        add("gui.ruralroutes.trade_atlas.detail.invalid_hint", "需要现场重新确认");
+        add("gui.ruralroutes.trade_atlas.map.zoom", "缩放 %s%%");
+        add("gui.ruralroutes.trade_atlas.locate.choose_style", "选择风格");
+        add("gui.ruralroutes.trade_atlas.locate.cost_pending", "成本：待接入");
+        add("gui.ruralroutes.trade_atlas.locate.no_style", "请先选择村庄风格。");
+        add("gui.ruralroutes.trade_atlas.locate.busy", "正在进行一次定位，请稍候。");
+        add("gui.ruralroutes.trade_atlas.locate.pending_clue", "请先确认或放弃当前未确认线索。");
+        add("gui.ruralroutes.trade_atlas.locate.failed", "没有找到对应的村庄结构。");
+        add("gui.ruralroutes.trade_atlas.locate.duplicate", "这个村庄已经记录过了。");
+        add("gui.ruralroutes.trade_atlas.locate.success", "已找到 %s 线索。");
+        add("block.ruralroutes.trade_station.invalid_village", "这个贸易站附近没有有效村庄。");
+        add("gui.ruralroutes.trade_atlas.status.clue", "线索");
+        add("gui.ruralroutes.trade_atlas.status.recorded", "已记录");
+        add("gui.ruralroutes.trade_atlas.status.invalid", "失效");
 
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "主题: %s");

@@ -1,8 +1,12 @@
 package github.mczme.ruralroutes.core.theme;
 
+import com.mojang.serialization.Codec;
 import github.mczme.ruralroutes.RuralRoutes;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.StructureTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 import java.util.Map;
 import java.util.Optional;
@@ -26,6 +30,9 @@ public enum VillageStyle implements StringRepresentable {
         ResourceLocation.parse("minecraft:snowy_plains"), SNOWY
     );
 
+    public static final Codec<VillageStyle> CODEC =
+        Codec.STRING.xmap(VillageStyle::byName, VillageStyle::getSerializedName);
+
     private final String serializedName;
     private final ResourceLocation biomeId;
 
@@ -36,6 +43,16 @@ public enum VillageStyle implements StringRepresentable {
 
     public ResourceLocation biomeId() {
         return biomeId;
+    }
+
+    public TagKey<Structure> structureTag() {
+        return switch (this) {
+            case PLAINS -> StructureTags.ON_PLAINS_VILLAGE_MAPS;
+            case DESERT -> StructureTags.ON_DESERT_VILLAGE_MAPS;
+            case SAVANNA -> StructureTags.ON_SAVANNA_VILLAGE_MAPS;
+            case TAIGA -> StructureTags.ON_TAIGA_VILLAGE_MAPS;
+            case SNOWY -> StructureTags.ON_SNOWY_VILLAGE_MAPS;
+        };
     }
 
     public String translationKey() {
@@ -60,6 +77,17 @@ public enum VillageStyle implements StringRepresentable {
         }
 
         return style;
+    }
+
+    public static VillageStyle byName(String serializedName) {
+        return switch (serializedName) {
+            case "plains" -> PLAINS;
+            case "desert" -> DESERT;
+            case "savanna" -> SAVANNA;
+            case "taiga" -> TAIGA;
+            case "snowy" -> SNOWY;
+            default -> PLAINS;
+        };
     }
 
     public static Optional<VillageStyle> tryFromBiome(ResourceLocation biomeId) {

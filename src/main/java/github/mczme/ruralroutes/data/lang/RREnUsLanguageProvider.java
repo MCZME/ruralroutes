@@ -61,6 +61,8 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("item.ruralroutes.config_tool.tooltip", "Developer tool for setting trade station themes and block styles");
         addItem(RRItems.NODE_DATA_VIEWER, "Node Data Viewer");
         add("item.ruralroutes.node_data_viewer.tooltip", "Developer tool for inspecting node data snapshots from core blocks");
+        addItem(RRItems.TRADE_ATLAS, "Trade Atlas");
+        add("item.ruralroutes.trade_atlas.tooltip", "Open the atlas and manage known village nodes");
 
         // 货币
         addItem(RRItems.COPPER_COIN, "Copper Coin");
@@ -132,6 +134,50 @@ public class RREnUsLanguageProvider extends LanguageProvider {
         add("gui.ruralroutes.node_data_viewer.status.missing_station", "This block is not linked to a trade station yet");
         add("gui.ruralroutes.node_data_viewer.status.missing_node_data", "The target does not have commercial node data yet");
         add("gui.ruralroutes.node_data_viewer.missing_item", "Missing item: %s");
+
+        // Trade atlas GUI
+        add("gui.ruralroutes.trade_atlas.title", "Trade Atlas");
+        add("gui.ruralroutes.trade_atlas.first_entry_prompt", "Choose your first village style");
+        add("gui.ruralroutes.trade_atlas.first_entry_hint", "This search is free for your first clue.");
+        add("gui.ruralroutes.trade_atlas.first_entry.plains", "Plains: steady start");
+        add("gui.ruralroutes.trade_atlas.first_entry.desert", "Desert: sparse routes");
+        add("gui.ruralroutes.trade_atlas.first_entry.savanna", "Savanna: wide travel");
+        add("gui.ruralroutes.trade_atlas.first_entry.taiga", "Taiga: timber paths");
+        add("gui.ruralroutes.trade_atlas.first_entry.snowy", "Snowy: remote trail");
+        add("gui.ruralroutes.trade_atlas.section.locate", "Locate");
+        add("gui.ruralroutes.trade_atlas.section.nodes", "Nodes");
+        add("gui.ruralroutes.trade_atlas.section.map", "Node Map");
+        add("gui.ruralroutes.trade_atlas.section.detail", "Detail");
+        add("gui.ruralroutes.trade_atlas.empty", "No village nodes yet");
+        add("gui.ruralroutes.trade_atlas.action.locate", "Locate");
+        add("gui.ruralroutes.trade_atlas.action.close_locate", "Close Locate");
+        add("gui.ruralroutes.trade_atlas.action.set_target", "Target");
+        add("gui.ruralroutes.trade_atlas.action.current_target", "Current Target");
+        add("gui.ruralroutes.trade_atlas.action.clear_target", "Clear Target");
+        add("gui.ruralroutes.trade_atlas.action.center_selected", "Center");
+        add("gui.ruralroutes.trade_atlas.detail.empty", "Select a node to inspect");
+        add("gui.ruralroutes.trade_atlas.detail.status", "Status");
+        add("gui.ruralroutes.trade_atlas.detail.style", "Style");
+        add("gui.ruralroutes.trade_atlas.detail.dimension", "Dimension");
+        add("gui.ruralroutes.trade_atlas.detail.position", "Position");
+        add("gui.ruralroutes.trade_atlas.detail.target", "Target");
+        add("gui.ruralroutes.trade_atlas.detail.yes", "Yes");
+        add("gui.ruralroutes.trade_atlas.detail.no", "No");
+        add("gui.ruralroutes.trade_atlas.detail.theme", "Theme");
+        add("gui.ruralroutes.trade_atlas.detail.invalid_hint", "Needs reconfirmation");
+        add("gui.ruralroutes.trade_atlas.map.zoom", "Zoom %s%%");
+        add("gui.ruralroutes.trade_atlas.locate.choose_style", "Choose a style");
+        add("gui.ruralroutes.trade_atlas.locate.cost_pending", "Cost: pending");
+        add("gui.ruralroutes.trade_atlas.locate.no_style", "Choose a village style first.");
+        add("gui.ruralroutes.trade_atlas.locate.busy", "A locate is already running.");
+        add("gui.ruralroutes.trade_atlas.locate.pending_clue", "Confirm or clear the existing clue first.");
+        add("gui.ruralroutes.trade_atlas.locate.failed", "No matching village structure was found.");
+        add("gui.ruralroutes.trade_atlas.locate.duplicate", "That village is already known.");
+        add("gui.ruralroutes.trade_atlas.locate.success", "Located %s clue.");
+        add("block.ruralroutes.trade_station.invalid_village", "No valid village was found at this trade station.");
+        add("gui.ruralroutes.trade_atlas.status.clue", "Clue");
+        add("gui.ruralroutes.trade_atlas.status.recorded", "Recorded");
+        add("gui.ruralroutes.trade_atlas.status.invalid", "Invalid");
 
         // 贸易站 GUI
         add("gui.ruralroutes.trade_station.theme", "Theme: %s");

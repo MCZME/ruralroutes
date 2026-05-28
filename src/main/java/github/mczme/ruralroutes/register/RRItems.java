@@ -3,6 +3,7 @@ package github.mczme.ruralroutes.register;
 import github.mczme.ruralroutes.RuralRoutes;
 import github.mczme.ruralroutes.item.ConfigToolItem;
 import github.mczme.ruralroutes.item.NodeDataViewerItem;
+import github.mczme.ruralroutes.item.TradeAtlasItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -68,6 +69,9 @@ public final class RRItems {
 
     public static final DeferredItem<NodeDataViewerItem> NODE_DATA_VIEWER =
         register("node_data_viewer", id -> new NodeDataViewerItem(new Item.Properties()));
+
+    public static final DeferredItem<TradeAtlasItem> TRADE_ATLAS =
+        register("trade_atlas", id -> new TradeAtlasItem(new Item.Properties().stacksTo(1)));
 
     // 货币物品
     public static final DeferredItem<Item> COPPER_COIN =

@@ -4,6 +4,7 @@ import github.mczme.ruralroutes.blockentity.DisplayCaseBlockEntity;
 import github.mczme.ruralroutes.blockentity.TradeNodeBlockEntity;
 import github.mczme.ruralroutes.blockentity.TradeStationBlockEntity;
 import github.mczme.ruralroutes.advancement.trigger.OpenTradeStationTrigger.TradeStationEvent;
+import github.mczme.ruralroutes.core.atlas.TradeAtlasManager;
 import github.mczme.ruralroutes.core.node.CommercialNodeData;
 import github.mczme.ruralroutes.core.node.CommercialNodeManager;
 import github.mczme.ruralroutes.core.node.NodeTradeEntry;
@@ -106,6 +107,9 @@ public class TradeStationBlock extends BaseEntityBlock {
                 // 检查主题是否有效
                 ResourceLocation themeName = station.getVillageTheme();
                 if (themeName == null) {
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        TradeAtlasManager.recordTradeStationVisit(serverPlayer, pos, state.getValue(STYLE), null, false);
+                    }
                     return InteractionResult.PASS;
                 }
 
@@ -125,6 +129,13 @@ public class TradeStationBlock extends BaseEntityBlock {
                         }
                         if (player instanceof ServerPlayer serverPlayer) {
                             recordVillageDiscovery(serverPlayer, themeName);
+                            TradeAtlasManager.recordTradeStationVisit(
+                                serverPlayer,
+                                pos,
+                                state.getValue(STYLE),
+                                themeName,
+                                true
+                            );
                             RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(serverPlayer, TradeStationEvent.OPEN);
                         }
                         openMenu(player, station);
@@ -134,11 +145,17 @@ public class TradeStationBlock extends BaseEntityBlock {
                     player.displayClientMessage(
                         Component.translatable("block.ruralroutes.trade_station.mismatch"),
                         true);
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        TradeAtlasManager.recordTradeStationVisit(serverPlayer, pos, state.getValue(STYLE), themeName, false);
+                    }
                     return InteractionResult.FAIL;
                 }
 
                 // 区块没有数据，检查附近是否有村庄
                 if (!CommercialNodeManager.hasVillageNearby(level, pos)) {
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        TradeAtlasManager.recordTradeStationVisit(serverPlayer, pos, state.getValue(STYLE), themeName, false);
+                    }
                     // 无村庄，无响应
                     return InteractionResult.PASS;
                 }
@@ -153,10 +170,20 @@ public class TradeStationBlock extends BaseEntityBlock {
                     syncNodeIdToNearbyBlocks(level, pos, nodeId, newData);
                     if (player instanceof ServerPlayer serverPlayer) {
                         recordVillageDiscovery(serverPlayer, themeName);
+                        TradeAtlasManager.recordTradeStationVisit(
+                            serverPlayer,
+                            pos,
+                            state.getValue(STYLE),
+                            themeName,
+                            true
+                        );
                         RRCriteriaTriggers.OPEN_TRADE_STATION.get().trigger(serverPlayer, TradeStationEvent.OPEN);
                     }
                     openMenu(player, station);
                     return InteractionResult.CONSUME;
+                }
+                if (player instanceof ServerPlayer serverPlayer) {
+                    TradeAtlasManager.recordTradeStationVisit(serverPlayer, pos, state.getValue(STYLE), themeName, false);
                 }
             }
         }
