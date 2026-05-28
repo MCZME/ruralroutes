@@ -2,6 +2,7 @@ package github.mczme.ruralroutes.core.atlas;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import github.mczme.ruralroutes.core.theme.VillageStyle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.resources.ResourceLocation;
@@ -92,6 +93,23 @@ public final class TradeAtlasState {
         return Optional.empty();
     }
 
+    /**
+     * 查找同维度、同风格的未确认线索。
+     *
+     * 图册结构定位拿到的是结构 locatePos；玩家实际交互的是贸易站方块位置。
+     * 因此贸易站确认时需要按风格合并线索，而不是只按精确坐标匹配。
+     */
+    public Optional<TradeAtlasNode> findClueByStyle(ResourceLocation dimensionId, VillageStyle style) {
+        for (TradeAtlasNode node : nodes) {
+            if (node.dimensionId().equals(dimensionId)
+                && node.style() == style
+                && node.status() == AtlasNodeStatus.CLUE) {
+                return Optional.of(node);
+            }
+        }
+        return Optional.empty();
+    }
+
     public Optional<TradeAtlasNode> currentTarget() {
         return currentTargetNodeId.flatMap(this::findNodeById);
     }
@@ -135,12 +153,21 @@ public final class TradeAtlasState {
         return true;
     }
 
+    /**
+     * 新增或替换一个节点。
+     *
+     * 优先按节点 id 替换，允许结构线索在确认贸易站后移动到真实方块位置。
+     * 如果没有同 id 节点，再退回到旧的“同位置合并”规则。
+     */
     public void upsertNodeAtLocation(TradeAtlasNode node, boolean selectIfEmpty) {
         if (node == null) {
             return;
         }
 
-        int index = findNodeIndex(node.dimensionId(), node.position());
+        int index = findNodeIndex(node.id());
+        if (index < 0) {
+            index = findNodeIndex(node.dimensionId(), node.position());
+        }
         if (index >= 0) {
             nodes.set(index, node);
         } else {
@@ -154,7 +181,20 @@ public final class TradeAtlasState {
 
     private int findNodeIndex(ResourceLocation dimensionId, BlockPos position) {
         for (int i = 0; i < nodes.size(); i++) {
-            if (nodes.get(i).sameLocation(dimensionId, position)) {
+            TradeAtlasNode node = nodes.get(i);
+            if (node.sameLocation(dimensionId, position)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private int findNodeIndex(UUID nodeId) {
+        if (nodeId == null) {
+            return -1;
+        }
+        for (int i = 0; i < nodes.size(); i++) {
+            if (nodes.get(i).id().equals(nodeId)) {
                 return i;
             }
         }

@@ -21,7 +21,7 @@ import java.util.UUID;
  */
 public final class TradeAtlasManager {
 
-    private static final int STRUCTURE_SEARCH_RADIUS = 1000;
+    private static final int STRUCTURE_SEARCH_RADIUS = 100;
 
     private TradeAtlasManager() {
     }
@@ -58,7 +58,10 @@ public final class TradeAtlasManager {
         ServerLevel level = player.serverLevel();
         ResourceLocation dimensionId = level.dimension().location();
         TradeAtlasState state = getState(player);
-        TradeAtlasNode existing = state.findNodeAt(dimensionId, stationPos).orElse(null);
+        // 结构线索位置通常不是贸易站方块位置；交互贸易站时优先把同风格线索升级。
+        TradeAtlasNode existing = state.findNodeAt(dimensionId, stationPos)
+            .or(() -> state.findClueByStyle(dimensionId, style))
+            .orElse(null);
 
         TradeAtlasNode updatedNode;
         if (validVillage) {
@@ -151,18 +154,57 @@ public final class TradeAtlasManager {
     private static Component locateOnce(ServerPlayer player, TradeAtlasState currentState, VillageStyle style,
             boolean firstEntryFlow) {
         ServerLevel level = player.serverLevel();
-        BlockPos foundPos = level.findNearestMapStructure(
-            style.structureTag(),
-            player.blockPosition(),
-            STRUCTURE_SEARCH_RADIUS,
-            false
-        );
+        BlockPos origin = player.blockPosition();
+        ResourceLocation dimensionId = level.dimension().location();
+        AtlasVillageStructureCache cache = AtlasVillageStructureCache.get(level);
 
-        if (foundPos == null) {
+        // 服务器已经定位过的结构可以直接复用，玩家图册状态只负责过滤个人已知线索。
+        AtlasVillageStructureCache.Entry cachedEntry = cache.findNearest(
+            dimensionId,
+            style,
+            origin,
+            entry -> currentState.findNodeAt(entry.dimensionId(), entry.locatePos()).isEmpty()
+        ).orElse(null);
+        if (cachedEntry != null) {
+            return addLocatedClue(currentState, style, cachedEntry.dimensionId(), cachedEntry.locatePos(), firstEntryFlow);
+        }
+
+        // 缓存没有可用候选时，再执行一次专用结构搜索，并跳过所有 level 已缓存结构。
+        AtlasVillageLocator.LocatedVillageStructure located = AtlasVillageLocator.findNearestUncached(
+            level,
+            style,
+            origin,
+            STRUCTURE_SEARCH_RADIUS,
+            candidate -> cache.contains(
+                candidate.dimensionId(),
+                candidate.style(),
+                candidate.structureId(),
+                candidate.structureChunk()
+            )
+        ).orElse(null);
+
+        if (located == null) {
             return Component.translatable("gui.ruralroutes.trade_atlas.locate.failed");
         }
 
-        ResourceLocation dimensionId = level.dimension().location();
+        AtlasVillageStructureCache.Entry remembered = cache.remember(
+            located.dimensionId(),
+            located.style(),
+            located.structureId(),
+            located.structureChunk(),
+            located.locatePos()
+        );
+
+        return addLocatedClue(currentState, style, remembered.dimensionId(), remembered.locatePos(), firstEntryFlow);
+    }
+
+    /**
+     * 将定位结果写入玩家图册。
+     *
+     * 首次免费资格只在真正新增线索后消耗，避免搜索失败或重复候选吃掉入口机会。
+     */
+    private static Component addLocatedClue(TradeAtlasState currentState, VillageStyle style,
+            ResourceLocation dimensionId, BlockPos foundPos, boolean firstEntryFlow) {
         TradeAtlasNode existing = currentState.findNodeAt(dimensionId, foundPos).orElse(null);
         if (existing != null) {
             currentState.setCurrentTargetIfAbsent(existing.id());

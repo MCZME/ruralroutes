@@ -3,10 +3,7 @@ package github.mczme.ruralroutes.core.theme;
 import com.mojang.serialization.Codec;
 import github.mczme.ruralroutes.RuralRoutes;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.StructureTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.level.levelgen.structure.Structure;
 
 import java.util.Map;
 import java.util.Optional;
@@ -16,11 +13,11 @@ import java.util.Optional;
  * 由主题所属群系推导，用于驱动方块状态和模型变体。
  */
 public enum VillageStyle implements StringRepresentable {
-    PLAINS("plains", ResourceLocation.parse("minecraft:plains")),
-    DESERT("desert", ResourceLocation.parse("minecraft:desert")),
-    SAVANNA("savanna", ResourceLocation.parse("minecraft:savanna")),
-    TAIGA("taiga", ResourceLocation.parse("minecraft:taiga")),
-    SNOWY("snowy", ResourceLocation.parse("minecraft:snowy_plains"));
+    PLAINS("plains", ResourceLocation.parse("minecraft:plains"), ResourceLocation.parse("minecraft:village_plains")),
+    DESERT("desert", ResourceLocation.parse("minecraft:desert"), ResourceLocation.parse("minecraft:village_desert")),
+    SAVANNA("savanna", ResourceLocation.parse("minecraft:savanna"), ResourceLocation.parse("minecraft:village_savanna")),
+    TAIGA("taiga", ResourceLocation.parse("minecraft:taiga"), ResourceLocation.parse("minecraft:village_taiga")),
+    SNOWY("snowy", ResourceLocation.parse("minecraft:snowy_plains"), ResourceLocation.parse("minecraft:village_snowy"));
 
     private static final Map<ResourceLocation, VillageStyle> BY_BIOME = Map.of(
         ResourceLocation.parse("minecraft:plains"), PLAINS,
@@ -35,24 +32,26 @@ public enum VillageStyle implements StringRepresentable {
 
     private final String serializedName;
     private final ResourceLocation biomeId;
+    private final ResourceLocation structureId;
 
-    VillageStyle(String serializedName, ResourceLocation biomeId) {
+    VillageStyle(String serializedName, ResourceLocation biomeId, ResourceLocation structureId) {
         this.serializedName = serializedName;
         this.biomeId = biomeId;
+        this.structureId = structureId;
     }
 
     public ResourceLocation biomeId() {
         return biomeId;
     }
 
-    public TagKey<Structure> structureTag() {
-        return switch (this) {
-            case PLAINS -> StructureTags.ON_PLAINS_VILLAGE_MAPS;
-            case DESERT -> StructureTags.ON_DESERT_VILLAGE_MAPS;
-            case SAVANNA -> StructureTags.ON_SAVANNA_VILLAGE_MAPS;
-            case TAIGA -> StructureTags.ON_TAIGA_VILLAGE_MAPS;
-            case SNOWY -> StructureTags.ON_SNOWY_VILLAGE_MAPS;
-        };
+    /**
+     * 与风格一一对应的原版村庄结构。
+     *
+     * 不使用 `StructureTags.ON_*_VILLAGE_MAPS` 作为图册搜索入口，因为这些 tag
+     * 位于 vanilla 的 trade_rebalance 内置数据包中，普通世界默认不会加载。
+     */
+    public ResourceLocation structureId() {
+        return structureId;
     }
 
     public String translationKey() {
