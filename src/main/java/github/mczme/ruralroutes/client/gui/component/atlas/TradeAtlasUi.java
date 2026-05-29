@@ -12,9 +12,10 @@ import java.util.List;
 
 public final class TradeAtlasUi {
 
-    public static final int PANEL_HEADER_HEIGHT = 18;
-    public static final int ROW_HEIGHT = 20;
-    public static final int ROW_GAP = 3;
+    public static final int PANEL_HEADER_HEIGHT = 14;
+    public static final int ROW_HEIGHT = 14;
+    public static final int ROW_GAP = 1;
+    public static final int BUTTON_HEIGHT = 14;
 
     public static final int PANEL_BG = 0xD9262B30;
     public static final int PANEL_HEADER_BG = 0xCC384049;
@@ -47,7 +48,7 @@ public final class TradeAtlasUi {
         guiGraphics.fill(x, y, x + width, y + height, PANEL_BG);
         guiGraphics.renderOutline(x, y, width, height, PANEL_BORDER);
         guiGraphics.fill(x + 1, y + 1, x + width - 1, y + PANEL_HEADER_HEIGHT, PANEL_HEADER_BG);
-        guiGraphics.drawString(font, title, x + 6, y + 5, TEXT_PRIMARY, false);
+        guiGraphics.drawString(font, title, x + 6, y + 3, TEXT_PRIMARY, false);
     }
 
     public static void drawDetailLine(GuiGraphics guiGraphics, Font font, int x, int y,

@@ -10,9 +10,11 @@ import github.mczme.ruralroutes.client.gui.component.atlas.TradeRouteListWidget;
 import github.mczme.ruralroutes.core.atlas.TradeAtlasNode;
 import github.mczme.ruralroutes.core.atlas.TradeAtlasState;
 import github.mczme.ruralroutes.core.atlas.TradeRoute;
+import github.mczme.ruralroutes.core.atlas.TradeRouteSegment;
 import github.mczme.ruralroutes.core.atlas.TradeRouteStop;
 import github.mczme.ruralroutes.core.theme.VillageStyle;
 import github.mczme.ruralroutes.network.packet.TradeAtlasActionPayload;
+import github.mczme.ruralroutes.network.packet.TradeRouteActionPayload;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -23,14 +25,14 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class TradeAtlasScreen extends Screen {
 
-    private static final int GUI_WIDTH = 536;
-    private static final int GUI_HEIGHT = 256;
-    private static final int HEADER_HEIGHT = 22;
+    private static final int MIN_GUI_WIDTH = 536;
+    private static final int MAX_GUI_WIDTH = 720;
+    private static final int MIN_GUI_HEIGHT = 256;
+    private static final int MAX_GUI_HEIGHT = 322;
+    private static final int HEADER_HEIGHT = 16;
     private static final int PADDING = 8;
-    private static final int PANEL_GAP = 8;
-    private static final int LIST_WIDTH = 142;
-    private static final int MAP_WIDTH = 224;
-    private static final int DETAIL_WIDTH = 138;
+    private static final int PANEL_GAP = 4;
+    private static final int FLOATING_PANEL_TOP_OFFSET = 4;
 
     private static final int BACKDROP_TOP = 0xE015171A;
     private static final int BACKDROP_BOTTOM = 0xF0050608;
@@ -42,6 +44,11 @@ public class TradeAtlasScreen extends Screen {
     private final TradeAtlasState state;
     private final boolean firstEntrySelection;
     private final TradeAtlasViewState viewState;
+    private int guiWidth;
+    private int guiHeight;
+    private int listWidth;
+    private int mapWidth;
+    private int detailWidth;
     private int leftPos;
     private int topPos;
     private TradeAtlasFirstEntryWidget firstEntryWidget;
@@ -60,19 +67,37 @@ public class TradeAtlasScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        leftPos = (this.width - GUI_WIDTH) / 2;
-        topPos = (this.height - GUI_HEIGHT) / 2;
+        int availableWidth = Math.max(320, this.width - 16);
+        int availableHeight = Math.max(220, this.height - 16);
+        int preferredWidth = Math.min(MAX_GUI_WIDTH, Math.max(MIN_GUI_WIDTH, this.width - 32));
+        int preferredHeight = Math.min(MAX_GUI_HEIGHT, Math.max(MIN_GUI_HEIGHT, this.height - 32));
+
+        guiWidth = Math.min(preferredWidth, availableWidth);
+        guiHeight = Math.min(preferredHeight, availableHeight);
+
+        if (guiWidth < MIN_GUI_WIDTH) {
+            int columnsWidth = guiWidth - PADDING * 2 - PANEL_GAP * 2;
+            listWidth = Math.max(112, columnsWidth * 29 / 100);
+            detailWidth = Math.max(112, columnsWidth * 27 / 100);
+        } else {
+            listWidth = Math.min(156, Math.max(132, guiWidth / 5));
+            detailWidth = Math.min(148, Math.max(126, guiWidth / 5));
+        }
+        mapWidth = guiWidth - PADDING * 2;
+
+        leftPos = (this.width - guiWidth) / 2;
+        topPos = (this.height - guiHeight) / 2;
 
         if (firstEntrySelection) {
-            firstEntryWidget = new TradeAtlasFirstEntryWidget(leftPos, topPos, GUI_WIDTH, GUI_HEIGHT, state,
+            firstEntryWidget = new TradeAtlasFirstEntryWidget(leftPos, topPos, guiWidth, guiHeight, state,
                 this::sendLocate);
             return;
         }
 
         nodeListWidget = new TradeAtlasNodeListWidget(
             listX(),
-            contentY(),
-            LIST_WIDTH,
+            floatingPanelY(),
+            listWidth,
             nodeListHeight(),
             state,
             viewState,
@@ -81,35 +106,38 @@ public class TradeAtlasScreen extends Screen {
         routeListWidget = new TradeRouteListWidget(
             listX(),
             routeListY(),
-            LIST_WIDTH,
+            listWidth,
             routeListHeight(),
             state,
             viewState,
             this::selectRoute
         );
         mapWidget = new TradeAtlasMapWidget(
-            mapX(),
+            contentX(),
             contentY(),
-            MAP_WIDTH,
+            contentWidth(),
             contentHeight(),
             state,
             viewState,
             this::selectNode,
+            this::selectRoute,
             this::selectRouteStop,
-            this::sendLocate
+            this::selectRouteSegment,
+            this::sendLocate,
+            mapToolbarX(),
+            mapToolbarWidth()
         );
         detailWidget = new TradeAtlasDetailWidget(
             detailX(),
-            contentY(),
-            DETAIL_WIDTH,
-            contentHeight(),
+            floatingPanelY(),
+            detailWidth,
+            floatingPanelHeight(),
             state,
             viewState,
             this::setTarget,
             this::cancelPendingClue,
             this::clearTarget,
-            () -> mapWidget.centerOnSelected(),
-            viewState::toggleLocateSelection
+            () -> mapWidget.centerOnSelected()
         );
     }
 
@@ -121,20 +149,26 @@ public class TradeAtlasScreen extends Screen {
         if (firstEntrySelection) {
             firstEntryWidget.render(guiGraphics, mouseX, mouseY, partialTick);
         } else {
+            mapWidget.render(guiGraphics, mouseX, mouseY, partialTick);
             nodeListWidget.render(guiGraphics, mouseX, mouseY, partialTick);
             routeListWidget.render(guiGraphics, mouseX, mouseY, partialTick);
-            mapWidget.render(guiGraphics, mouseX, mouseY, partialTick);
             detailWidget.render(guiGraphics, mouseX, mouseY, partialTick);
-            mapWidget.renderHoveredTooltip(guiGraphics, mouseX, mouseY);
+            if (nodeListWidget.isMouseOver(mouseX, mouseY)) {
+                nodeListWidget.renderHoveredTooltip(guiGraphics, mouseX, mouseY);
+            } else if (routeListWidget.isMouseOver(mouseX, mouseY)) {
+                routeListWidget.renderHoveredTooltip(guiGraphics, mouseX, mouseY);
+            } else if (!isHoveringFloatingPanel(mouseX, mouseY)) {
+                mapWidget.renderHoveredTooltip(guiGraphics, mouseX, mouseY);
+            }
         }
     }
 
     private void renderFrame(GuiGraphics guiGraphics) {
         guiGraphics.fillGradient(0, 0, this.width, this.height, BACKDROP_TOP, BACKDROP_BOTTOM);
-        guiGraphics.fill(leftPos, topPos, leftPos + GUI_WIDTH, topPos + GUI_HEIGHT, BOARD_BG);
-        guiGraphics.renderOutline(leftPos, topPos, GUI_WIDTH, GUI_HEIGHT, PANEL_BORDER);
-        guiGraphics.fill(leftPos + 1, topPos + 1, leftPos + GUI_WIDTH - 1, topPos + HEADER_HEIGHT, PANEL_HEADER_BG);
-        guiGraphics.drawCenteredString(font, this.title, leftPos + GUI_WIDTH / 2, topPos + 7, TEXT_PRIMARY);
+        guiGraphics.fill(leftPos, topPos, leftPos + guiWidth, topPos + guiHeight, BOARD_BG);
+        guiGraphics.renderOutline(leftPos, topPos, guiWidth, guiHeight, PANEL_BORDER);
+        guiGraphics.fill(leftPos + 1, topPos + 1, leftPos + guiWidth - 1, topPos + HEADER_HEIGHT, PANEL_HEADER_BG);
+        guiGraphics.drawCenteredString(font, this.title, leftPos + guiWidth / 2, topPos + 4, TEXT_PRIMARY);
     }
 
     @Override
@@ -146,13 +180,22 @@ public class TradeAtlasScreen extends Screen {
         if (detailWidget.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
-        if (mapWidget.mouseClicked(mouseX, mouseY, button)) {
+        if (detailWidget.isMouseOver(mouseX, mouseY)) {
             return true;
         }
         if (routeListWidget.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
-        return nodeListWidget.mouseClicked(mouseX, mouseY, button);
+        if (routeListWidget.isMouseOver(mouseX, mouseY)) {
+            return true;
+        }
+        if (nodeListWidget.mouseClicked(mouseX, mouseY, button)) {
+            return true;
+        }
+        if (nodeListWidget.isMouseOver(mouseX, mouseY)) {
+            return true;
+        }
+        return mapWidget.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
@@ -181,6 +224,17 @@ public class TradeAtlasScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (!firstEntrySelection && nodeListWidget.isMouseOver(mouseX, mouseY)) {
+            nodeListWidget.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+            return true;
+        }
+        if (!firstEntrySelection && routeListWidget.isMouseOver(mouseX, mouseY)) {
+            routeListWidget.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+            return true;
+        }
+        if (!firstEntrySelection && detailWidget.isMouseOver(mouseX, mouseY)) {
+            return true;
+        }
         if (!firstEntrySelection && mapWidget.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
             return true;
         }
@@ -188,6 +242,12 @@ public class TradeAtlasScreen extends Screen {
     }
 
     private void selectNode(TradeAtlasNode node) {
+        viewState.routeDraftStartNodeId().ifPresent(startNodeId -> {
+            if (!startNodeId.equals(node.id())) {
+                PacketDistributor.sendToServer(TradeRouteActionPayload.createRoute(startNodeId, node.id()));
+                viewState.clearRouteDraftStartNode();
+            }
+        });
         viewState.selectNode(node);
     }
 
@@ -197,6 +257,10 @@ public class TradeAtlasScreen extends Screen {
 
     private void selectRouteStop(TradeRoute route, TradeRouteStop stop) {
         viewState.selectRouteStop(route, stop);
+    }
+
+    private void selectRouteSegment(TradeRoute route, TradeRouteSegment segment) {
+        viewState.selectRouteSegment(route, segment);
     }
 
     private void setTarget(TradeAtlasNode node) {
@@ -219,35 +283,61 @@ public class TradeAtlasScreen extends Screen {
     }
 
     private int listX() {
+        return contentX() + PADDING;
+    }
+
+    private int contentX() {
         return leftPos + PADDING;
     }
 
-    private int mapX() {
-        return listX() + LIST_WIDTH + PANEL_GAP;
-    }
-
     private int detailX() {
-        return mapX() + MAP_WIDTH + PANEL_GAP;
+        return leftPos + guiWidth - PADDING - detailWidth - PADDING;
     }
 
     private int contentY() {
         return topPos + HEADER_HEIGHT + PADDING;
     }
 
+    private int contentWidth() {
+        return guiWidth - PADDING * 2;
+    }
+
     private int contentHeight() {
-        return GUI_HEIGHT - HEADER_HEIGHT - PADDING * 2;
+        return guiHeight - HEADER_HEIGHT - PADDING * 2;
     }
 
     private int nodeListHeight() {
-        return (contentHeight() - PANEL_GAP) / 2;
+        return Math.max(86, (floatingPanelHeight() - PANEL_GAP) * 56 / 100);
     }
 
     private int routeListY() {
-        return contentY() + nodeListHeight() + PANEL_GAP;
+        return floatingPanelY() + nodeListHeight() + PANEL_GAP;
     }
 
     private int routeListHeight() {
-        return contentHeight() - nodeListHeight() - PANEL_GAP;
+        return floatingPanelHeight() - nodeListHeight() - PANEL_GAP;
+    }
+
+    private int floatingPanelY() {
+        return contentY() + FLOATING_PANEL_TOP_OFFSET;
+    }
+
+    private int floatingPanelHeight() {
+        return contentHeight() - FLOATING_PANEL_TOP_OFFSET;
+    }
+
+    private int mapToolbarX() {
+        return listX() + listWidth + PANEL_GAP;
+    }
+
+    private int mapToolbarWidth() {
+        return Math.max(120, detailX() - PANEL_GAP - mapToolbarX());
+    }
+
+    private boolean isHoveringFloatingPanel(double mouseX, double mouseY) {
+        return nodeListWidget.isMouseOver(mouseX, mouseY)
+            || routeListWidget.isMouseOver(mouseX, mouseY)
+            || detailWidget.isMouseOver(mouseX, mouseY);
     }
 
     @Override

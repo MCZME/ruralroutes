@@ -11,109 +11,130 @@ import java.util.UUID;
 
 public final class TradeAtlasViewState {
 
-    public enum DetailMode {
+    public enum SelectionType {
+        NONE,
         NODE,
-        ROUTE
+        ROUTE,
+        ROUTE_STOP,
+        ROUTE_SEGMENT
     }
 
+    private SelectionType selectionType = SelectionType.NONE;
     private UUID selectedNodeId;
     private UUID selectedRouteId;
     private UUID selectedRouteStopId;
     private UUID selectedRouteSegmentId;
     private UUID routeDraftStartNodeId;
-    private DetailMode detailMode = DetailMode.NODE;
     private boolean locateSelectionOpen;
 
     public TradeAtlasViewState(TradeAtlasState state) {
-        if (state.currentTargetNodeId().isPresent()) {
-            selectedNodeId = state.currentTargetNodeId().get();
-        } else if (!state.nodes().isEmpty()) {
-            selectedNodeId = state.nodes().get(0).id();
-        }
     }
 
     public Optional<TradeAtlasNode> selectedNode(TradeAtlasState state) {
-        Optional<TradeAtlasNode> selected = state.findNodeById(selectedNodeId);
-        if (selected.isPresent()) {
-            return selected;
+        if (selectionType != SelectionType.NODE) {
+            return Optional.empty();
         }
-        if (!state.nodes().isEmpty()) {
-            selectedNodeId = state.nodes().get(0).id();
-            return Optional.of(state.nodes().get(0));
-        }
-        selectedNodeId = null;
-        return Optional.empty();
+        return state.findNodeById(selectedNodeId);
     }
 
     public Optional<TradeRoute> selectedRoute(TradeAtlasState state) {
-        Optional<TradeRoute> selected = state.findRouteById(selectedRouteId);
-        if (selected.isPresent()) {
-            return selected;
+        if (selectionType != SelectionType.ROUTE
+                && selectionType != SelectionType.ROUTE_STOP
+                && selectionType != SelectionType.ROUTE_SEGMENT) {
+            return Optional.empty();
         }
-        if (!state.routes().isEmpty()) {
-            selectedRouteId = state.routes().get(0).id();
-            return Optional.of(state.routes().get(0));
-        }
-        selectedRouteId = null;
-        selectedRouteStopId = null;
-        selectedRouteSegmentId = null;
-        return Optional.empty();
+        return state.findRouteById(selectedRouteId);
     }
 
     public Optional<TradeRouteStop> selectedRouteStop(TradeAtlasState state) {
-        return selectedRoute(state).flatMap(route -> route.findStop(selectedRouteStopId)
-            .or(() -> route.stops().isEmpty() ? Optional.empty() : Optional.of(route.stops().get(route.stops().size() - 1))));
+        if (selectionType != SelectionType.ROUTE_STOP) {
+            return Optional.empty();
+        }
+        return selectedRoute(state).flatMap(route -> route.findStop(selectedRouteStopId));
     }
 
     public Optional<TradeRouteSegment> selectedRouteSegment(TradeAtlasState state) {
-        return selectedRoute(state).flatMap(route -> route.findSegment(selectedRouteSegmentId)
-            .or(() -> route.segments().isEmpty() ? Optional.empty() : Optional.of(route.segments().get(0))));
+        if (selectionType != SelectionType.ROUTE_SEGMENT) {
+            return Optional.empty();
+        }
+        return selectedRoute(state).flatMap(route -> route.findSegment(selectedRouteSegmentId));
     }
 
     public void selectNode(TradeAtlasNode node) {
-        selectedNodeId = node == null ? null : node.id();
-        detailMode = DetailMode.NODE;
+        if (node == null) {
+            clearSelection();
+            return;
+        }
+        selectionType = SelectionType.NODE;
+        selectedNodeId = node.id();
+        selectedRouteId = null;
+        selectedRouteStopId = null;
+        selectedRouteSegmentId = null;
+    }
+
+    public boolean isNodeSelected(UUID nodeId) {
+        return selectionType == SelectionType.NODE && selectedNodeId != null && selectedNodeId.equals(nodeId);
     }
 
     public boolean isSelected(UUID nodeId) {
-        return selectedNodeId != null && selectedNodeId.equals(nodeId);
+        return isNodeSelected(nodeId);
     }
 
     public void selectRoute(TradeRoute route) {
-        selectedRouteId = route == null ? null : route.id();
-        detailMode = DetailMode.ROUTE;
-        if (route != null) {
-            if (selectedRouteStopId == null || route.findStop(selectedRouteStopId).isEmpty()) {
-                selectedRouteStopId = route.stops().isEmpty() ? null : route.stops().get(0).id();
-            }
-            if (selectedRouteSegmentId == null || route.findSegment(selectedRouteSegmentId).isEmpty()) {
-                selectedRouteSegmentId = route.segments().isEmpty() ? null : route.segments().get(0).id();
-            }
+        if (route == null) {
+            clearSelection();
+            return;
         }
+        selectionType = SelectionType.ROUTE;
+        selectedNodeId = null;
+        selectedRouteId = route.id();
+        selectedRouteStopId = null;
+        selectedRouteSegmentId = null;
     }
 
     public void selectRouteStop(TradeRoute route, TradeRouteStop stop) {
-        selectedRouteId = route == null ? null : route.id();
-        selectedRouteStopId = stop == null ? null : stop.id();
-        detailMode = DetailMode.ROUTE;
+        if (route == null || stop == null) {
+            clearSelection();
+            return;
+        }
+        selectionType = SelectionType.ROUTE_STOP;
+        selectedNodeId = null;
+        selectedRouteId = route.id();
+        selectedRouteStopId = stop.id();
+        selectedRouteSegmentId = null;
     }
 
     public void selectRouteSegment(TradeRoute route, TradeRouteSegment segment) {
-        selectedRouteId = route == null ? null : route.id();
-        selectedRouteSegmentId = segment == null ? null : segment.id();
-        detailMode = DetailMode.ROUTE;
+        if (route == null || segment == null) {
+            clearSelection();
+            return;
+        }
+        selectionType = SelectionType.ROUTE_SEGMENT;
+        selectedNodeId = null;
+        selectedRouteId = route.id();
+        selectedRouteStopId = null;
+        selectedRouteSegmentId = segment.id();
     }
 
     public boolean isRouteSelected(UUID routeId) {
-        return selectedRouteId != null && selectedRouteId.equals(routeId);
+        return selectionType == SelectionType.ROUTE && selectedRouteId != null && selectedRouteId.equals(routeId);
     }
 
     public boolean isRouteStopSelected(UUID stopId) {
-        return selectedRouteStopId != null && selectedRouteStopId.equals(stopId);
+        return selectionType == SelectionType.ROUTE_STOP && selectedRouteStopId != null && selectedRouteStopId.equals(stopId);
     }
 
     public boolean isRouteSegmentSelected(UUID segmentId) {
-        return selectedRouteSegmentId != null && selectedRouteSegmentId.equals(segmentId);
+        return selectionType == SelectionType.ROUTE_SEGMENT && selectedRouteSegmentId != null
+            && selectedRouteSegmentId.equals(segmentId);
+    }
+
+    public void clearSelection() {
+        selectionType = SelectionType.NONE;
+        selectedNodeId = null;
+        selectedRouteId = null;
+        selectedRouteStopId = null;
+        selectedRouteSegmentId = null;
     }
 
     public Optional<UUID> routeDraftStartNodeId() {
@@ -128,8 +149,8 @@ public final class TradeAtlasViewState {
         routeDraftStartNodeId = null;
     }
 
-    public DetailMode detailMode() {
-        return detailMode;
+    public SelectionType selectionType() {
+        return selectionType;
     }
 
     public boolean isLocateSelectionOpen() {
